@@ -4,6 +4,7 @@ Created on Jul 21, 2015
 @author: kashefy
 '''
 import os
+import numpy as np
 import to_lmdb
 import fileSystemUtils as fs
 
@@ -28,25 +29,22 @@ def view_segm_lmdb(nb_imgs, path_solver):
     for _ in xrange(nb_imgs):
          
         solver.net.forward()  # train net
-        print solver.net.blobs['data'].data.shape
          
         d = solver.net.blobs['data'].data
-        sh = d.shape
-        d = d.reshape(sh[1], sh[2], sh[3])
-        y = cv2.cvtColor(cv2.merge([d[0, :, :], d[1, :, :], d[2, :, :]]), cv.CV_RGB2BGR)
+        print d.shape
+        d = np.squeeze(d, axis=(0,)) # get rid of elements dimensions
+        y = cv2.cvtColor(cv2.merge([ch for ch in d]), cv.CV_RGB2BGR)
          
-        print y.dtype, y.max()
+        #print y.dtype, y.max()
          
         cv2.imshow('data', y)
          
         d = solver.net.blobs['label'].data
-        sh = d.shape
-        d = d.reshape(sh[1], sh[2], sh[3])
-        y = cv2.cvtColor(cv2.merge([d[0, :, :], d[1, :, :], d[2, :, :]]), cv.CV_RGB2BGR)
-         
-        print y.dtype, y.max()
-         
-        cv2.imshow('label', y)
+        print d.shape
+        d = np.squeeze(d, axis=(0,))
+        
+        print d
+        
         cv2.waitKey()
         
     return 0
@@ -57,9 +55,6 @@ def main(args):
      
     dir_imgs = '/media/win/Users/woodstock/dev/data/VOCdevkit/VOC2012/JPEGImagesX'
     paths_imgs = fs.gen_paths(dir_imgs, fs.filter_is_img)
-     
-    dir_segm_labels = '/media/win/Users/woodstock/dev/data/PASCAL-Context/59_context_labels'
-    paths_segm_labels = fs.gen_paths(dir_segm_labels, fs.filter_is_img)
     
     dir_segm_labels = '/media/win/Users/woodstock/dev/data/PASCAL-Context/trainval/trainval'
     paths_segm_labels = fs.gen_paths(dir_segm_labels)
@@ -78,7 +73,7 @@ def main(args):
     #with open("/media/win/Users/woodstock/dev/data/models/fcn_segm/train_val2.prototxt", 'w') as f:
     #    f.write(str(gen_net(os.path.join(dir_dst, '59_context_imgs_lmdb'), 1)))
         
-    #view_segm_lmdb(20, '/media/win/Users/woodstock/dev/data/models/fcn_segm/solver2.prototxt')
+    view_segm_lmdb(2, '/media/win/Users/woodstock/dev/data/models/fcn_segm/solver2.prototxt')
         
         
     return 0
