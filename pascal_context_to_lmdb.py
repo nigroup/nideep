@@ -53,7 +53,7 @@ def main(args):
     
     dir_dst = '/media/win/Users/woodstock/dev/data/PASCAL-Context/'
      
-    dir_imgs = '/media/win/Users/woodstock/dev/data/VOCdevkit/VOC2012/JPEGImagesX'
+    dir_imgs = '/media/win/Users/woodstock/dev/data/VOCdevkit/VOC2012/JPEGImages'
     paths_imgs = fs.gen_paths(dir_imgs, fs.filter_is_img)
     
     dir_segm_labels = '/media/win/Users/woodstock/dev/data/PASCAL-Context/trainval/trainval'
@@ -62,8 +62,8 @@ def main(args):
     paths_pairs = fs.fname_pairs(paths_imgs, paths_segm_labels)    
     paths_imgs, paths_segm_labels = map(list, zip(*paths_pairs))
      
-    for a, b in paths_pairs:
-        print a,b
+    #for a, b in paths_pairs:
+    #    print a,b
      
     to_lmdb.imgs_to_lmdb(paths_imgs, os.path.join(dir_dst, 'context_imgs_lmdb'))
     to_lmdb.matfiles_to_lmdb(paths_segm_labels, os.path.join(dir_dst, 'context_labels_lmdb'), 'LabelMap')
@@ -73,7 +73,7 @@ def main(args):
     #with open("/media/win/Users/woodstock/dev/data/models/fcn_segm/train_val2.prototxt", 'w') as f:
     #    f.write(str(gen_net(os.path.join(dir_dst, '59_context_imgs_lmdb'), 1)))
         
-    view_segm_lmdb(2, '/media/win/Users/woodstock/dev/data/models/fcn_segm/solver2.prototxt')
+    #view_segm_lmdb(2, '/media/win/Users/woodstock/dev/data/models/fcn_segm/solver2.prototxt')
         
         
     return 0
