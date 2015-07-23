@@ -10,11 +10,10 @@ import fileSystemUtils as fs
 import cv2 as cv2
 import cv2.cv as cv
 
-import os
 CAFFE_ROOT = '/home/kashefy/src/caffe_forks/bvlc/'
-os.chdir(CAFFE_ROOT)
-import sys
-sys.path.insert(0, './python')
+if CAFFE_ROOT is not None:
+    import sys
+    sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
 import caffe
 
 def main(args):
