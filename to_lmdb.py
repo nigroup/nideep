@@ -69,11 +69,11 @@ def matfiles_to_lmdb(paths_src, path_dst, fieldname,
             content_field = np.expand_dims(content_field, axis=0)
             content_field = content_field.astype(int)
             #print content_field.shape
-            print 'before', content_field
+            #print 'before', content_field
             if lut is not None:
                 content_field = lut(content_field)
             
-            print 'after', content_field
+            #print 'after', content_field
             img_dat = caffe.io.array_to_datum(content_field)
             in_txn.put('{:0>10d}'.format(idx), img_dat.SerializeToString())
     
