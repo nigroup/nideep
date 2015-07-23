@@ -10,13 +10,18 @@ import cv2 as cv2
 import cv2.cv as cv
 import lmdb
 
-def imgs_to_lmdb(paths_src, path_dst):
+def imgs_to_lmdb(paths_src, path_dst, CAFFE_ROOT=None):
     '''
     Generate LMDB file from set of images
     Source: https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045
     credit: Evan Shelhamer
     
     '''
+    if CAFFE_ROOT is not None:
+        import sys
+        sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
+    import caffe
+    
     db = lmdb.open(path_dst, map_size=int(1e12))
     
     with db.begin(write=True) as in_txn:
@@ -40,13 +45,20 @@ def imgs_to_lmdb(paths_src, path_dst):
 
     return 0
 
-def matfiles_to_lmdb(paths_src, path_dst, fieldname, lut=None):
+def matfiles_to_lmdb(paths_src, path_dst, fieldname,
+                     CAFFE_ROOT=None,
+                     lut=None):
     '''
     Generate LMDB file from set of images
     Source: https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045
     credit: Evan Shelhamer
     
     '''
+    if CAFFE_ROOT is not None:
+        import sys
+        sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
+    import caffe
+    
     db = lmdb.open(path_dst, map_size=int(1e12))
     
     with db.begin(write=True) as in_txn:
@@ -86,53 +98,3 @@ def gen_net(lmdb, batch_size, CAFFE_ROOT):
     n.data, n.label = L.Data(batch_size=batch_size, backend=P.Data.LMDB, source=lmdb,
                              transform_param=dict(scale=1./255), ntop=2)
     return n.to_proto()
-
-def main(args):
-    
-    paths_in = ['/media/win/Users/woodstock/dev/data/lena.png']
-    
-    if args is not None:
-        CAFFE_ROOT = args.caffe_root
-    
-    if CAFFE_ROOT is not None:
-        os.chdir(CAFFE_ROOT)
-        import sys
-        sys.path.insert(0, './python')
-    import caffe
-    
-    caffe.set_mode_cpu()
-    
-    path_lmdb_train = 'image-lmdb'
-    path_lmdb_test = path_lmdb_train
-    
-    imgs_to_lmdb(paths_in, path_lmdb_train)
-    
-    with open('train.prototxt', 'w') as f:
-        f.write(str(gen_net(path_lmdb_train, 1)))
-    
-    with open('test.prototxt', 'w') as f:
-        f.write(str(gen_net(path_lmdb_test, 1)))
-    
-    solver = caffe.SGDSolver('auto_solver.prototxt')
-    
-    for i in xrange(len(paths_in)):
-        
-        solver.net.forward()  # train net
-        print solver.net.blobs['data'].data.shape
-        
-        d = solver.net.blobs['data'].data
-        sh = d.shape
-        d = d.reshape(sh[1], sh[2], sh[3])
-        y = cv2.merge([d[0, :, :], d[1, :, :], d[2, :, :]])
-        print y.dtype
-        print y
-        cv2.imshow('y', y)
-        cv2.waitKey()
-    
-    return 0
-
-if __name__ == '__main__':
-    
-    main(None)
-    
-    pass
