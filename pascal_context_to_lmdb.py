@@ -212,18 +212,18 @@ def pascal_context_to_lmdb(dir_imgs,
 
 def main(args):
     
-    val_list_path = '/media/win/Users/woodstock/dev/data/PASCAL-Context/val_59.txt'
+    val_list_path = '/home/kashefy/data/PASCAL-Context/val_59.txt'
     with open(val_list_path, 'r') as f:
         val_list = f.readlines()
         val_list = [l.translate(None, ''.join('\n')) for l in val_list if len(l) > 0]
     
     nt, nv, fpath_imgs_train, fpath_labels_train, fpath_imgs_val, fpath_labels_val = \
-    pascal_context_to_lmdb('/media/win/Users/woodstock/dev/data/VOCdevkit/VOC2012/JPEGImagesX',
-                           '/media/win/Users/woodstock/dev/data/PASCAL-Context/trainval/',
-                           '/media/win/Users/woodstock/dev/data/PASCAL-Context/labels.txt',
-                           '/media/win/Users/woodstock/dev/data/PASCAL-Context/59_labels.txt',
+    pascal_context_to_lmdb('/home/kashefy/data/VOCdevkit/VOC2012/JPEGImagesX',
+                           '/home/kashefy/data/PASCAL-Context/trainval/',
+                           '/home/kashefy/data/PASCAL-Context/labels.txt',
+                           '/home/kashefy/data/PASCAL-Context/59_labels.txt',
                            '',
-                           '/media/win/Users/woodstock/dev/data/PASCAL-Context/',
+                           '/home/kashefy/data/PASCAL-Context/',
                            val_list=val_list
                            )
     
