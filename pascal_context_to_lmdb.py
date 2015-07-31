@@ -96,27 +96,53 @@ def get_labels_lut(labels_list, labels_subset):
             
     return labels_lut
 
+def get_train_val_split(src, val_list):
+    
+    train_idx = []
+    val_idx = []
+    
+    len_ = len(val_list)
+    
+    for i, x in enumerate(src):
+        
+        found = False
+        j = 0
+        while j < len_ and not found:
+            
+            found = val_list[j] in x            
+            j += 1
+            
+        if found:
+            val_idx.append(i)
+        else:
+            train_idx.append(i)
+    
+    return train_idx, val_idx
+
 def pascal_context_to_lmdb(dir_imgs,
                            dir_segm_labels,
                            fpath_labels_list,
                            fpath_labels_list_subset,
                            dst_prefix,
                            dir_dst,
-                           CAFFE_ROOT=None):
+                           CAFFE_ROOT=None,
+                           val_list=None):
     '''
     Fine intersection of filename in both directories and create
     one lmdb directory for each
+    val_list - list of entities to exclude from train (validation subset e.g. ['2008_000002', '2010_000433'])
     '''
     if dst_prefix is None:
         dst_prefix = ''
-    
+        
     labels_list = get_labels_list(fpath_labels_list)
     labels_59_list = get_labels_list(fpath_labels_list_subset)
     
     #print labels_list
     #print labels_59_list
     labels_lut = get_labels_lut(labels_list, labels_59_list)
-    #print labels_lut
+    def apply_labels_lut(m):
+        return labels_lut[m]
     
     paths_imgs = fs.gen_paths(dir_imgs, fs.filter_is_img)
     
@@ -128,36 +154,80 @@ def pascal_context_to_lmdb(dir_imgs,
     #for a, b in paths_pairs:
     #    print a,b
     
-    fpath_lmdb_imgs = os.path.join(dir_dst,
-                                   '%scontext_imgs_lmdb' % dst_prefix)
-    to_lmdb.imgs_to_lmdb(paths_imgs,
-                         fpath_lmdb_imgs,
-                         CAFFE_ROOT=CAFFE_ROOT)
-    
-    def apply_labels_lut(m):
-        return labels_lut[m]
-    
-    fpath_lmdb_segm_labels = os.path.join(dir_dst,
-                                          '%scontext_labels_lmdb' % dst_prefix)
-    to_lmdb.matfiles_to_lmdb(paths_segm_labels,
-                             fpath_lmdb_segm_labels,
-                             'LabelMap',
-                             CAFFE_ROOT=CAFFE_ROOT, lut=apply_labels_lut)
-    
-    return len(paths_imgs), fpath_lmdb_imgs, fpath_lmdb_segm_labels
+    if val_list is not None:
+        # do train/val split
+        
+        train_idx, val_idx = get_train_val_split(paths_imgs, val_list)
+        
+        # images
+        paths_imgs_train = [paths_imgs[i] for i in train_idx]
+        fpath_lmdb_imgs_train = os.path.join(dir_dst,
+                                       '%scontext_imgs_train_lmdb' % dst_prefix)
+        to_lmdb.imgs_to_lmdb(paths_imgs_train,
+                             fpath_lmdb_imgs_train,
+                             CAFFE_ROOT=CAFFE_ROOT)
+        
+        paths_imgs_val = [paths_imgs[i] for i in val_idx]
+        fpath_lmdb_imgs_val = os.path.join(dir_dst,
+                                       '%scontext_imgs_val_lmdb' % dst_prefix)
+        to_lmdb.imgs_to_lmdb(paths_imgs_val,
+                             fpath_lmdb_imgs_val,
+                             CAFFE_ROOT=CAFFE_ROOT)
+        
+        # ground truth
+        paths_segm_labels_train = [paths_segm_labels[i] for i in train_idx]
+        fpath_lmdb_segm_labels_train = os.path.join(dir_dst,
+                                              '%scontext_labels_train_lmdb' % dst_prefix)
+        to_lmdb.matfiles_to_lmdb(paths_segm_labels_train,
+                                 fpath_lmdb_segm_labels_train,
+                                 'LabelMap',
+                                 CAFFE_ROOT=CAFFE_ROOT, lut=apply_labels_lut)
+        
+        paths_segm_labels_val = [paths_segm_labels[i] for i in val_idx]
+        fpath_lmdb_segm_labels_val = os.path.join(dir_dst,
+                                              '%scontext_labels_val_lmdb' % dst_prefix)
+        to_lmdb.matfiles_to_lmdb(paths_segm_labels_val,
+                                 fpath_lmdb_segm_labels_val,
+                                 'LabelMap',
+                                 CAFFE_ROOT=CAFFE_ROOT, lut=apply_labels_lut)
+        
+        return len(paths_imgs_train), len(paths_imgs_val),\
+            fpath_lmdb_imgs_train, fpath_lmdb_segm_labels_train, fpath_lmdb_imgs_val, fpath_lmdb_segm_labels_val
+        
+    else:
+        fpath_lmdb_imgs = os.path.join(dir_dst,
+                                       '%scontext_imgs_lmdb' % dst_prefix)
+        to_lmdb.imgs_to_lmdb(paths_imgs,
+                             fpath_lmdb_imgs,
+                             CAFFE_ROOT=CAFFE_ROOT)
+        
+        fpath_lmdb_segm_labels = os.path.join(dir_dst,
+                                              '%scontext_labels_lmdb' % dst_prefix)
+        to_lmdb.matfiles_to_lmdb(paths_segm_labels,
+                                 fpath_lmdb_segm_labels,
+                                 'LabelMap',
+                                 CAFFE_ROOT=CAFFE_ROOT, lut=apply_labels_lut)
+        
+        return len(paths_imgs), fpath_lmdb_imgs, fpath_lmdb_segm_labels
 
 def main(args):
     
-    n, fpath_lmdb_imgs, fpath_lmdb_segm_labels = \
+    val_list_path = '/media/win/Users/woodstock/dev/data/PASCAL-Context/val_59.txt'
+    with open(val_list_path, 'r') as f:
+        val_list = f.readlines()
+        val_list = [l.translate(None, ''.join('\n')) for l in val_list if len(l) > 0]
+    
+    nt, nv, fpath_imgs_train, fpath_labels_train, fpath_imgs_val, fpath_labels_val = \
     pascal_context_to_lmdb('/media/win/Users/woodstock/dev/data/VOCdevkit/VOC2012/JPEGImagesX',
                            '/media/win/Users/woodstock/dev/data/PASCAL-Context/trainval/',
                            '/media/win/Users/woodstock/dev/data/PASCAL-Context/labels.txt',
                            '/media/win/Users/woodstock/dev/data/PASCAL-Context/59_labels.txt',
-                           'X_',
-                           '/media/win/Users/woodstock/dev/data/PASCAL-Context/'
+                           '',
+                           '/media/win/Users/woodstock/dev/data/PASCAL-Context/',
+                           val_list=val_list
                            )
     
-    print "size: %d" % n, fpath_lmdb_imgs, fpath_lmdb_segm_labels
+    print "size: %d" % nt, nv, fpath_imgs_train, fpath_labels_train, fpath_imgs_val, fpath_labels_val
     
     #load    
     
