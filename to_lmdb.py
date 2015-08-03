@@ -9,6 +9,7 @@ from scipy import io
 import cv2 as cv2
 import cv2.cv as cv
 import lmdb
+from read_img import read_img_cv2
 
 def imgs_to_lmdb(paths_src, path_dst, CAFFE_ROOT=None):
     '''
@@ -27,16 +28,8 @@ def imgs_to_lmdb(paths_src, path_dst, CAFFE_ROOT=None):
     with db.begin(write=True) as in_txn:
     
         for idx, path_ in enumerate(paths_src):
-            # load image:
-            # - as np.uint8 {0, ..., 255}
-            # - in BGR (switch from RGB)
-            # - in Channel x Height x Width order (switch from H x W x C)
-            # or load whatever ndarray you need
-            img = cv2.imread(path_)
-            #print "img.shape", img.shape, img.max()
-            img = img[:, :, ::-1]
-            img = img.transpose((2, 0, 1))
-            #print "after", img.shape
+            
+            img = read_img_cv2(path_)
             
             img_dat = caffe.io.array_to_datum(img)
             in_txn.put('{:0>10d}'.format(idx), img_dat.SerializeToString())
