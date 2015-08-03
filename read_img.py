@@ -47,7 +47,6 @@ def read_img_cv2(fpath, mean=None):
     img_dat = cv2.imread(fpath) # pixel value range per channel: [0, 255]
     
     # channels already in BGR order
-    
     img_dat = img_dat.astype(np.float32)
     
     # per-channel mean subtraction
@@ -56,6 +55,9 @@ def read_img_cv2(fpath, mean=None):
     
     # reorder dimensions
     img_dat = whc_to_chw(img_dat)
+    
+    # casting to np.float enables plugging into protobuf
+    img_dat = img_dat.astype(np.float)
     
     return img_dat
 
