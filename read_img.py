@@ -26,13 +26,13 @@ def read_img_PIL(fpath, mean=None):
     load image, switch to BGR, subtract mean, and make dims C x H x W for Caffe
     '''
     img = Image.open(fpath) # pixel value range per channel: [0, 255]
-    img_dat = np.array(img, dtype=np.float32)
     
     # RGB to BGR
     img_dat = img_dat[:, :, ::-1]
     
     # per-channel mean subtraction
     if mean is not None:
+        img_dat = np.array(img, dtype=np.float32)
         img_dat -= mean
     
     # reorder dimensions
@@ -47,17 +47,17 @@ def read_img_cv2(fpath, mean=None):
     img_dat = cv2.imread(fpath) # pixel value range per channel: [0, 255]
     
     # channels already in BGR order
-    img_dat = img_dat.astype(np.float32)
     
     # per-channel mean subtraction
     if mean is not None:
+        img_dat = img_dat.astype(np.float32)
         img_dat -= mean
+        img_dat = img_dat.astype(np.float)
     
     # reorder dimensions
     img_dat = whc_to_chw(img_dat)
     
     # casting to np.float enables plugging into protobuf
-    img_dat = img_dat.astype(np.float)
     
     return img_dat
 
