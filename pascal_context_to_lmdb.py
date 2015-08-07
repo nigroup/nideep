@@ -218,12 +218,12 @@ def main(args):
         val_list = [l.translate(None, ''.join('\n')) for l in val_list if len(l) > 0]
     
     nt, nv, fpath_imgs_train, fpath_labels_train, fpath_imgs_val, fpath_labels_val = \
-    pascal_context_to_lmdb('/home/kashefy/data/VOCdevkit/VOC2012/JPEGImagesX',
-                           '/home/kashefy/data/PASCAL-Context/trainval/',
-                           '/home/kashefy/data/PASCAL-Context/labels.txt',
-                           '/home/kashefy/data/PASCAL-Context/59_labels.txt',
+    pascal_context_to_lmdb(os.path.expanduser('~/data/VOCdevkit/VOC2012/JPEGImagesX'),
+                           os.path.expanduser('~/data/PASCAL-Context/trainval'),
+                           os.path.expanduser('~/data/PASCAL-Context/labels.txt'),
+                           os.path.expanduser('~/data/PASCAL-Context/59_labels.txt'),
                            '',
-                           '/home/kashefy/data/PASCAL-Context/',
+                           os.path.expanduser('~/data/PASCAL-Context/'),
                            val_list=val_list
                            )
     
