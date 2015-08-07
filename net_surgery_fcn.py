@@ -53,6 +53,13 @@ def make_fully_conv(path_model_src,
     # save new weights
     net_full_conv.save(path_weights_dst)
     
+    for pr, pr_conv in zip(params, params_full_conv):
+        print pr_conv
+         
+        raw_input()
+        print net_full_conv.params[pr_conv][0].data
+    
+    return 0
     import matplotlib.pyplot as plt
     
     # load input and configure preprocessing
@@ -76,15 +83,25 @@ def main(args):
     
     caffe.set_mode_cpu()
     
-    #param_pairs = [('fc6', 'fc6'), ('fc7', 'fc7'), ('fc8', 'fc8')]
+#     #param_pairs = [('fc6', 'fc6'), ('fc7', 'fc7'), ('fc8', 'fc8')]
+#     param_pairs = [('fc6', 'fc6-conv'),
+#                    ('fc7', 'fc7-conv'),
+#                    ('fc8', 'fc8-conv')]
+#     make_fully_conv(os.path.join(CAFFE_ROOT, 'models/bvlc_reference_caffenet/deploy.prototxt'),
+#                     os.path.join(CAFFE_ROOT, 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'),
+#                     os.path.join(CAFFE_ROOT, 'examples/net_surgery/bvlc_caffenet_full_conv.prototxt'),
+#                     param_pairs,
+#                     os.path.join(CAFFE_ROOT, 'examples/net_surgery/bvlc_caffenet_full_conv.caffemodel'),
+#                     )
+    
     param_pairs = [('fc6', 'fc6-conv'),
                    ('fc7', 'fc7-conv'),
                    ('fc8', 'fc8-conv')]
-    make_fully_conv(os.path.join(CAFFE_ROOT, 'models/bvlc_reference_caffenet/deploy.prototxt'),
-                    os.path.join(CAFFE_ROOT, 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'),
-                    os.path.join(CAFFE_ROOT, 'examples/net_surgery/bvlc_caffenet_full_conv.prototxt'),
+    make_fully_conv('/home/kashefy/data/models/vgg-16/VGG_ILSVRC_16_layers_deploy.prototxt',
+                    '/home/kashefy/data/models/vgg-16/VGG_ILSVRC_16_layers.caffemodel',
+                    '/home/kashefy/data/models/vgg-16/VGG_ILSVRC_16_layers_fcn_deploy.prototxt',
                     param_pairs,
-                    os.path.join(CAFFE_ROOT, 'examples/net_surgery/bvlc_caffenet_full_conv.caffemodel'),
+                    '/home/kashefy/data/models/vgg-16/VGG_ILSVRC_16_layers_fcn.caffemodel',
                     )
     
     
