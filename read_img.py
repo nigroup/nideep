@@ -27,12 +27,13 @@ def read_img_PIL(fpath, mean=None):
     '''
     img = Image.open(fpath) # pixel value range per channel: [0, 255]
     
+    img_dat = np.array(img, dtype=np.float32)
+    
     # RGB to BGR
     img_dat = img_dat[:, :, ::-1]
     
     # per-channel mean subtraction
     if mean is not None:
-        img_dat = np.array(img, dtype=np.float32)
         img_dat -= mean
     
     # reorder dimensions
