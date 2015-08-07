@@ -1,6 +1,6 @@
 # My Caffe Sandbox
 This is a random collection of scripts/utilities to use with caffe.
-Do not assume they're thorouhgly tested but please feel free to inspect them, scrutinize them. Feedback on making making them more usable for others are welcome.
+Do not assume they're thorouhgly tested but please feel free to inspect them, scrutinize them. Feedback on making them more usable for others are welcome.
 
 Beware: the documentation is pretty scarce. I'm working on it.
 
