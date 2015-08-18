@@ -27,9 +27,6 @@ def imgs_to_lmdb(paths_src, path_dst, CAFFE_ROOT=None):
         for idx, path_ in enumerate(paths_src):
             
             img = read_img_cv2(path_)
-            print path_
-            print img.shape
-            print img
             img_dat = caffe.io.array_to_datum(img)
             in_txn.put('{:0>10d}'.format(idx), img_dat.SerializeToString())
     
@@ -63,8 +60,7 @@ def matfiles_to_lmdb(paths_src, path_dst, fieldname,
             
             if lut is not None:
                 content_field = lut(content_field)
-            print path_
-            print content_field
+                
             img_dat = caffe.io.array_to_datum(content_field)
             in_txn.put('{:0>10d}'.format(idx), img_dat.SerializeToString())
     
