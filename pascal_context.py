@@ -17,6 +17,7 @@ from read_img import read_img_cv2, read_img_PIL
 
 CAFFE_ROOT = '/home/kashefy/src/caffe/'
 if CAFFE_ROOT is not None:
+    import os
     import sys
     sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
 import caffe
