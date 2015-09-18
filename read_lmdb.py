@@ -13,6 +13,23 @@ if CAFFE_ROOT is not None:
     import sys
     sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
 import caffe
+
+# Adapted from: Gustav Larsson http://deepdish.io/2015/04/28/creating-lmdb-in-python/
+def read_labels_scalar(path_lmdb):
+    
+    labels = []
+    env_src = lmdb.open(path_lmdb, readonly=True)
+    with env_src.begin() as txn:
+        cursor = txn.cursor()
+        for _, value in cursor:
+            #print(key, value)
+            
+            datum = caffe.proto.caffe_pb2.Datum()
+            datum.ParseFromString(value)
+            
+            labels.append(datum.label)
+            
+    return labels
     
 # CREDIT: Gustav Larsson http://deepdish.io/2015/04/28/creating-lmdb-in-python/
 if __name__ == '__main__':
