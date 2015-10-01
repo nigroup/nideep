@@ -52,6 +52,8 @@ def pid_from_str(s):
 def pid_from_logname(p):
     
     _, ext = os.path.splitext(p)
+    ext = ext.replace(".", "")
+    
     return pid_from_str(ext)
 
 def read_pid(p):
