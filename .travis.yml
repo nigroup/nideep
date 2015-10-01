@@ -1,0 +1,65 @@
+# Travis CI configuration file
+sudo: false
+language: cpp
+compiler:
+  #- clang
+  - gcc
+  
+# blacklist
+branches:
+  except:
+    - experimental
+    - /^appveyor.*$/
+    
+env:
+  global:
+    # Dependencies
+    - DEPS_DIR="`readlink -f $TRAVIS_BUILD_DIR/..`"
+    - CONDA_ENV=test-environment
+    - CONDA_ENV_PREFIX=$HOME/miniconda/envs/$CONDA_ENV
+    # since we've set language to cpp we have to define python vars ourselves
+    - TRAVIS_PYTHON_VERSION="2.7"
+
+before_install:  
+  - which python
+  - python --version
+  
+  # Setup anaconda for python bindings
+  - echo "Python $TRAVIS_PYTHON_VERSION"
+  # CREDIT: https://github.com/SmokinCaterpillar/pypet/blob/master/.travis.yml
+  - |
+    if [[ $TRAVIS_PYTHON_VERSION == 2.* ]]; then
+      travis_retry wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      travis_retry wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  # miniconda is not always updated with conda
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  
+install:
+  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy nose
+  
+  - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
+  - export C_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$C_INCLUDE_PATH"
+  - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
+  - source activate $CONDA_ENV
+  # list installed python packages
+  #- pip freeze
+  
+#before_script:
+#  - pwd
+  
+script:
+  #- nosetests --with-cov --cover-package=elm --logging-level=INFO
+  - nosetests --logging-level=INFO
+  - ls -a
+  
+#after_success:
+#  - pwd
+    
