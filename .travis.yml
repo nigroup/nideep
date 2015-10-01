@@ -52,14 +52,8 @@ install:
   # list installed python packages
   #- pip freeze
   
-#before_script:
-#  - pwd
-  
 script:
   #- nosetests --with-cov --cover-package=elm --logging-level=INFO
   - nosetests --logging-level=INFO
   - ls -a
-  
-#after_success:
-#  - pwd
-    
+
