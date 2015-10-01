@@ -1,4 +1,8 @@
 # My Caffe Sandbox
+
+[![Build Status](https://travis-ci.org/kashefy/caffe_sandbox.svg?branch=master)](https://travis-ci.org/kashefy/caffe_sandbox)
+[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
+
 This is a random collection of scripts/utilities to use with caffe.
 Do not assume they're thorouhgly tested but please feel free to inspect them, scrutinize them. Feedback on making them more usable for others are welcome.
 
