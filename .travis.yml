@@ -63,4 +63,6 @@ script:
 after_success:
   # report test coverage
   - coveralls --verbose
+  - which coveralls
+  - ls $HOME/miniconda/bin
 
