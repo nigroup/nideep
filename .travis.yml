@@ -19,6 +19,7 @@ env:
     - CONDA_ENV_PREFIX=$HOME/miniconda/envs/$CONDA_ENV
     # since we've set language to cpp we have to define python vars ourselves
     - TRAVIS_PYTHON_VERSION="2.7"
+    - WITH_COVERAGE=ON
 
 before_install:  
   - which python
@@ -45,6 +46,9 @@ before_install:
 install:
   - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy nose
   
+  - echo "Installing Coveralls if coverage:"
+  - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
+    
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
   - export C_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$C_INCLUDE_PATH"
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
@@ -53,7 +57,10 @@ install:
   #- pip freeze
   
 script:
-  #- nosetests --with-cov --cover-package=elm --logging-level=INFO
-  - nosetests --logging-level=INFO
+  - nosetests --with-coverage --cover-package=caffe_sandbox --logging-level=INFO
   - ls -a
+  
+after_success:
+  # report test coverage
+  - coveralls --verbose
 
