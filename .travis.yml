@@ -65,4 +65,5 @@ after_success:
   - coveralls --verbose
   - which coveralls
   - ls $HOME/miniconda/bin
+  - echo $PATH
 
