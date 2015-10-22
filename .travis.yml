@@ -54,7 +54,7 @@ install:
   #- pip freeze
   
 script:
-  - nosetests --with-coverage --omit test* --logging-level=INFO
+  - nosetests --with-coverage --logging-level=INFO
   - ls -a
   
 after_success:
