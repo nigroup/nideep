@@ -1,6 +1,7 @@
 # My Caffe Sandbox
 
 [![Build Status](https://travis-ci.org/kashefy/caffe_sandbox.svg?branch=master)](https://travis-ci.org/kashefy/caffe_sandbox)
+[![Coverage Status](https://coveralls.io/repos/kashefy/caffe_sandbox/badge.svg?branch=master&service=github)](https://coveralls.io/github/kashefy/caffe_sandbox?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
 This is a random collection of scripts/utilities to use with caffe.
