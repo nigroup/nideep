@@ -45,10 +45,8 @@ before_install:
   
 install:
   - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy nose
-  
   - echo "Installing Coveralls if coverage:"
   - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
-    
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
   - export C_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$C_INCLUDE_PATH"
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
@@ -65,5 +63,8 @@ after_success:
   - coveralls --verbose
   - which coveralls
   - ls $HOME/miniconda/bin
+  - ls $HOME/miniconda/envs/test-environment/bin
   - echo $PATH
+  - $HOME/miniconda/bin/coveralls --verbose
+  - $HOME/miniconda/envs/test-environment/bin/coveralls --verbose
 
