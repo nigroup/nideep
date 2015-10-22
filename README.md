@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/kashefy/caffe_sandbox/badge.svg?branch=master&service=github)](https://coveralls.io/github/kashefy/caffe_sandbox?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-This is a random collection of scripts/utilities to use with caffe.
+This is a random collection of scripts/utilities to use with [caffe](http://caffe.berkeleyvision.org/).
 Do not assume they're thorouhgly tested but please feel free to inspect them, scrutinize them. Feedback on making them more usable for others are welcome.
 
 Beware: the documentation is pretty scarce. I'm working on it.
