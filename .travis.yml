@@ -54,7 +54,7 @@ install:
   #- pip freeze
   
 script:
-  - nosetests --with-coverage --cover-package=caffe_sandbox --logging-level=INFO
+  - nosetests --with-coverage --logging-level=INFO
   - ls -a
   
 after_success:
