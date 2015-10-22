@@ -1,0 +1,8 @@
+[run]
+omit =
+  build.py
+  fabfile.py
+  pavement.py
+  setup.py
+  tests/*
+  test*.py
