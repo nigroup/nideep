@@ -34,5 +34,5 @@ class TestHandlingSplitsFile:
         
         val_list = n2l.split_matfile_to_val_list(self.path_splits)
         assert_is_instance(val_list, list)
-        assert_list_equal(val_list, [[2], [4], [10]])
+        assert_list_equal(val_list, [2, 4, 10])
         
