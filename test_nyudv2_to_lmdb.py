@@ -14,7 +14,7 @@ class TestHandlingSplitsFile:
         self.path_temp_dir = tempfile.mkdtemp()
         self.path_splits = os.path.join(self.path_temp_dir, 'foo.mat')
         
-        data = np.array([[2], [4], [10]])
+        data = {'testNdxs': np.array([[2], [4], [10]])}
         io.savemat(self.path_splits, data, oned_as='column')
         
     @classmethod
