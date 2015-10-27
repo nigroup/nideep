@@ -4,6 +4,7 @@ Created on Oct 27, 2015
 @author: kashefy
 '''
 import os
+from scipy import io
     
 def split_matfile_to_val_list(fpath):
     """
@@ -17,11 +18,19 @@ def split_matfile_to_val_list(fpath):
     
     if ext != '.mat':
         raise IOError("Invalid file type, expecting mat file (%s)" % fpath)
+    
+    fieldname = 'testNdxs'
+    val = io.loadmat(fpath)[fieldname]
+    val_list = val.ravel().tolist()
+    
+    return val_list
 
 def main(args):
     
-    split_path = '/home/kashefy/data/nyudv2/split.mat'
+    split_path = '/home/kashefy/data/nyudv2/splits.mat'
     val_list = split_matfile_to_val_list(split_path)
+    
+    print val_list
         
         
     return 0

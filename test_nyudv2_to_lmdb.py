@@ -6,3 +6,7 @@ import os
 def split_matfile_to_val_list_invalid_path_dir():
     
     n2l.split_matfile_to_val_list(os.curdir)
+    
+def split_matfile_to_val_list_invalid_path():
+    
+    n2l.split_matfile_to_val_list('/foo/bar.mat')
