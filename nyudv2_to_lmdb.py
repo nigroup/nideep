@@ -15,6 +15,11 @@ def split_matfile_to_val_list(fpath):
     """
     if not os.path.isfile(fpath):
         raise IOError("Path is not a regular file (%s)" % fpath)
+    
+    _, ext = os.path.splitext(fpath)
+    
+    if ext != '.mat':
+        raise IOError("Invalid file type, expecting mat file (%s)" % fpath)
 
 def main(args):
     
