@@ -4,9 +4,6 @@ Created on Oct 27, 2015
 @author: kashefy
 '''
 import os
-
-# obtain from https://gist.github.com/kashefy/2c098bd356dea090001e#file-filesystemutils-py
-import fileSystemUtils as fs
     
 def split_matfile_to_val_list(fpath):
     """
