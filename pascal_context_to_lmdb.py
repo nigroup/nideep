@@ -135,7 +135,7 @@ def pascal_context_to_lmdb(dir_imgs,
     if val_list is not None:
         # do train/val split
         
-        train_idx, val_idx = du.get_train_val_split(paths_imgs, val_list)
+        train_idx, val_idx = du.get_train_val_split_from_names(paths_imgs, val_list)
         
         # images
         paths_imgs_train = [paths_imgs[i] for i in train_idx]
