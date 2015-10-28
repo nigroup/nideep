@@ -16,3 +16,13 @@ def whc_to_chw(m):
     
     return m
 
+def cwh_to_chw(m):
+    '''
+    Reorder 3-dim array from C x W x H to C x H x W
+    '''
+    if m.ndim == 3:
+        m = m.transpose((0, 2, 1))
+    else:
+        AttributeError("No. of dimensions (%d) not supported." % m.ndim)
+    
+    return m
