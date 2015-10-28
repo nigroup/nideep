@@ -17,6 +17,10 @@ class TestHandlingSplitsFile:
         data = {'testNdxs': np.array([[2], [4], [10]])}
         io.savemat(self.path_splits, data, oned_as='column')
         
+        self.path_other = os.path.join(self.path_temp_dir, 'bar.mat')
+        data = {'foo': np.array([[2], [4]])}
+        io.savemat(self.path_other, data, oned_as='column')
+        
     @classmethod
     def teardown_class(self):
         
@@ -35,4 +39,8 @@ class TestHandlingSplitsFile:
         val_list = n2l.split_matfile_to_val_list(self.path_splits)
         assert_is_instance(val_list, list)
         assert_list_equal(val_list, [2, 4, 10])
+        
+    def test_val_list_other(self):
+        
+        assert_raises(KeyError, n2l.split_matfile_to_val_list, self.path_other)
         
