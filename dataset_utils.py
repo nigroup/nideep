@@ -5,7 +5,13 @@ Created on Oct 28, 2015
 '''
 
 def get_train_val_split(src, val_list):
+    """
+    Get indices split for train and validation subsets
     
+    src -- list of all entities in dataset
+    val_list -- contains entities that belong to the validation subset
+    
+    """    
     train_idx = []
     val_idx = []
     
