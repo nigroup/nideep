@@ -3,12 +3,24 @@ Created on Oct 28, 2015
 
 @author: kashefy
 '''
-from nose.tools import assert_equals
+from nose.tools import assert_equals, assert_raises
 import numpy as np
 import mat_utils as mu
 
 class TestTranspose:
 
+    def test_cwh_to_chw_invalid_dims(self):
+        
+        assert_raises(AttributeError, mu.cwh_to_chw, np.random.rand(3))
+        assert_raises(AttributeError, mu.cwh_to_chw, np.random.rand(3, 2))
+        assert_raises(AttributeError, mu.cwh_to_chw, np.random.rand(5, 4, 3, 2))
+        
+    def test_hwc_to_chw_invalid_dims(self):
+        
+        assert_raises(AttributeError, mu.hwc_to_chw, np.random.rand(3))
+        assert_raises(AttributeError, mu.hwc_to_chw, np.random.rand(3, 2))
+        assert_raises(AttributeError, mu.hwc_to_chw, np.random.rand(5, 4, 3, 2))
+        
     def test_hwc_to_chw(self):
         
         x = np.array([[[ 1,  2,  3],
