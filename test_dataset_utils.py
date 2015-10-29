@@ -91,3 +91,10 @@ class TestTrainValSplitFromIdx:
         
         assert_list_equal(train_idx, [0, 1, 2])
         assert_list_equal(val_idx, [40])
+        
+    def test_split_empty_val(self):
+        
+        train_idx, val_idx = du.get_train_val_split_from_idx([0, 1, 2], [])
+        
+        assert_list_equal(train_idx, [0, 1, 2])
+        assert_list_equal(val_idx, [])

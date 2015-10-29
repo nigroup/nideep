@@ -45,7 +45,7 @@ def big_arr_to_arrs(a):
 def nyudv2_to_lmdb(path_mat,
                    dst_prefix,
                    dir_dst,
-                   val_list=None):
+                   val_list=[]):
     
     if not os.path.isfile(path_mat):
         raise IOError("Path is not a regular file (%s)" % path_mat)
@@ -76,10 +76,13 @@ def nyudv2_to_lmdb(path_mat,
         elif typ == NYUDV2DataType.LABELS:
             
             dat = np.expand_dims(data[typ], axis=1).astype(int)
+            dat = big_arr_to_arrs(dat)
             
         elif typ == NYUDV2DataType.DEPTHS:
             
             dat = np.expand_dims(data[typ], axis=1).astype(np.float)
+            dat = big_arr_to_arrs(dat)
+            
         else:
             raise ValueError("unknown NYUDV2DataType")
             
@@ -115,35 +118,6 @@ def nyudv2_to_lmdb(path_mat,
     print paths_lmdb
 
     return
-
-    
-#     # ground truth
-#     print labels.shape
-#     labels = big_arr_to_arrs(labels)
-#     print len(labels), labels[0].shape
-#     fpath_lmdb_labels_train = os.path.join(dir_dst,
-#                                                 '%slabels_train_lmdb' % dst_prefix)
-#     to_lmdb.arrays_to_lmdb(imgs, fpath_lmdb_labels_train)
-#     
-#     fpath_lmdb_labels_val = os.path.join(dir_dst,
-#                                               '%slabels_val_lmdb' % dst_prefix)
-#     to_lmdb.arrays_to_lmdb(imgs, fpath_lmdb_labels_val)
-#     
-#     # depths
-#     depths = big_arr_to_arrs(depths)
-#     print len(depths), depths[0].shape
-#     fpath_lmdb_depths_train = os.path.join(dir_dst,
-#                                                 '%slabels_train_lmdb' % dst_prefix)
-#     to_lmdb.arrays_to_lmdb(imgs, fpath_lmdb_imgs_val)
-#     
-#     fpath_lmdb_segm_labels_val = os.path.join(dir_dst,
-#                                               '%slabels_val_lmdb' % dst_prefix)
-#     to_lmdb.arrays_to_lmdb(imgs, fpath_lmdb_imgs_val)
-#     
-#     return nt, nv, \
-#         fpath_lmdb_imgs_train, fpath_lmdb_labels_train,\
-#         fpath_lmdb_imgs_val, fpath_lmdb_labels_val
-    
     
 def main(args):
     
