@@ -61,7 +61,7 @@ def nyudv2_to_lmdb(path_mat,
         data = h5py.File(path_mat) # support version >= 7.3 matfile HDF5 format
         pass
     
-    paths_lmdb = []
+    lmdb_info = []
         
     for typ in [NYUDV2DataType.IMAGES,
                 NYUDV2DataType.LABELS,
@@ -90,9 +90,6 @@ def nyudv2_to_lmdb(path_mat,
         n = len(dat)
         train_idx, val_idx = get_train_val_split_from_idx(n, val_list)
         
-        nt = len(train_idx)
-        nv = len(val_idx)
-        
     #     # len(ndarray) same as ndarray.shape[0]
     #     if  len(labels) != len(imgs):
     #         raise ValueError("No. of images != no. of labels. (%d) != (%d)",
@@ -107,33 +104,29 @@ def nyudv2_to_lmdb(path_mat,
                                         '%s%s_train_lmdb' % (dst_prefix, typ))
         to_lmdb.arrays_to_lmdb([dat[i] for i in train_idx], fpath_lmdb)
         
-        paths_lmdb.append(fpath_lmdb)
+        lmdb_info.append(len(train_idx), fpath_lmdb)
         
         fpath_lmdb = os.path.join(dir_dst,
                                       '%s%s_val_lmdb' % (dst_prefix, typ))
         to_lmdb.arrays_to_lmdb([dat[i] for i in val_idx], fpath_lmdb)
         
-        paths_lmdb.append(fpath_lmdb)
+        lmdb_info.append((len(val_idx), fpath_lmdb))
     
-    print paths_lmdb
-
-    return
+    return lmdb_info
     
 def main(args):
     
     split_path = '/home/kashefy/data/nyudv2/splits.mat'
     val_list = split_matfile_to_val_list(split_path)
     
-    nt, nv, \
-    fpath_imgs_train, fpath_labels_train, \
-    fpath_imgs_val, fpath_labels_val = \
+    lmdb_info = \
     nyudv2_to_lmdb(os.path.expanduser('~/data/nyudv2/nyu_depth_v2_labeled.mat'),
                    'nyudv2_',
                    os.path.expanduser('~/data/nyudv2'),
                    val_list=val_list
                    )
     
-    print "size: %d" % (nt+nv), fpath_imgs_train, fpath_labels_train
+    print lmdb_info
     
         
         
