@@ -67,8 +67,6 @@ def nyudv2_to_lmdb(path_mat,
                 NYUDV2DataType.LABELS,
                 NYUDV2DataType.DEPTHS]:
         
-        typ = NYUDV2DataType.IMAGES
-        
         if typ == NYUDV2DataType.IMAGES:
             
             dat = [mu.cwh_to_chw(x).astype(np.float) for x in data[typ]]
@@ -85,10 +83,8 @@ def nyudv2_to_lmdb(path_mat,
             
         else:
             raise ValueError("unknown NYUDV2DataType")
-            
-        # do train/val split
-        n = len(dat)
-        train_idx, val_idx = get_train_val_split_from_idx(n, val_list)
+        
+        train_idx, val_idx = get_train_val_split_from_idx(len(dat), val_list)
         
     #     # len(ndarray) same as ndarray.shape[0]
     #     if  len(labels) != len(imgs):
@@ -99,15 +95,14 @@ def nyudv2_to_lmdb(path_mat,
     #         raise ValueError("No. of depths != no. of labels. (%d) != (%d)",
     #                          len(depths), len(labels))
         
-        print len(dat), dat[0].shape
-        fpath_lmdb = os.path.join(dir_dst,
-                                        '%s%s_train_lmdb' % (dst_prefix, typ))
+        print typ, len(dat), dat[0].shape
+        
+        fpath_lmdb = os.path.join(dir_dst, '%s%s_train_lmdb' % (dst_prefix, typ))
         to_lmdb.arrays_to_lmdb([dat[i] for i in train_idx], fpath_lmdb)
         
         lmdb_info.append(len(train_idx), fpath_lmdb)
         
-        fpath_lmdb = os.path.join(dir_dst,
-                                      '%s%s_val_lmdb' % (dst_prefix, typ))
+        fpath_lmdb = os.path.join(dir_dst, '%s%s_val_lmdb' % (dst_prefix, typ))
         to_lmdb.arrays_to_lmdb([dat[i] for i in val_idx], fpath_lmdb)
         
         lmdb_info.append((len(val_idx), fpath_lmdb))
