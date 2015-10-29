@@ -37,7 +37,7 @@ def get_train_val_split_from_idx(src, val_list):
     """
     Get indices split for train and validation subsets
     
-    src -- dataset size (int) or full range of indices
+    src -- dataset size (int) or full range of indices (list)
     val_list -- indices that belong to the validation subset
     
     """    
