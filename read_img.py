@@ -7,7 +7,6 @@ import os
 import numpy as np
 from PIL import Image
 import cv2 as cv2
-import cv2.cv as cv
 import mat_utils as mu
 
 def read_img_PIL(fpath, mean=None):
