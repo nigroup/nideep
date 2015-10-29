@@ -100,7 +100,7 @@ def nyudv2_to_lmdb(path_mat,
         fpath_lmdb = os.path.join(dir_dst, '%s%s_train_lmdb' % (dst_prefix, typ))
         to_lmdb.arrays_to_lmdb([dat[i] for i in train_idx], fpath_lmdb)
         
-        lmdb_info.append(len(train_idx), fpath_lmdb)
+        lmdb_info.append((len(train_idx), fpath_lmdb))
         
         fpath_lmdb = os.path.join(dir_dst, '%s%s_val_lmdb' % (dst_prefix, typ))
         to_lmdb.arrays_to_lmdb([dat[i] for i in val_idx], fpath_lmdb)
