@@ -4,9 +4,9 @@ Created on Oct 28, 2015
 @author: kashefy
 '''
 
-def whc_to_chw(m):
+def hwc_to_chw(m):
     '''
-    Reorder multi-channel image matrix from W x H x C to C x H x W
+    Transpose 3-d matrix from H x W x C to C x H x W where C is no. of channels
     '''
     if m.ndim == 3:
         m = m.transpose((2, 0, 1))

@@ -5,10 +5,11 @@ Created on Oct 28, 2015
 '''
 from nose.tools import assert_equals
 import numpy as np
+import mat_utils as mu
 
 class TestTranspose:
 
-    def test_whc_to_chw(self):
+    def test_hwc_to_chw(self):
         
         x = np.array([[[ 1,  2,  3],
                        [ 4,  5,  6]
@@ -27,3 +28,16 @@ class TestTranspose:
         assert_equals(x.shape[0], 4)
         assert_equals(x.shape[1], 2)
         assert_equals(x.shape[2], 3)
+        
+        y = mu.hwc_to_chw(x)
+        
+        assert_equals(y.shape[0], 3)
+        assert_equals(y.shape[1], 4)
+        assert_equals(y.shape[2], 2)
+        
+        assert_equals(x[3][1][2], y[2][3][1])
+        
+        for i in range(4):
+            for j in range(2):
+                for k in range(3):
+                    assert_equals(x[i][j][k], y[k][i][j])

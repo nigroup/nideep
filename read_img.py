@@ -26,7 +26,7 @@ def read_img_PIL(fpath, mean=None):
         img_dat -= mean
     
     # reorder dimensions
-    img_dat = mu.whc_to_chw(img_dat)
+    img_dat = mu.hwc_to_chw(img_dat)
     
     return img_dat
 
@@ -45,7 +45,7 @@ def read_img_cv2(fpath, mean=None):
         img_dat = img_dat.astype(np.float)
     
     # reorder dimensions
-    img_dat = mu.whc_to_chw(img_dat)
+    img_dat = mu.hwc_to_chw(img_dat)
     
     # casting to np.float enables plugging into protobuf
     
@@ -71,7 +71,7 @@ def read_img_caf(fpath, mean=None, caffe_root=None):
         img_dat -= mean
     
     # reorder dimensions
-    img_dat = mu.whc_to_chw(img_dat)
+    img_dat = mu.hwc_to_chw(img_dat)
     
     return img_dat
 
