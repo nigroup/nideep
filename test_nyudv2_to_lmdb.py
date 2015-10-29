@@ -1,4 +1,5 @@
-from nose.tools import assert_is_instance, assert_list_equal, assert_raises
+from nose.tools import assert_is_instance, assert_list_equal, assert_raises, \
+    assert_true
 import os
 import tempfile
 import shutil
@@ -34,11 +35,20 @@ class TestHandlingSplitsFile:
         
         assert_raises(IOError, n2l.split_matfile_to_val_list, '/foo/bar.mat')
         
+    def test_invalid_ext(self):
+        
+        fpath = os.path.join(self.path_temp_dir, 'foo.txt')
+        with open(fpath, 'w') as f:
+            f.write('hello')
+        
+        assert_true(os.path.isfile(fpath))
+        assert_raises(IOError, n2l.split_matfile_to_val_list, fpath)
+        
     def test_val_list(self):
         
         val_list = n2l.split_matfile_to_val_list(self.path_splits)
         assert_is_instance(val_list, list)
-        assert_list_equal(val_list, [2, 4, 10])
+        assert_list_equal(val_list, [1, 3, 9])
         
     def test_val_list_other(self):
         
