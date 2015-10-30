@@ -31,7 +31,7 @@ def read_img_PIL(fpath, mean=None):
 
 def read_img_cv2(fpath, mean=None):
     '''
-    load image, switch to BGR, subtract mean, and make dims C x H x W for Caffe
+    load image in BGR, subtract mean, and make dims C x H x W for Caffe
     '''
     img_dat = cv2.imread(fpath) # pixel value range per channel: [0, 255]
     
