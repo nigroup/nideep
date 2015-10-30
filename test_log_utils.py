@@ -102,7 +102,7 @@ class TestCaffeLog:
     @classmethod
     def setup_class(self):
         
-        self.path_temp_dir = tempfile.mkdtemp()
+        self.dir_tmp = tempfile.mkdtemp()
         self.path_real_log = os.path.join(os.path.dirname(CURRENT_MODULE_PATH),
                                           TEST_DATA_DIRNAME,
                                           TEST_LOG_FILENAME)
@@ -110,7 +110,7 @@ class TestCaffeLog:
     @classmethod
     def teardown_class(self):
         
-        shutil.rmtree(self.path_temp_dir)
+        shutil.rmtree(self.dir_tmp)
     
     def test_is_caffe_log(self):
         
@@ -118,7 +118,7 @@ class TestCaffeLog:
         
     def test_is_caffe_log_invalid_prefix(self):
         
-        fpath = os.path.join(self.path_temp_dir,
+        fpath = os.path.join(self.dir_tmp,
                              "foo.hostname.username.log.INFO.20150917-163712.31405")
         
         with open(fpath, 'w') as f:
@@ -128,7 +128,7 @@ class TestCaffeLog:
         
     def test_is_caffe_log_invalid_content(self):
         
-        fpath = os.path.join(self.path_temp_dir,
+        fpath = os.path.join(self.dir_tmp,
                              "caffe.hostname.username.log.INFO.20150917-163712.31405")
         
         with open(fpath, 'w') as f:
@@ -142,7 +142,7 @@ class TestCaffeLog:
         
     def test_is_caffe_info_log_invalid_fname(self):
         
-        fpath = os.path.join(self.path_temp_dir,
+        fpath = os.path.join(self.dir_tmp,
                              "foo.hostname.username.log.ERROR.20150917-163712.31405")
         
         with open(fpath, 'w') as f:
@@ -155,16 +155,16 @@ class TestFindLine:
     @classmethod
     def setup_class(self):
         
-        self.path_temp_dir = tempfile.mkdtemp()
+        self.dir_tmp = tempfile.mkdtemp()
         
     @classmethod
     def teardown_class(self):
         
-        shutil.rmtree(self.path_temp_dir)
+        shutil.rmtree(self.dir_tmp)
         
     def test_find_line(self):
         
-        fpath = os.path.join(self.path_temp_dir, "foo.txt")
+        fpath = os.path.join(self.dir_tmp, "foo.txt")
         
         with open(fpath, 'w') as f:
             f.write('line one\n')
