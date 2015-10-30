@@ -12,20 +12,20 @@ class TestHandlingSplitsFile:
     @classmethod
     def setup_class(self):
         
-        self.path_temp_dir = tempfile.mkdtemp()
-        self.path_splits = os.path.join(self.path_temp_dir, 'foo.mat')
+        self.dir_tmp = tempfile.mkdtemp()
+        self.path_splits = os.path.join(self.dir_tmp, 'foo.mat')
         
         data = {'testNdxs': np.array([[2], [4], [10]])}
         io.savemat(self.path_splits, data, oned_as='column')
         
-        self.path_other = os.path.join(self.path_temp_dir, 'bar.mat')
+        self.path_other = os.path.join(self.dir_tmp, 'bar.mat')
         data = {'foo': np.array([[2], [4]])}
         io.savemat(self.path_other, data, oned_as='column')
         
     @classmethod
     def teardown_class(self):
         
-        shutil.rmtree(self.path_temp_dir)
+        shutil.rmtree(self.dir_tmp)
         
     def test_invalid_path_dir(self):
         
@@ -37,7 +37,7 @@ class TestHandlingSplitsFile:
         
     def test_invalid_ext(self):
         
-        fpath = os.path.join(self.path_temp_dir, 'foo.txt')
+        fpath = os.path.join(self.dir_tmp, 'foo.txt')
         with open(fpath, 'w') as f:
             f.write('hello')
         
