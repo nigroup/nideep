@@ -8,7 +8,7 @@ import sys
 import shutil
 import tempfile
 from nose.tools import assert_equal, assert_false, \
-    assert_is_instance, assert_true
+    assert_is_instance, assert_is_none, assert_less, assert_true
 import log_utils as lu
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
@@ -62,6 +62,41 @@ class TestPID:
         assert_is_instance(res, int)
         assert_equal(res, -1)
         
+    def test_read_pid(self):
+        
+        fpath = os.path.join(os.path.dirname(CURRENT_MODULE_PATH),
+                             TEST_DATA_DIRNAME,
+                             TEST_LOG_FILENAME)
+        
+        result = lu.read_pid(fpath)
+        assert_is_instance(result, int)
+        assert_equal(result, 31405)
+        
+    def test_read_pid_from_content(self):
+        
+        fpath = os.path.join(os.path.dirname(CURRENT_MODULE_PATH),
+                             TEST_DATA_DIRNAME,
+                             TEST_LOG_FILENAME)
+        
+        path_temp_dir = tempfile.mkdtemp()
+        
+        fpath2 = os.path.join(path_temp_dir, "foo.txt")
+        
+        shutil.copyfile(fpath, fpath2)
+        
+        try:
+        
+            assert_less(lu.pid_from_logname(fpath2), 0)
+        
+            result = lu.read_pid(fpath2)
+            assert_is_instance(result, int)
+            assert_equal(result, 31405)
+            
+        except Exception:
+            pass
+        shutil.rmtree(path_temp_dir)
+            
+        
 class TestCaffeLog:
     
     @classmethod
@@ -100,4 +135,44 @@ class TestCaffeLog:
             f.write('foo')
         
         assert_false(lu.is_caffe_log(fpath))
+        
+    def test_is_caffe_info_log(self):
+        
+        assert_true(lu.is_caffe_log(self.path_real_log))
+        
+    def test_is_caffe_info_log_invalid_fname(self):
+        
+        fpath = os.path.join(self.path_temp_dir,
+                             "foo.hostname.username.log.ERROR.20150917-163712.31405")
+        
+        with open(fpath, 'w') as f:
+            f.write('log file')
+        
+        assert_false(lu.is_caffe_log(fpath))
+        
+class TestFindLine:
     
+    @classmethod
+    def setup_class(self):
+        
+        self.path_temp_dir = tempfile.mkdtemp()
+        
+    @classmethod
+    def teardown_class(self):
+        
+        shutil.rmtree(self.path_temp_dir)
+        
+    def test_find_line(self):
+        
+        fpath = os.path.join(self.path_temp_dir, "foo.txt")
+        
+        with open(fpath, 'w') as f:
+            f.write('line one\n')
+            f.write('line two\n')
+            f.write('LINE x\n')
+            f.write('line y\n')
+            f.write('last line\n')
+            
+        assert_is_none(lu.find_line(fpath, 'hello'))
+        assert_equal(lu.find_line(fpath, 'line'), 'line one' + os.linesep)
+        assert_equal(lu.find_line(fpath, 'LINE'), 'LINE x' + os.linesep)
