@@ -18,30 +18,39 @@ class TestReadImage:
         
         self.dir_tmp = tempfile.mkdtemp()
         
-        x = np.array([[[ 1,  2,  3],
-                       [ 4,  5,  6]
-                       ],
-                      [[ 7,  8,  9],
-                       [10, 11, 12]
-                       ],
-                      [[13, 14, 15],
-                       [16, 17, 18],
-                       ],
-                      [[19, 20, 21],
-                       [22, 23, 24]
-                       ]
-                      ])
+        self.img1 = np.array([[[ 1,  2,  3],
+                               [ 4,  5,  6]
+                               ],
+                              [[ 7,  8,  9],
+                               [10, 11, 12]
+                               ],
+                              [[13, 14, 15],
+                               [16, 17, 18],
+                               ],
+                              [[19, 20, 21],
+                               [22, 23, 24]
+                               ]
+                              ])
         
         self.path_img1 = os.path.join(self.dir_tmp, "a.png")
-        cv2.imwrite(self.path_img1, x)
+        cv2.imwrite(self.path_img1, self.img1)
         
     @classmethod
     def teardown_class(self):
         
         shutil.rmtree(self.dir_tmp)
     
-    def test_read_img_cv2(self):
+    def test_read_img_cv2_shape(self):
         
         img = r.read_img_cv2(self.path_img1)
         assert_equal(img.shape, (3, 4, 2))
+        
+    def test_read_img_cv2_pixels(self):
+        
+        img = r.read_img_cv2(self.path_img1)
+        
+        for ch in range(3):
+            for row in range(4):
+                for col in range(2):
+                    assert_equal(img[ch][row][col], self.img1[row][col][ch])
         
