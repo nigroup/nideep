@@ -44,6 +44,10 @@ before_install:
   - conda info -a
   - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL
   - source activate $CONDA_ENV
+  
+  # For mocking caffe
+  - mv $TRAVIS_BUILD_DIR/caffe_mock.py $TRAVIS_BUILD_DIR/caffe.py
+  
 install:
   - echo "Installing Coveralls if coverage:"
   - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
