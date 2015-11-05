@@ -4,6 +4,7 @@ Created on Oct 30, 2015
 @author: kashefy
 '''
 from nose.tools import assert_equal, assert_true
+from mock import patch
 import os
 import tempfile
 import shutil
@@ -11,6 +12,8 @@ import numpy as np
 import lmdb
 import cv2 as cv2
 import to_lmdb as tol
+import caffe
+import caffe_mock
 
 class TestImagesToLMDB:
 
@@ -40,11 +43,24 @@ class TestImagesToLMDB:
     def teardown_class(self):
         
         shutil.rmtree(self.dir_tmp)
-    
-    def test_img_str(self):
         
+    class DatumMock:
+        
+        def SerializeToString(self):
+            return
+            
+    @patch('to_lmdb.caffe')
+    @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_img_str(self, mock_dat, mock_caffe):
+        
+        # expected serialization of the test image
         s = '\x08\x03\x10\x04\x18\x02"\x18\x01\x04\x07\n\r\x10\x13\x16\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18(\x00'
         
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString.return_value = s
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        # use the module and test it
         path_lmdb = os.path.join(self.dir_tmp, 'x_lmdb')
         tol.imgs_to_lmdb([self.path_img1], path_lmdb)
         assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
