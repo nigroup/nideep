@@ -4,7 +4,7 @@ Created on Oct 30, 2015
 @author: kashefy
 '''
 from nose.tools import assert_equal, assert_true
-from mock import patch
+from mock import patch, MagicMock
 import os
 import tempfile
 import shutil
@@ -38,6 +38,9 @@ class TestImagesToLMDB:
         self.path_img1 = os.path.join(self.dir_tmp, "a.png")
         cv2.imwrite(self.path_img1, x)
         
+        self.path_img2 = os.path.join(self.dir_tmp, "b.png")
+        cv2.imwrite(self.path_img2, x+1)
+        
     @classmethod
     def teardown_class(self):
         
@@ -60,7 +63,7 @@ class TestImagesToLMDB:
         mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
         
         # use the module and test it
-        path_lmdb = os.path.join(self.dir_tmp, 'x_lmdb')
+        path_lmdb = os.path.join(self.dir_tmp, 'x1_lmdb')
         tol.imgs_to_lmdb([self.path_img1], path_lmdb)
         assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
         
@@ -78,7 +81,43 @@ class TestImagesToLMDB:
                 
                 count += 1
         
-        assert_equal(count, 1, "Unexpected number of samples.")    
+        assert_equal(count, 1, "Unexpected number of samples.")   
             
+    @patch('to_lmdb.caffe')
+    @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_imgs_str(self, mock_dat, mock_caffe):
+        
+        # expected serialization of the test image
+        s = ['\x08\x03\x10\x04\x18\x02"\x18\x01\x04\x07\n\r\x10\x13\x16\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18(\x00',
+             '\x08\x03\x10\x04\x18\x02"\x18\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18\x04\x07\n\r\x10\x13\x16\x19(\x00',
+             ]
+        
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString = MagicMock(side_effect=s)
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        # use the module and test it
+        path_lmdb = os.path.join(self.dir_tmp, 'x2_lmdb')
+        tol.imgs_to_lmdb([self.path_img1, self.path_img2], path_lmdb)
+        assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
+        
+        env_src = lmdb.open(path_lmdb, readonly=True)
+        
+        count = 0
+        
+        with env_src.begin() as txn:
+            
+            cursor = txn.cursor()
+            for key, value in cursor:
+                
+                k = tol.IDX_FMT.format(count)
+                #print(k, value)
+                #print(k, s[count])
+                assert_equal(key, k, "Unexpected key.")
+                assert_equal(value, s[count], "Unexpected content.")
+                
+                count += 1
+        
+        assert_equal(count, 2, "Unexpected number of samples.")
         
         

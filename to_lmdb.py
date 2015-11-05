@@ -10,6 +10,9 @@ import lmdb
 from read_img import read_img_cv2
 import caffe
 
+NUM_IDX_DIGITS = 10
+IDX_FMT = '{:0>%d' % NUM_IDX_DIGITS + 'd}'
+
 def imgs_to_lmdb(paths_src, path_dst):
     '''
     Generate LMDB file from set of images
@@ -25,7 +28,7 @@ def imgs_to_lmdb(paths_src, path_dst):
             
             img = read_img_cv2(path_)
             img_dat = caffe.io.array_to_datum(img)
-            in_txn.put('{:0>10d}'.format(idx), img_dat.SerializeToString())
+            in_txn.put(IDX_FMT.format(idx), img_dat.SerializeToString())
     
     db.close()
 
