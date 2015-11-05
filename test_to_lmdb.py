@@ -13,7 +13,6 @@ import lmdb
 import cv2 as cv2
 import to_lmdb as tol
 import caffe
-import caffe_mock
 
 class TestImagesToLMDB:
 
