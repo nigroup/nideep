@@ -8,17 +8,14 @@ import numpy as np
 from scipy import io
 import lmdb
 from read_img import read_img_cv2
+import caffe
 
-def imgs_to_lmdb(paths_src, path_dst, CAFFE_ROOT=None):
+def imgs_to_lmdb(paths_src, path_dst):
     '''
     Generate LMDB file from set of images
     Source: https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045
     credit: Evan Shelhamer
     '''
-    if CAFFE_ROOT is not None:
-        import sys
-        sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
-    import caffe
     
     db = lmdb.open(path_dst, map_size=int(1e12))
     
