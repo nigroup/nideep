@@ -1,11 +1,13 @@
 from nose.tools import assert_is_instance, assert_list_equal, assert_raises, \
-    assert_true, assert_equal
+    assert_true, assert_equal, assert_false
+from mock import patch
 import os
 import tempfile
 import shutil
 import numpy as np
 from scipy import io
 import nyudv2_to_lmdb as n2l
+import caffe
     
 class TestHandlingSplitsFile:
     
@@ -80,6 +82,78 @@ class TestBigArrToArrs:
             for j in range(4):
                 for k in range(2):
                     assert_equal(z[0][j][i][k], x[j][k][i])
+                    
+class TestNYUDV2ToLMDB:
+    
+    @classmethod
+    def setup_class(self):
         
+        self.dir_tmp = tempfile.mkdtemp()
+        
+    @classmethod
+    def teardown_class(self):
+        
+        shutil.rmtree(self.dir_tmp)
+
+    def test_validate_path_mat_dir_exists(self):
+        
+        assert_raises(IOError, n2l.nyudv2_to_lmdb, os.curdir, "", self.dir_tmp)
+        
+    def test_validate_path_mat_ext(self):
+        
+        p = os.path.join(self.dir_tmp, "foo.txt")
+        with open(p, 'w') as f:
+            f.write('foo')
+            
+        assert_true(os.path.isfile(p))
+        assert_raises(IOError, n2l.nyudv2_to_lmdb, p, "", self.dir_tmp)
+        
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_nyudv2_to_lmdb_info(self, mock_dat, mock_caffe):
+        
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString.return_value = 'x'
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        x = np.array([[[ 1,  2,  3],
+                       [ 4,  5,  6]
+                       ],
+                      [[ 7,  8,  9],
+                       [10, 11, 12]
+                       ],
+                      [[13, 14, 15],
+                       [16, 17, 18],
+                       ],
+                      [[19, 20, 21],
+                       [22, 23, 24]
+                       ]
+                      ])
+        
+        imgs = np.expand_dims(x, axis=1).astype(float)
+        imgs = np.tile(imgs, (3, 1, 1))
+        
+        dat = {n2l.NYUDV2DataType.IMAGES : imgs,
+               n2l.NYUDV2DataType.LABELS : x.astype(int)+1,
+               n2l.NYUDV2DataType.DEPTHS : x.astype(float)+2
+               }
+        
+        p = os.path.join(self.dir_tmp, 'foo.mat')
+        io.savemat(p, dat)
+        
+        prefix = 'xyz_'
+        lmdb_info = n2l.nyudv2_to_lmdb(p, prefix, self.dir_tmp)
+        
+        assert_is_instance(lmdb_info, list)
+        
+        for info_ in lmdb_info:
+            
+            n = info_[0]
+            plmdb = info_[-1]
+            
+            assert_true(os.path.isdir(plmdb))
+            
+            if 'val' in os.path.basename(plmdb):
+                assert_equal(n, 0)
         
         
