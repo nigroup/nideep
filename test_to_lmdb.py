@@ -3,7 +3,7 @@ Created on Oct 30, 2015
 
 @author: kashefy
 '''
-from nose.tools import assert_equal, assert_true
+from nose.tools import assert_equal, assert_true, assert_raises
 from mock import patch, MagicMock
 import os
 import tempfile
@@ -221,4 +221,151 @@ class TestMatFilesToLMDB:
                 count += 1
         
         assert_equal(count, 2, "Unexpected number of samples.")
+        
+class TestScalarsToLMDB:
+
+    PREFIX = '\x08\x01\x10\x01\x18\x01(\x005\x00\x00'
+    STR_MAPPINGS = {-2 : '\x00\xc0',
+                    -1 : '\x80\xbf',
+                     0 : '\x00\x00',
+                     1 : '\x80?',
+                     2 : '\x00@',
+                     3 : '@@',
+                     4 : '\x80@',
+                     5 : '\xa0@',
+                     6 : '\xc0@',
+                     7 : '\xe0@',
+                     8 : '\x00A',
+                     9 : '\x10A',
+                    10 : ' A'}
+        
+    @classmethod
+    def setup_class(self):
+        
+        self.dir_tmp = tempfile.mkdtemp()
+        
+    @classmethod
+    def teardown_class(self):
+        
+        shutil.rmtree(self.dir_tmp)   
+            
+#     def test_scalars_strX(self):
+#         
+#         # expected serialization of the test image
+#         x = np.random.randint(-2, 11, size=(10, 1)) # [low, high)
+#         
+#         # use the module and test it
+#         path_lmdb = os.path.join(self.dir_tmp, 'x2_lmdb')
+#         tol.scalars_to_lmdb(x, path_lmdb)
+#         assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
+#         
+#         env_src = lmdb.open(path_lmdb, readonly=True)
+#         
+#         c = 0
+#         with env_src.begin() as txn:
+#             for key, value in txn.cursor():
+#                 #print(k, x[c], value)
+#                 assert_equal(key, tol.IDX_FMT.format(c), "Unexpected key.")
+#                 assert_equal(value,
+#                              self.PREFIX + self.STR_MAPPINGS[x.ravel()[c]],
+#                              "Unexpected content.")
+#                 c += 1
+#         
+#         assert_equal(c, x.size, "Unexpected number of samples.")
+        
+    @patch('to_lmdb.caffe')
+    @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_scalars_str(self, mock_dat, mock_caffe):
+        
+        # expected serialization of the test image
+        x = np.random.randint(-2, 11, size=(10, 1)) # [low, high)
+        ser_vals = [self.PREFIX + self.STR_MAPPINGS[v] for v in x.ravel()]
+        
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString = MagicMock(side_effect=ser_vals)
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        # use the module and test it
+        path_lmdb = os.path.join(self.dir_tmp, 'x2_lmdb')
+        tol.scalars_to_lmdb(x, path_lmdb)
+        assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
+        
+        c = 0
+        with lmdb.open(path_lmdb, readonly=True).begin() as txn:
+            for key, value in txn.cursor():
+                #print(k, x[c], value)
+                assert_equal(key, tol.IDX_FMT.format(c), "Unexpected key.")
+                assert_equal(value, ser_vals[c], "Unexpected content.")
+                c += 1
+        
+        assert_equal(c, x.size, "Unexpected number of samples.")
+        
+    @patch('to_lmdb.caffe')
+    @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_scalars_str_list_of_one(self, mock_dat, mock_caffe):
+        
+        # expected serialization of the test image
+        x = np.random.randint(-2, 11) # [low, high), single integer
+        
+        # mock caffe calls made by our module
+        v = self.PREFIX + self.STR_MAPPINGS[x]
+        mock_dat.return_value.SerializeToString.return_value = self.PREFIX + self.STR_MAPPINGS[x]
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        # use the module and test it
+        path_lmdb = os.path.join(self.dir_tmp, 'test_scalars_str_single_lmdb')
+        tol.scalars_to_lmdb([x], path_lmdb)
+        assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
+        
+        c = 0
+        with lmdb.open(path_lmdb, readonly=True).begin() as txn:
+            for key, value in txn.cursor():
+                #print(k, x[c], value)
+                assert_equal(key, tol.IDX_FMT.format(c), "Unexpected key.")
+                assert_equal(value, self.PREFIX + self.STR_MAPPINGS[x],
+                             "Unexpected content.")
+                c += 1
+        
+        assert_equal(c, 1, "Unexpected number of samples.")
+        
+    @patch('to_lmdb.caffe')
+    @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_scalars_str_single_int(self, mock_dat, mock_caffe):
+        
+        # expected serialization of the test image
+        x = np.random.randint(-2, 11) # [low, high), single integer
+        
+        # mock caffe calls made by our module
+        v = self.PREFIX + self.STR_MAPPINGS[x]
+        mock_dat.return_value.SerializeToString.return_value = self.PREFIX + self.STR_MAPPINGS[x]
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        # use the module and test it
+        path_lmdb = os.path.join(self.dir_tmp, 'test_scalars_str_single_lmdb')
+        tol.scalars_to_lmdb(x, path_lmdb)
+        assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
+        
+        c = 0
+        with lmdb.open(path_lmdb, readonly=True).begin() as txn:
+            for key, value in txn.cursor():
+                #print(k, x[c], value)
+                assert_equal(key, tol.IDX_FMT.format(c), "Unexpected key.")
+                assert_equal(value, self.PREFIX + self.STR_MAPPINGS[x],
+                             "Unexpected content.")
+                c += 1
+        
+        assert_equal(c, 1, "Unexpected number of samples.")
+        
+    def test_scalars_invalid_scalars(self):
+        
+        assert_raises(AttributeError,
+              tol.scalars_to_lmdb,
+              [np.random.randint(-2, 11, size=(2, 3))],
+              os.path.join(self.dir_tmp, 'xx_lmdb'))
+        
+        assert_raises(AttributeError,
+                      tol.scalars_to_lmdb,
+                      [np.random.randint(-2, 11, size=(2, 3, 4))],
+                      os.path.join(self.dir_tmp, 'xx_lmdb'))
+        
         

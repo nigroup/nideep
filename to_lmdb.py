@@ -72,11 +72,23 @@ def scalars_to_lmdb(scalars, path_dst,
     db = lmdb.open(path_dst, map_size=int(1e12))
     
     with db.begin(write=True) as in_txn:
-    
+        
+        if not hasattr(scalars, '__iter__'):
+            scalars = np.array([scalars])
+        
         for idx, x in enumerate(scalars):
             
-            content_field = np.array([x])
-            # get shape (1,1,1)
+            if not hasattr(x, '__iter__'):
+                content_field = np.array([x])
+            else:
+                content_field = np.array(x)
+                
+            # validate these are scalars
+            if content_field.size != 1:
+                raise AttributeError("Unexpected shape for scalar at i=%d (%s)"
+                                     % (idx, str(content_field.shape)))                
+                
+            # guarantee shape (1,1,1)
             while len(content_field.shape) < 3:
                 content_field = np.expand_dims(content_field, axis=0)
             content_field = content_field.astype(int)
