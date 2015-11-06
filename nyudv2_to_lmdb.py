@@ -114,8 +114,8 @@ def nyudv2_to_lmdb(path_mat,
         lmdb_info.append((len(val_idx), fpath_lmdb))
     
     return lmdb_info
-    
-def main(args):
+
+if __name__ == '__main__':
     
     split_path = '/home/kashefy/data/nyudv2/splits.mat'
     val_list = split_matfile_to_val_list(split_path)
@@ -128,13 +128,5 @@ def main(args):
                    )
     
     print lmdb_info
-    
-        
-        
-    return 0
-
-if __name__ == '__main__':
-    
-    main(None)
     
     pass
