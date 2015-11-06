@@ -4,6 +4,7 @@ Created on Oct 27, 2015
 @author: kashefy
 '''
 import os
+from random import shuffle
 import numpy as np
 from scipy import io
 import h5py
@@ -62,6 +63,7 @@ def nyudv2_to_lmdb(path_mat,
         pass
     
     lmdb_info = []
+    train_idx = None
         
     for typ in [NYUDV2DataType.IMAGES,
                 NYUDV2DataType.LABELS,
@@ -84,7 +86,11 @@ def nyudv2_to_lmdb(path_mat,
         else:
             raise ValueError("unknown NYUDV2DataType")
         
-        train_idx, val_idx = get_train_val_split_from_idx(len(dat), val_list)
+        
+        if train_idx is None:
+            train_idx, val_idx = get_train_val_split_from_idx(len(dat), val_list)
+            shuffle(train_idx)
+            print(train_idx)
         
     #     # len(ndarray) same as ndarray.shape[0]
     #     if  len(labels) != len(imgs):
