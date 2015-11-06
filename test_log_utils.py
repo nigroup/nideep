@@ -7,7 +7,7 @@ import os
 import sys
 import shutil
 import tempfile
-from nose.tools import assert_equal, assert_false, \
+from nose.tools import assert_equal, assert_false, assert_raises, \
     assert_is_instance, assert_is_none, assert_less, assert_true
 import log_utils as lu
 
@@ -96,6 +96,22 @@ class TestPID:
             pass
         shutil.rmtree(path_temp_dir)
             
+    def test_read_pid_invalid(self):
+        
+        path_temp_dir = tempfile.mkdtemp()
+        fpath = os.path.join(path_temp_dir, TEST_LOG_FILENAME)
+        
+        with open(fpath, 'w') as f:
+            f.write('log file')
+        
+        assert_true(lu.is_caffe_info_log(fpath))
+        
+        fpath2 = os.path.join(path_temp_dir, "foo.txt")
+        shutil.copyfile(fpath, fpath2)
+        
+        assert_raises(IOError, lu.read_pid, fpath2)
+        
+        shutil.rmtree(path_temp_dir)
         
 class TestCaffeLog:
     
