@@ -53,12 +53,12 @@ def nyudv2_to_lmdb(path_mat,
     
     _, ext = os.path.splitext(path_mat)
     
-    if ext != '.mat':
-        raise IOError("Invalid file type, expecting mat file (%s)" % path_mat)
+    if ext != '.mat' and ext != '.h5'  and ext != '.hdf5' :
+        raise IOError("Invalid file type, expecting mat/h5/hdf5 file (%s)" % path_mat)
     
     try:
         data = io.loadmat(path_mat)
-    except NotImplementedError:
+    except (ValueError, NotImplementedError):
         data = h5py.File(path_mat) # support version >= 7.3 matfile HDF5 format
         pass
     

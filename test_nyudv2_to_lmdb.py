@@ -6,6 +6,7 @@ import tempfile
 import shutil
 import numpy as np
 from scipy import io
+import h5py
 import nyudv2_to_lmdb as n2l
 import caffe
     
@@ -155,5 +156,142 @@ class TestNYUDV2ToLMDB:
             
             if 'val' in os.path.basename(plmdb):
                 assert_equal(n, 0)
+                
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_nyudv2_to_lmdb_info_mat73(self, mock_dat, mock_caffe):
         
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString.return_value = 'x'
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        x = np.array([[[ 1,  2,  3],
+                       [ 4,  5,  6]
+                       ],
+                      [[ 7,  8,  9],
+                       [10, 11, 12]
+                       ],
+                      [[13, 14, 15],
+                       [16, 17, 18],
+                       ],
+                      [[19, 20, 21],
+                       [22, 23, 24]
+                       ]
+                      ])
+        
+        imgs = np.expand_dims(x, axis=1).astype(float)
+        imgs = np.tile(imgs, (3, 1, 1))
+        
+        p = os.path.join(self.dir_tmp, 'foo.mat')
+        with h5py.File(p, "w") as f:
+            f.create_dataset(n2l.NYUDV2DataType.IMAGES, data=imgs)
+            f.create_dataset(n2l.NYUDV2DataType.LABELS, data=x.astype(int)+1)
+            f.create_dataset(n2l.NYUDV2DataType.DEPTHS, data=x.astype(float)+2)
+        
+        prefix = 'xyz_'
+        lmdb_info = n2l.nyudv2_to_lmdb(p, prefix, self.dir_tmp)
+        
+        assert_is_instance(lmdb_info, list)
+        
+        for info_ in lmdb_info:
+            
+            n = info_[0]
+            plmdb = info_[-1]
+            
+            assert_true(os.path.isdir(plmdb))
+            
+            if 'val' in os.path.basename(plmdb):
+                assert_equal(n, 0)
+                
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_nyudv2_to_lmdb_info_hdf5(self, mock_dat, mock_caffe):
+        
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString.return_value = 'x'
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        x = np.array([[[ 1,  2,  3],
+                       [ 4,  5,  6]
+                       ],
+                      [[ 7,  8,  9],
+                       [10, 11, 12]
+                       ],
+                      [[13, 14, 15],
+                       [16, 17, 18],
+                       ],
+                      [[19, 20, 21],
+                       [22, 23, 24]
+                       ]
+                      ])
+        
+        imgs = np.expand_dims(x, axis=1).astype(float)
+        imgs = np.tile(imgs, (3, 1, 1))
+        
+        p = os.path.join(self.dir_tmp, 'foo.h5')
+        with h5py.File(p, "w") as f:
+            f.create_dataset(n2l.NYUDV2DataType.IMAGES, data=imgs)
+            f.create_dataset(n2l.NYUDV2DataType.LABELS, data=x.astype(int)+1)
+            f.create_dataset(n2l.NYUDV2DataType.DEPTHS, data=x.astype(float)+2)
+        
+        prefix = 'xyz_'
+        lmdb_info = n2l.nyudv2_to_lmdb(p, prefix, self.dir_tmp)
+        
+        assert_is_instance(lmdb_info, list)
+        
+        for info_ in lmdb_info:
+            
+            n = info_[0]
+            plmdb = info_[-1]
+            
+            assert_true(os.path.isdir(plmdb))
+            
+            if 'val' in os.path.basename(plmdb):
+                assert_equal(n, 0)
+        
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_nyudv2_to_lmdb_info_hdf5_2(self, mock_dat, mock_caffe):
+        
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString.return_value = 'x'
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        x = np.array([[[ 1,  2,  3],
+                       [ 4,  5,  6]
+                       ],
+                      [[ 7,  8,  9],
+                       [10, 11, 12]
+                       ],
+                      [[13, 14, 15],
+                       [16, 17, 18],
+                       ],
+                      [[19, 20, 21],
+                       [22, 23, 24]
+                       ]
+                      ])
+        
+        imgs = np.expand_dims(x, axis=1).astype(float)
+        imgs = np.tile(imgs, (3, 1, 1))
+        
+        p = os.path.join(self.dir_tmp, 'foo.hdf5')
+        with h5py.File(p, "w") as f:
+            f.create_dataset(n2l.NYUDV2DataType.IMAGES, data=imgs)
+            f.create_dataset(n2l.NYUDV2DataType.LABELS, data=x.astype(int)+1)
+            f.create_dataset(n2l.NYUDV2DataType.DEPTHS, data=x.astype(float)+2)
+        
+        prefix = 'xyz_'
+        lmdb_info = n2l.nyudv2_to_lmdb(p, prefix, self.dir_tmp)
+        
+        assert_is_instance(lmdb_info, list)
+        
+        for info_ in lmdb_info:
+            
+            n = info_[0]
+            plmdb = info_[-1]
+            
+            assert_true(os.path.isdir(plmdb))
+            
+            if 'val' in os.path.basename(plmdb):
+                assert_equal(n, 0)
         
