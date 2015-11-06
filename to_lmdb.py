@@ -35,19 +35,13 @@ def imgs_to_lmdb(paths_src, path_dst):
     return 0
 
 def matfiles_to_lmdb(paths_src, path_dst, fieldname,
-                     CAFFE_ROOT=None,
                      lut=None):
     '''
-    Generate LMDB file from set of mat files
+    Generate LMDB file from set of mat files with integer data
     Source: https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045
     credit: Evan Shelhamer
     
-    '''
-    if CAFFE_ROOT is not None:
-        import sys
-        sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
-    import caffe
-    
+    '''    
     db = lmdb.open(path_dst, map_size=int(1e12))
     
     with db.begin(write=True) as in_txn:
@@ -55,27 +49,26 @@ def matfiles_to_lmdb(paths_src, path_dst, fieldname,
         for idx, path_ in enumerate(paths_src):
             
             content_field = io.loadmat(path_)[fieldname]
-            content_field = np.expand_dims(content_field, axis=0)
+            # get shape (1,H,W)
+            while len(content_field.shape) < 3:
+                content_field = np.expand_dims(content_field, axis=0)
             content_field = content_field.astype(int)
             
             if lut is not None:
                 content_field = lut(content_field)
                 
             img_dat = caffe.io.array_to_datum(content_field)
-            in_txn.put('{:0>10d}'.format(idx), img_dat.SerializeToString())
+            in_txn.put(IDX_FMT.format(idx), img_dat.SerializeToString())
     
     db.close()
 
     return 0
 
 def scalars_to_lmdb(scalars, path_dst,
-                    CAFFE_ROOT=None,
                     lut=None):
     '''
     Generate LMDB file from list of scalars
-    '''
-    import caffe
-    
+    '''    
     db = lmdb.open(path_dst, map_size=int(1e12))
     
     with db.begin(write=True) as in_txn:
@@ -91,8 +84,8 @@ def scalars_to_lmdb(scalars, path_dst,
             if lut is not None:
                 content_field = lut(content_field)
                 
-            img_dat = caffe.io.array_to_datum(content_field)
-            in_txn.put('{:0>10d}'.format(idx), img_dat.SerializeToString())
+            dat = caffe.io.array_to_datum(content_field)
+            in_txn.put(IDX_FMT.format(idx), dat.SerializeToString())
     
     db.close()
 
@@ -102,8 +95,6 @@ def arrays_to_lmdb(arrs, path_dst):
     '''
     Generate LMDB file from list of ndarrays    
     '''
-    import caffe
-    
     db = lmdb.open(path_dst, map_size=int(1e12))
     
     with db.begin(write=True) as in_txn:
@@ -115,7 +106,7 @@ def arrays_to_lmdb(arrs, path_dst):
                 content_field = np.expand_dims(content_field, axis=0)
             
             dat = caffe.io.array_to_datum(content_field)
-            in_txn.put('{:0>10d}'.format(idx), dat.SerializeToString())
+            in_txn.put(IDX_FMT.format(idx), dat.SerializeToString())
     
     db.close()
 
