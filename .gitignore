@@ -61,3 +61,5 @@ target/
 *.prototxt
 *.caffemodel
 *lmdb/
+
+.ipynb_checkpoints/

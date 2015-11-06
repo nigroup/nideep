@@ -42,11 +42,16 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose
+  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL
   - source activate $CONDA_ENV
+  
+  # For mocking caffe
+  - mv $TRAVIS_BUILD_DIR/caffe_mock.py $TRAVIS_BUILD_DIR/caffe.py
+  
 install:
   - echo "Installing Coveralls if coverage:"
   - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
+  - travis_retry pip install lmdb 
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
   - export C_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$C_INCLUDE_PATH"
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"

@@ -6,6 +6,7 @@ Created on Jul 21, 2015
 import os
 import numpy as np
 import to_lmdb
+import dataset_utils as du
 import fileSystemUtils as fs
 
 import cv2 as cv2
@@ -96,29 +97,6 @@ def get_labels_lut(labels_list, labels_subset):
             
     return labels_lut
 
-def get_train_val_split(src, val_list):
-    
-    train_idx = []
-    val_idx = []
-    
-    len_ = len(val_list)
-    
-    for i, x in enumerate(src):
-        
-        found = False
-        j = 0
-        while j < len_ and not found:
-            
-            found = val_list[j] in x            
-            j += 1
-            
-        if found:
-            val_idx.append(i)
-        else:
-            train_idx.append(i)
-    
-    return train_idx, val_idx
-
 def pascal_context_to_lmdb(dir_imgs,
                            dir_segm_labels,
                            fpath_labels_list,
@@ -157,7 +135,7 @@ def pascal_context_to_lmdb(dir_imgs,
     if val_list is not None:
         # do train/val split
         
-        train_idx, val_idx = get_train_val_split(paths_imgs, val_list)
+        train_idx, val_idx = du.get_train_val_split_from_names(paths_imgs, val_list)
         
         # images
         paths_imgs_train = [paths_imgs[i] for i in train_idx]

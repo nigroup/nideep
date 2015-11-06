@@ -7,19 +7,8 @@ import os
 import numpy as np
 from PIL import Image
 import cv2 as cv2
-import cv2.cv as cv
-
-def whc_to_chw(m):
-    '''
-    Reorder multi-channel image matrix from W x H x C to C x H x W expected by Caffe
-    '''
-    if m.ndim == 3:
-        m = m.transpose((2, 0, 1))
-    #elif m.ndim == 2:
-    else:
-        AttributeError("No. of dimensions (%d) not supported." % m.ndim)
-    
-    return m
+import caffe
+import mat_utils as mu
 
 def read_img_PIL(fpath, mean=None):
     '''
@@ -37,13 +26,13 @@ def read_img_PIL(fpath, mean=None):
         img_dat -= mean
     
     # reorder dimensions
-    img_dat = whc_to_chw(img_dat)
+    img_dat = mu.hwc_to_chw(img_dat)
     
     return img_dat
 
 def read_img_cv2(fpath, mean=None):
     '''
-    load image, switch to BGR, subtract mean, and make dims C x H x W for Caffe
+    load image in BGR, subtract mean, and make dims C x H x W for Caffe
     '''
     img_dat = cv2.imread(fpath) # pixel value range per channel: [0, 255]
     
@@ -56,22 +45,18 @@ def read_img_cv2(fpath, mean=None):
         img_dat = img_dat.astype(np.float)
     
     # reorder dimensions
-    img_dat = whc_to_chw(img_dat)
+    img_dat = mu.hwc_to_chw(img_dat)
     
     # casting to np.float enables plugging into protobuf
     
     return img_dat
 
-def read_img_caf(fpath, mean=None, caffe_root=None):
+def read_img_caf(fpath, mean=None):
     '''
     load image, switch to BGR, subtract mean, and make dims C x H x W for Caffe
     '''
-    if caffe_root is not None:
-        import sys
-        sys.path.insert(0,  os.path.join(caffe_root, 'python'))
-    import caffe
-
     img_dat = caffe.io.load_image(fpath) # pixel value range per channel: [0, 1]
+    
     img_dat *= 255.
     
     # RGB to BGR
@@ -82,7 +67,7 @@ def read_img_caf(fpath, mean=None, caffe_root=None):
         img_dat -= mean
     
     # reorder dimensions
-    img_dat = whc_to_chw(img_dat)
+    img_dat = mu.hwc_to_chw(img_dat)
     
     return img_dat
 
