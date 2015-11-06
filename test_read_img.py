@@ -58,4 +58,14 @@ class TestReadImage:
         
         img = r.read_img_cv2(self.path_img1)
         assert_equal(img.dtype, np.dtype('uint8'))
+        
+    def test_read_img_cv2_subtract_mean(self):
+        
+        m = np.array((1., 2. ,3.))
+        img = r.read_img_cv2(self.path_img1, mean=m)
+
+        for ch in range(3):
+            for row in range(4):
+                for col in range(2):
+                    assert_equal(img[ch][row][col], self.img1[row][col][ch]-m[ch])
     
