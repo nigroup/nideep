@@ -12,3 +12,5 @@ omit =
   setup.py
   tests/*
   test*.py
+  caffe.py
+  caffe_mock.py
