@@ -68,4 +68,28 @@ class TestReadImage:
             for row in range(4):
                 for col in range(2):
                     assert_equal(img[ch][row][col], self.img1[row][col][ch]-m[ch])
+                    
+    
+    def test_read_img_PIL_shape(self):
+        
+        assert_equal(r.read_img_PIL(self.path_img1).shape, (3, 4, 2))
+        
+    def test_read_img_PIL_pixels(self):
+        
+        img = r.read_img_PIL(self.path_img1)
+        
+        for ch in range(3):
+            for row in range(4):
+                for col in range(2):
+                    assert_equal(img[ch][row][col], self.img1[row][col][ch])
+        
+    def test_read_img_PIL_subtract_mean(self):
+        
+        m = np.array((1., 2. ,3.))
+        img = r.read_img_PIL(self.path_img1, mean=m)
+
+        for ch in range(3):
+            for row in range(4):
+                for col in range(2):
+                    assert_equal(img[ch][row][col], self.img1[row][col][ch]-m[ch])
     
