@@ -3,7 +3,8 @@ Created on Oct 30, 2015
 
 @author: kashefy
 '''
-from nose.tools import assert_equal, assert_not_equal
+from nose.tools import assert_equal, assert_almost_equals
+from mock import patch
 import os
 import tempfile
 import shutil
@@ -68,7 +69,6 @@ class TestReadImage:
             for row in range(4):
                 for col in range(2):
                     assert_equal(img[ch][row][col], self.img1[row][col][ch]-m[ch])
-                    
     
     def test_read_img_PIL_shape(self):
         
@@ -92,4 +92,71 @@ class TestReadImage:
             for row in range(4):
                 for col in range(2):
                     assert_equal(img[ch][row][col], self.img1[row][col][ch]-m[ch])
+                 
+    @patch('read_img.caffe')   
+    def test_read_img_caf_shape(self, mock_caffe):
+        
+        mock_caffe.io.load_image.return_value = np.array([[[0.01176471,  0.00784314,  0.00392157],
+                                                           [0.02352941,  0.01960784,  0.01568628]
+                                                           ],
+                                                          [[0.03529412,  0.03137255,  0.02745098],
+                                                            [0.04705882, 0.04313726, 0.03921569],
+                                                            ],
+                                                          [[0.05882353,  0.05490196,  0.05098039],
+                                                           [0.07058824,  0.06666667,  0.0627451 ]
+                                                           ],
+                                                          [[0.08235294,  0.07843138,  0.07450981],
+                                                           [0.09411765,  0.09019608,  0.08627451]
+                                                           ]
+                                                          ])
+        assert_equal(r.read_img_caf(self.path_img1).shape, (3, 4, 2))
+                    
+    @patch('read_img.caffe')   
+    def test_read_img_caf_pixels(self, mock_caffe):
+        
+        mock_caffe.io.load_image.return_value = np.array([[[0.01176471,  0.00784314,  0.00392157],
+                                                           [0.02352941,  0.01960784,  0.01568628]
+                                                           ],
+                                                          [[0.03529412,  0.03137255,  0.02745098],
+                                                            [0.04705882, 0.04313726, 0.03921569],
+                                                            ],
+                                                          [[0.05882353,  0.05490196,  0.05098039],
+                                                           [0.07058824,  0.06666667,  0.0627451 ]
+                                                           ],
+                                                          [[0.08235294,  0.07843138,  0.07450981],
+                                                           [0.09411765,  0.09019608,  0.08627451]
+                                                           ]
+                                                          ])
+        
+        img = r.read_img_caf(self.path_img1)
+        
+        for ch in range(3):
+            for row in range(4):
+                for col in range(2):
+                    assert_almost_equals(img[ch][row][col], self.img1[row][col][ch], places=5)
+                    
+    @patch('read_img.caffe')   
+    def test_read_img_caf_subtract_mean(self, mock_caffe):
+        
+        mock_caffe.io.load_image.return_value = np.array([[[0.01176471,  0.00784314,  0.00392157],
+                                                           [0.02352941,  0.01960784,  0.01568628]
+                                                           ],
+                                                          [[0.03529412,  0.03137255,  0.02745098],
+                                                            [0.04705882, 0.04313726, 0.03921569],
+                                                            ],
+                                                          [[0.05882353,  0.05490196,  0.05098039],
+                                                           [0.07058824,  0.06666667,  0.0627451 ]
+                                                           ],
+                                                          [[0.08235294,  0.07843138,  0.07450981],
+                                                           [0.09411765,  0.09019608,  0.08627451]
+                                                           ]
+                                                          ])
+        
+        m = np.array((1., 2. ,3.))
+        img = r.read_img_caf(self.path_img1, mean=m)
+        
+        for ch in range(3):
+            for row in range(4):
+                for col in range(2):
+                    assert_almost_equals(img[ch][row][col], self.img1[row][col][ch]-m[ch], places=5)
     

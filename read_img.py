@@ -7,6 +7,7 @@ import os
 import numpy as np
 from PIL import Image
 import cv2 as cv2
+import caffe
 import mat_utils as mu
 
 def read_img_PIL(fpath, mean=None):
@@ -50,16 +51,12 @@ def read_img_cv2(fpath, mean=None):
     
     return img_dat
 
-def read_img_caf(fpath, mean=None, caffe_root=None):
+def read_img_caf(fpath, mean=None):
     '''
     load image, switch to BGR, subtract mean, and make dims C x H x W for Caffe
     '''
-    if caffe_root is not None:
-        import sys
-        sys.path.insert(0,  os.path.join(caffe_root, 'python'))
-    import caffe
-
     img_dat = caffe.io.load_image(fpath) # pixel value range per channel: [0, 1]
+    
     img_dat *= 255.
     
     # RGB to BGR
