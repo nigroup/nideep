@@ -112,6 +112,11 @@ class TestCaffeLog:
         
         shutil.rmtree(self.dir_tmp)
     
+    def test_is_caffe_log_invalid_dir(self):
+        
+        assert_true(os.path.isdir(self.dir_tmp))
+        assert_false(lu.is_caffe_log(self.dir_tmp))
+        
     def test_is_caffe_log(self):
         
         assert_true(lu.is_caffe_log(self.path_real_log))
@@ -148,7 +153,7 @@ class TestCaffeLog:
         with open(fpath, 'w') as f:
             f.write('log file')
         
-        assert_false(lu.is_caffe_log(fpath))
+        assert_false(lu.is_caffe_info_log(fpath))
         
 class TestFindLine:
     
