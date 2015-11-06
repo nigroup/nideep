@@ -247,31 +247,7 @@ class TestScalarsToLMDB:
     @classmethod
     def teardown_class(self):
         
-        shutil.rmtree(self.dir_tmp)   
-            
-#     def test_scalars_strX(self):
-#         
-#         # expected serialization of the test image
-#         x = np.random.randint(-2, 11, size=(10, 1)) # [low, high)
-#         
-#         # use the module and test it
-#         path_lmdb = os.path.join(self.dir_tmp, 'x2_lmdb')
-#         tol.scalars_to_lmdb(x, path_lmdb)
-#         assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
-#         
-#         env_src = lmdb.open(path_lmdb, readonly=True)
-#         
-#         c = 0
-#         with env_src.begin() as txn:
-#             for key, value in txn.cursor():
-#                 #print(k, x[c], value)
-#                 assert_equal(key, tol.IDX_FMT.format(c), "Unexpected key.")
-#                 assert_equal(value,
-#                              self.PREFIX + self.STR_MAPPINGS[x.ravel()[c]],
-#                              "Unexpected content.")
-#                 c += 1
-#         
-#         assert_equal(c, x.size, "Unexpected number of samples.")
+        shutil.rmtree(self.dir_tmp)
         
     @patch('to_lmdb.caffe')
     @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
@@ -399,4 +375,83 @@ class TestScalarsToLMDB:
                       [np.random.randint(-2, 11, size=(2, 3, 4))],
                       os.path.join(self.dir_tmp, 'xx_lmdb'))
         
+class TestArraysToLMDB:
+
+    @classmethod
+    def setup_class(self):
+        
+        self.dir_tmp = tempfile.mkdtemp()
+        
+        x = np.array([[[ 1,  2,  3],
+                       [ 4,  5,  6]
+                       ],
+                      [[ 7,  8,  9],
+                       [10, 11, 12]
+                       ],
+                      [[13, 14, 15],
+                       [16, 17, 18],
+                       ],
+                      [[19, 20, 21],
+                       [22, 23, 24]
+                       ]
+                      ])
+        
+        self.arr = [x, x+1]
+        
+    @classmethod
+    def teardown_class(self):
+        
+        shutil.rmtree(self.dir_tmp)
+            
+    @patch('to_lmdb.caffe')
+    @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_arr_single(self, mock_dat, mock_caffe):
+        
+        # expected serialization of the test image
+        s = '\x08\x03\x10\x04\x18\x02"\x18\x01\x04\x07\n\r\x10\x13\x16\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18(\x00'
+        
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString.return_value = s
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        # use the module and test it
+        path_lmdb = os.path.join(self.dir_tmp, 'xarr1_lmdb')
+        tol.arrays_to_lmdb([self.arr[0]], path_lmdb)
+        assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
+        
+        count = 0
+        with lmdb.open(path_lmdb, readonly=True).begin() as txn:
+            for key, value in txn.cursor():
+                
+                assert_equal(key, '0000000000', "Unexpected key.")
+                assert_equal(value, s, "Unexpected content.")                
+                count += 1
+        assert_equal(count, 1, "Unexpected number of samples.")   
+            
+    @patch('to_lmdb.caffe')
+    @patch('to_lmdb.caffe.proto.caffe_pb2.Datum')
+    def test_arr(self, mock_dat, mock_caffe):
+        
+        # expected serialization of the test image
+        s = ['\x08\x03\x10\x04\x18\x02"\x18\x01\x04\x07\n\r\x10\x13\x16\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18(\x00',
+             '\x08\x03\x10\x04\x18\x02"\x18\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18\x04\x07\n\r\x10\x13\x16\x19(\x00',
+             ]
+        
+        # mock caffe calls made by our module
+        mock_dat.return_value.SerializeToString = MagicMock(side_effect=s)
+        mock_caffe.io.array_to_datum.return_value = caffe.proto.caffe_pb2.Datum()
+        
+        # use the module and test it
+        path_lmdb = os.path.join(self.dir_tmp, 'xarr2_lmdb')
+        tol.arrays_to_lmdb(self.arr, path_lmdb)
+        assert_true(os.path.isdir(path_lmdb), "failed to save LMDB")
+        
+        count = 0
+        with lmdb.open(path_lmdb, readonly=True).begin() as txn:
+            for key, value in txn.cursor():
+                
+                assert_equal(key, tol.IDX_FMT.format(count), "Unexpected key.")
+                assert_equal(value, s[count], "Unexpected content.")
+                count += 1
+        assert_equal(count, 2, "Unexpected number of samples.")
         
