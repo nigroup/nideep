@@ -2,7 +2,12 @@
 omit =
   build.py
   fabfile.py
-  pavement.py
   setup.py
   tests/*
   test*.py
+exclude_lines =
+  pragma: no cover
+  def __repr__
+  if self.debug:
+  if settings.DEBUG
+  if __name__ == .__main__.:
