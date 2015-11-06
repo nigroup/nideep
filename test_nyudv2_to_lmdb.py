@@ -1,5 +1,5 @@
 from nose.tools import assert_is_instance, assert_list_equal, assert_raises, \
-    assert_true
+    assert_true, assert_equal
 import os
 import tempfile
 import shutil
@@ -53,4 +53,33 @@ class TestHandlingSplitsFile:
     def test_val_list_other(self):
         
         assert_raises(KeyError, n2l.split_matfile_to_val_list, self.path_other)
+        
+class TestBigArrToArrs:
+    
+    def test_big_arr_to_arrs_single(self):
+        
+        x = np.array([[[ 1,  2,  3],
+                       [ 4,  5,  6]
+                       ],
+                      [[ 7,  8,  9],
+                       [10, 11, 12]
+                       ],
+                      [[13, 14, 15],
+                       [16, 17, 18],
+                       ],
+                      [[19, 20, 21],
+                       [22, 23, 24]
+                       ]
+                      ])
+        y = np.expand_dims(x, axis=0)
+        z = n2l.big_arr_to_arrs(y)
+        
+        assert_is_instance(z, list)
+        assert_equal(len(z), 1)
+        for i in range(3):
+            for j in range(4):
+                for k in range(2):
+                    assert_equal(z[0][j][i][k], x[j][k][i])
+        
+        
         
