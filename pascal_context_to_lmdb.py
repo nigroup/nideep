@@ -142,15 +142,13 @@ def pascal_context_to_lmdb(dir_imgs,
         fpath_lmdb_imgs_train = os.path.join(dir_dst,
                                        '%scontext_imgs_train_lmdb' % dst_prefix)
         to_lmdb.imgs_to_lmdb(paths_imgs_train,
-                             fpath_lmdb_imgs_train,
-                             CAFFE_ROOT=CAFFE_ROOT)
+                             fpath_lmdb_imgs_train)
         
         paths_imgs_val = [paths_imgs[i] for i in val_idx]
         fpath_lmdb_imgs_val = os.path.join(dir_dst,
                                        '%scontext_imgs_val_lmdb' % dst_prefix)
         to_lmdb.imgs_to_lmdb(paths_imgs_val,
-                             fpath_lmdb_imgs_val,
-                             CAFFE_ROOT=CAFFE_ROOT)
+                             fpath_lmdb_imgs_val)
         
         # ground truth
         paths_segm_labels_train = [paths_segm_labels[i] for i in train_idx]
@@ -159,7 +157,7 @@ def pascal_context_to_lmdb(dir_imgs,
         to_lmdb.matfiles_to_lmdb(paths_segm_labels_train,
                                  fpath_lmdb_segm_labels_train,
                                  'LabelMap',
-                                 CAFFE_ROOT=CAFFE_ROOT, lut=apply_labels_lut)
+                                 lut=apply_labels_lut)
         
         paths_segm_labels_val = [paths_segm_labels[i] for i in val_idx]
         fpath_lmdb_segm_labels_val = os.path.join(dir_dst,
@@ -167,7 +165,7 @@ def pascal_context_to_lmdb(dir_imgs,
         to_lmdb.matfiles_to_lmdb(paths_segm_labels_val,
                                  fpath_lmdb_segm_labels_val,
                                  'LabelMap',
-                                 CAFFE_ROOT=CAFFE_ROOT, lut=apply_labels_lut)
+                                 lut=apply_labels_lut)
         
         return len(paths_imgs_train), len(paths_imgs_val),\
             fpath_lmdb_imgs_train, fpath_lmdb_segm_labels_train, fpath_lmdb_imgs_val, fpath_lmdb_segm_labels_val
@@ -176,15 +174,14 @@ def pascal_context_to_lmdb(dir_imgs,
         fpath_lmdb_imgs = os.path.join(dir_dst,
                                        '%scontext_imgs_lmdb' % dst_prefix)
         to_lmdb.imgs_to_lmdb(paths_imgs,
-                             fpath_lmdb_imgs,
-                             CAFFE_ROOT=CAFFE_ROOT)
+                             fpath_lmdb_imgs)
         
         fpath_lmdb_segm_labels = os.path.join(dir_dst,
                                               '%scontext_labels_lmdb' % dst_prefix)
         to_lmdb.matfiles_to_lmdb(paths_segm_labels,
                                  fpath_lmdb_segm_labels,
                                  'LabelMap',
-                                 CAFFE_ROOT=CAFFE_ROOT, lut=apply_labels_lut)
+                                 lut=apply_labels_lut)
         
         return len(paths_imgs), fpath_lmdb_imgs, fpath_lmdb_segm_labels
 
