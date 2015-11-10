@@ -8,24 +8,10 @@ import numpy as np
 import to_lmdb
 import dataset_utils as du
 import fileSystemUtils as fs
-
 import cv2 as cv2
 import cv2.cv as cv
 
-CAFFE_ROOT = '/home/kashefy/src/caffe_forks/bvlc/'
-if CAFFE_ROOT is not None:
-    import sys
-    sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
 import caffe
-from caffe import layers as L
-from caffe import params as P
-
-def gen_net(lmdb, batch_size):
-    # our version of LeNet: a series of linear and simple nonlinear transformations
-    n = caffe.NetSpec()
-    n.data, n.label = L.Data(batch_size=batch_size, backend=P.Data.LMDB, source=lmdb,
-                             transform_param=dict(scale=1./255), ntop=2)
-    return n.to_proto()
 
 def view_segm_lmdb(nb_imgs, path_solver):
     
@@ -37,7 +23,7 @@ def view_segm_lmdb(nb_imgs, path_solver):
          
         d = solver.net.blobs['data'].data
         print d.shape
-        d = np.squeeze(d, axis=(0,)) # get rid of elements dimensions
+        d = np.squeeze(d, axis=(0,)) # get rid of batch elements dimensions
         y = cv2.cvtColor(cv2.merge([ch for ch in d]), cv.CV_RGB2BGR)
          
         #print y.dtype, y.max()
