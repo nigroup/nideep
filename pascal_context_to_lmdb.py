@@ -4,7 +4,6 @@ Created on Jul 21, 2015
 @author: kashefy
 '''
 import os
-import numpy as np
 import to_lmdb
 import dataset_utils as du
 import fileSystemUtils as fs
