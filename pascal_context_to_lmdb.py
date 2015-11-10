@@ -5,39 +5,9 @@ Created on Jul 21, 2015
 '''
 import os
 import numpy as np
-import cv2 as cv2
-import cv2.cv as cv
 import to_lmdb
 import dataset_utils as du
 import fileSystemUtils as fs
-import caffe
-
-def view_segm_lmdb(nb_imgs, path_solver):
-    
-    solver = caffe.SGDSolver(path_solver)
-     
-    for _ in xrange(nb_imgs):
-         
-        solver.net.forward()  # train net
-         
-        d = solver.net.blobs['data'].data
-        print d.shape
-        d = np.squeeze(d, axis=(0,)) # get rid of batch elements dimensions
-        y = cv2.cvtColor(cv2.merge([ch for ch in d]), cv.CV_RGB2BGR)
-         
-        #print y.dtype, y.max()
-         
-        cv2.imshow('data', y)
-         
-        d = solver.net.blobs['label'].data
-        print d.shape
-        d = np.squeeze(d, axis=(0,))
-        
-        print d
-        
-        cv2.waitKey()
-        
-    return 0
 
 def get_labels_list(fpath):
     """
@@ -143,7 +113,7 @@ def pascal_context_to_lmdb(dir_imgs,
         
         return len(paths_imgs), fpath_lmdb_imgs, fpath_lmdb_segm_labels
 
-def main(args):
+if __name__ == '__main__':
     
     val_list_path = '/home/kashefy/data/PASCAL-Context/val_59.txt'
     with open(val_list_path, 'r') as f:
@@ -161,19 +131,5 @@ def main(args):
                            )
     
     print "size: %d" % nt, nv, fpath_imgs_train, fpath_labels_train, fpath_imgs_val, fpath_labels_val
-    
-    #load    
-    
-    #with open("/media/win/Users/woodstock/dev/data/models/fcn_segm/train_val2.prototxt", 'w') as f:
-    #    f.write(str(gen_net(os.path.join(dir_dst, '59_context_imgs_lmdb'), 1)))
-        
-    #view_segm_lmdb(2, '/media/win/Users/woodstock/dev/data/models/fcn_segm/solver2.prototxt')
-        
-        
-    return 0
-
-if __name__ == '__main__':
-    
-    main(None)
     
     pass
