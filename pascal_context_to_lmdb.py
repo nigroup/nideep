@@ -41,7 +41,9 @@ def view_segm_lmdb(nb_imgs, path_solver):
     return 0
 
 def get_labels_list(fpath):
-    
+    """
+    Read class names from text file
+    """
     _, ext = os.path.splitext(fpath)
     if not ext.endswith('.txt'):
         
@@ -55,7 +57,13 @@ def get_labels_list(fpath):
     return labels_list
 
 def get_labels_lut(labels_list, labels_subset):
-
+    """
+    Generate a look-up-table for mapping labels from a list to a subset
+    Unmapped labels are mapped to class id zero.
+    
+    labels_list -- full list of labels/class names
+    labels_subset -- contains entities that belong to the validation subset
+    """
     pairs = []
     len_labels_list = len(labels_list)
     for id_, name in labels_subset:
