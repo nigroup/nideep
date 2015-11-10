@@ -53,3 +53,39 @@ def get_train_val_split_from_idx(src, val_list):
             train_idx.append(x)
     
     return train_idx, val_idx
+
+def get_labels_lut(labels_list, labels_subset):
+    """
+    Generate a look-up-table for mapping labels from a list to a subset
+    Unmapped labels are mapped to class id zero.
+    Can be used for selecting a subset of classes and grouping everything else.
+    
+    labels_list -- full list of labels/class names
+    labels_subset -- contains entities that belong to the validation subset
+    """
+    pairs = []
+    len_labels_list = len(labels_list)
+    for id_, name in labels_subset:
+        
+        found = False
+        idx = 0
+        while idx < len_labels_list and not found:
+            
+            id2, name2 = labels_list[idx]
+            
+            if name2 == name:
+                pairs.append([int(id2), int(id_)])
+                found = True
+            
+            idx += 1
+            
+        if not found:
+            print "Could not find %s" % name
+    
+    #print len(labels_list)
+    labels_lut = np.zeros((len(labels_list)+1,), dtype='int')
+    #print pairs
+    for src, dst in pairs:
+        labels_lut[src] = dst
+            
+    return labels_lut
