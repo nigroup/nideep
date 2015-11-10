@@ -30,7 +30,6 @@ def pascal_context_to_lmdb(dir_imgs,
                            fpath_labels_list_subset,
                            dst_prefix,
                            dir_dst,
-                           CAFFE_ROOT=None,
                            val_list=None):
     '''
     Fine intersection of filename in both directories and create
