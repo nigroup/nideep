@@ -11,6 +11,8 @@ class proto:
         class Datum:
             def SerializeToString(self):
                 return "mock_this"
+            def ParseFromString(self, val):
+                return # do nothing
             
 class io:
     @staticmethod

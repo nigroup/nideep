@@ -3,31 +3,24 @@ Created on Sep 16, 2015
 
 @author: kashefy
 '''
-
-import os
 import numpy as np
 import lmdb
-
-CAFFE_ROOT = '/home/kashefy/src/caffe/'
-if CAFFE_ROOT is not None:
-    import sys
-    sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
 import caffe
 
-# Adapted from: Gustav Larsson http://deepdish.io/2015/04/28/creating-lmdb-in-python/
-def read_labels_scalar(path_lmdb):
+def read_labels(path_lmdb):
+    """
+    Read label member from lmdb
+    adapted from Gustav Larsson http://deepdish.io/2015/04/28/creating-lmdb-in-python/
+    """
     
     labels = []
-    env_src = lmdb.open(path_lmdb, readonly=True)
-    with env_src.begin() as txn:
+    with lmdb.open(path_lmdb, readonly=True).begin() as txn:
         cursor = txn.cursor()
         for _, value in cursor:
-            #print(key, value)
             
-            datum = caffe.proto.caffe_pb2.Datum()
-            datum.ParseFromString(value)
-            
-            labels.append(datum.label)
+            dat = caffe.proto.caffe_pb2.Datum()
+            dat.ParseFromString(value)
+            labels.append(dat.label)
             
     return labels
     
@@ -42,12 +35,12 @@ if __name__ == '__main__':
         for key, value in cursor:
             #print(key, value)
             
-            datum = caffe.proto.caffe_pb2.Datum()
-            datum.ParseFromString(value)
+            dat = caffe.proto.caffe_pb2.Datum()
+            dat.ParseFromString(value)
              
-            flat_x = np.fromstring(datum.data, dtype=np.uint8)
-            x = flat_x.reshape(datum.channels, datum.height, datum.width)
-            y = datum.label
+            flat_x = np.fromstring(dat.data, dtype=np.uint8)
+            x = flat_x.reshape(dat.channels, dat.height, dat.width)
+            y = dat.label
             
             print y
     
