@@ -3,7 +3,6 @@ Created on Jul 18, 2015
 
 @author: kashefy
 '''
-import os
 import numpy as np
 from scipy import io
 import lmdb
