@@ -3,7 +3,6 @@ Created on Jul 18, 2015
 
 @author: kashefy
 '''
-import os
 import numpy as np
 from scipy import io
 import lmdb
@@ -25,7 +24,6 @@ def imgs_to_lmdb(paths_src, path_dst):
     with db.begin(write=True) as in_txn:
     
         for idx, path_ in enumerate(paths_src):
-            
             img = read_img_cv2(path_)
             img_dat = caffe.io.array_to_datum(img)
             in_txn.put(IDX_FMT.format(idx), img_dat.SerializeToString())
