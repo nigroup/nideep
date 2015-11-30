@@ -17,11 +17,12 @@ Beware: The documentation is pretty scarce. I'm working on it.
 
 # Getting Started:
 
-## Required Dependencies:
+## Dependencies:
 * Caffe with python support (pycaffe)
 * LMDB (apt-get and pip install)
 * cv2 (you probably already have this if you've build caffe)
 * PIL (pip install)
+* Add [fileSystemUtils.py](https://gist.github.com/kashefy/2c098bd356dea090001e#file-filesystemutils-py) to your PYTHONPATH
 
 # Examples:
 
