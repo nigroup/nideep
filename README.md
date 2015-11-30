@@ -4,16 +4,26 @@
 [![Coverage Status](https://coveralls.io/repos/kashefy/caffe_sandbox/badge.svg?branch=master&service=github)](https://coveralls.io/github/kashefy/caffe_sandbox?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-This is a random collection of scripts/utilities to use with [caffe](http://caffe.berkeleyvision.org/).
-Do not assume they're thorouhgly tested but please feel free to inspect them, scrutinize them. Feedback on making them more usable for others are welcome.
+This is a collection of random scripts and utilities to use with [caffe](http://caffe.berkeleyvision.org/) that may be too specific to certain types of data and use cases and are therefore kept outside of the Caffe framework.
+Use cases include:
+* i/o of custom data to/from lmdb
+* generating lmdb for select benchmark datasets (adding support for more is welcome)
+* parsing caffe logs (incomplete, wraps around existing parser from Caffe)
 
-Beware: the documentation is pretty scarce. I'm working on it.
+# Disclaimer:
+Some automated testing is in place. However, do not assume the functionality is free of bugs. Please feel free to inspect them, scrutinize them. Feedback on making them more usable for others is welcome.
 
-# Dependencies
+Beware: The documentation is pretty scarce. I'm working on it.
+
+# Getting Started:
+
+## Required Dependencies:
 * Caffe with python support (pycaffe)
 * LMDB (apt-get and pip install)
 * cv2 (you probably already have this if you've build caffe)
 * PIL (pip install)
+
+# Examples:
 
 ## PASCAL-Context to LMDB
 
