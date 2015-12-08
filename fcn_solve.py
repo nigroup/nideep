@@ -1,15 +1,6 @@
-from __future__ import division
 import os
-
-CAFFE_ROOT = '/home/kashefy/src/caffe/'
-BASE_WEIGHTS='/home/kashefy/data/models/vgg-16/VGG_ILSVRC_16_layers_fcn.caffemodel'
-PATH_SOLVER='/home/kashefy/data/models/fcn_segm/fcn-32s-Pascal-context/t2/solver2.prototxt'
-
-if CAFFE_ROOT is not None:
-    import sys
-    sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
-import caffe
 import numpy as np
+import caffe
 
 # make a bilinear interpolation kernel
 # credit @longjon
@@ -37,21 +28,29 @@ def interp_surgery(net, layers):
         filt = upsample_filt(h)
         net.params[l][0].data[range(m), range(k), :, :] = filt
 
-# base net -- follow the editing model parameters example to make
-# a fully convolutional VGG16 net.
-# http://nbviewer.ipython.org/github/BVLC/caffe/blob/master/examples/net_surgery.ipynb
 
-# init
-caffe.set_mode_cpu()
+def init_up_bilinear(net, path_base_weights, key='up'):
+    """
+    base net -- follow the editing model parameters example to make a fully convolutional VGG16 net.
+    http://nbviewer.ipython.org/github/BVLC/caffe/blob/master/examples/net_surgery.ipynb
+    """
+    
+    # do net surgery to set the deconvolution weights for bilinear interpolation
+    interp_layers = [k for k in net.params.keys() if key in k]
+    interp_surgery(net, interp_layers)
+    
+    # copy base weights for fine-tuning
+    net.copy_from(path_base_weights)
+    
+    return
 
-solver = caffe.SGDSolver(PATH_SOLVER)
-
-# do net surgery to set the deconvolution weights for bilinear interpolation
-interp_layers = [k for k in solver.net.params.keys() if 'up' in k]
-interp_surgery(solver.net, interp_layers)
-
-# copy base weights for fine-tuning
-solver.net.copy_from(BASE_WEIGHTS)
-
-
+if __name__ == '__main__':
+    
+    caffe.set_mode_cpu()
+    
+    solver = caffe.SGDSolver(os.path.expanduser('~/models/fcn_segm/fcn-32s-Pascal-context/tx3/solver.prototxt'))
+    init_up_bilinear(solver.net, os.path.expanduser('~/models/vgg-16/VGG_ILSVRC_16_layers_fcn.caffemodel'))
+    solver.net.save(os.path.expanduser('~/models/fcn_segm/fcn-32s-Pascal-context/tx3/fcn.caffemodel'))
+    
+    pass
 
