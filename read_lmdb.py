@@ -76,9 +76,18 @@ def read_values_at(path_lmdb, key, dtype=None):
         dat, x = unpack_raw_datum(txn.get(key), dtype)
         return x, dat.label # scalar label
     
-# CREDIT: Gustav Larsson http://deepdish.io/2015/04/28/creating-lmdb-in-python/
+def num_entries(path_lmdb):
+    """
+    Get no. of entries in lmdb (slow)
+    """
+    n = 0
+    with lmdb.open(path_lmdb, readonly=True).begin() as txn:
+        n = len([_ for _ in txn.cursor()])
+    return n
+    
 if __name__ == '__main__':
     
+    # CREDIT: Gustav Larsson http://deepdish.io/2015/04/28/creating-lmdb-in-python/
     import os
     path_lmdb = os.path.expanduser('~/src/caffe/examples/mnist/mnist_train_lmdb')
     env = lmdb.open(path_lmdb, readonly=True)
