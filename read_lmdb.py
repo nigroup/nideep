@@ -96,4 +96,22 @@ if __name__ == '__main__':
             y = dat.label
             
             print y
+            
+            
+    ###########################        
+    with lmdb.open(path_lmdb, readonly=True).begin() as txn:
+        
+        key = 10
+        
+        if not isinstance(key, basestring):
+            key = b'{:0>10d}'.format(key)
+        value = txn.get(key)
+        
+        if value is not None:
+            
+            dat, x = unpack_raw_datum(value)
+            y = dat.label # assume scalar
+            
+            
+            
     pass
