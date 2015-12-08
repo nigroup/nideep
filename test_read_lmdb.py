@@ -224,6 +224,20 @@ class TestReadValuesWithLabelLMDB:
                     
         assert_equal(l, 0, "Unexpected 2nd label")
         
+    def test_num_entries(self):
+        
+        assert_equal(2, r.num_entries(self.path_lmdb))
+        
+    def test_num_entries_empty(self):
+        
+        path_lmdb_empty = os.path.join(self.dir_tmp, 'empty_lmdb')
+        db = lmdb.open(path_lmdb_empty, map_size=int(1e12))
+        with db.begin(write=True) as _:
+            _
+        db.close()
+        
+        assert_equal(0, r.num_entries(path_lmdb_empty))
+        
     # to generate mock data
 #     def test_gen_img_lmdb(self):
 #          
