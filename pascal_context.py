@@ -3,26 +3,13 @@ Created on Jul 21, 2015
 
 @author: kashefy
 '''
-import os
 import numpy as np
-import fileSystemUtils as fs
-
-import cv2 as cv2
-import cv2.cv as cv
-from PIL import Image
-
 import matplotlib.pyplot as plt
-
+from PIL import Image
+import caffe
 from read_img import read_img_cv2, read_img_PIL
 
-CAFFE_ROOT = '/home/kashefy/src/caffe/'
-if CAFFE_ROOT is not None:
-    import os
-    import sys
-    sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
-import caffe
-
-def main(args):
+if __name__ == '__main__':
     
     caffe.set_mode_cpu()
     
@@ -86,9 +73,5 @@ def main(args):
 #               out.shape[1]/2-3:out.shape[1]/2+3]
 #     plt.imshow(out)
 #     plt.show()
-
-if __name__ == '__main__':
-    
-    main(None)
     
     pass

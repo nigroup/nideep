@@ -14,7 +14,7 @@ import caffe
 
 def make_fully_conv(path_model_src,
                     path_weights_src,
-                    path_model_fcn,
+                    path_model_full_conv,
                     param_pairs,
                     path_weights_dst
                     ):
@@ -34,7 +34,7 @@ def make_fully_conv(path_model_src,
         
     # PART B
     # Load the fully convolutional network to transplant the parameters.
-    net_full_conv = caffe.Net(path_model_fcn, 
+    net_full_conv = caffe.Net(path_model_full_conv, 
                               path_weights_src,
                               caffe.TEST)
     params_full_conv = [dst for _, dst in param_pairs]

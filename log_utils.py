@@ -4,6 +4,26 @@ Created on Oct 1, 2015
 @author: kashefy
 '''
 import os
+from itertools import product
+
+def get_rel_readme_path(p):
+    """
+    Get README file in same directory
+    """
+    if os.path.isfile(p):
+        p = os.path.dirname(p)
+        
+    for fname, ext in product(["README", "ReadMe", "Readme", "readme"],
+                              ['', '.txt', '.md']):
+        
+        fpath = os.path.join(p, fname+ext)
+        if os.path.isfile(fpath):
+            return fpath
+
+def readme_to_str(fpath):
+    
+    with open (fpath, "r") as f:
+        return f.read()
 
 def is_caffe_log(p):
     
