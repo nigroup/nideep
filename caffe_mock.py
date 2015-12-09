@@ -14,7 +14,12 @@ class proto:
             def ParseFromString(self, val):
                 return # do nothing
             
+class Net:
+    def forward(self):
+        return "mock this"
+            
 class io:
     @staticmethod
     def array_to_datum(s):
         return proto.caffe_pb2.Datum()
+    

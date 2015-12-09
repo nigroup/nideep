@@ -29,7 +29,7 @@ def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
 def forward(net, keys):
     
     net.forward()
-    return {k: net.blobs[k].data for k in keys}
+    return {k : net.blobs[k].data for k in keys}
 
 if __name__ == '__main__':
     
