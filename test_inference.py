@@ -77,8 +77,10 @@ class TestHDF5Inference:
         assert_false(os.path.isfile(fpath))
         
         out = infr.infer_to_h5_fixed_dims(net, ['x', 'z'], 1, fpath)
-        assert_true(os.path.isfile(fpath))
+        
         assert_equal(net.forward.call_count, 1)
+        assert_true(os.path.isfile(fpath))
+        assert_list_equal(out, [1, 1])
         
         # check db content
         with h5py.File(fpath, "r") as f:
@@ -89,6 +91,70 @@ class TestHDF5Inference:
                              msg="unexpected shape for blob %s" % k)
             assert_array_equal(b[k].data, f[k])
         
-        assert_list_equal(out, [1, 1])
+        
+    @patch('inference.caffe.Net')
+    def test_infer_to_h5_fixed_dims_n(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(1, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        
+            
+        for n in range(1, 10):
+            
+            net = mock_net()
+            net.reset_mock()
+            fpath = os.path.join(self.dir_tmp, 'test_infer_to_h5_fixed_dims_n.h5')
+            out = infr.infer_to_h5_fixed_dims(net, ['x', 'z'], n, fpath)
+            
+            assert_equal(net.forward.call_count, n)
+            assert_list_equal(out, [n, n])
+            
+    @patch('inference.caffe.Net')
+    def test_infer_to_h5_fixed_dims_preserve_batch_no(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(4, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        net = mock_net()
+        
+        fpath = os.path.join(self.dir_tmp, 'test_infer_to_h5_fixed_dims_preserve_batch_no.h5')
+        assert_false(os.path.isfile(fpath))
+        
+        n = 3
+        out = infr.infer_to_h5_fixed_dims(net, ['x', 'z'], n, fpath,
+                                          preserve_batch=False)
+        
+        assert_equal(net.forward.call_count, n)
+        assert_true(os.path.isfile(fpath))
+        assert_list_equal(out, [n*4]*2)
+        
+    @patch('inference.caffe.Net')
+    def test_infer_to_h5_fixed_dims_preserve_batch_yes(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(4, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        net = mock_net()
+        
+        fpath = os.path.join(self.dir_tmp, 'test_infer_to_h5_fixed_dims_preserve_batch_yes.h5')
+        assert_false(os.path.isfile(fpath))
+        
+        n = 3
+        out = infr.infer_to_h5_fixed_dims(net, ['x', 'z'], n, fpath,
+                                          preserve_batch=True)
+        
+        assert_equal(net.forward.call_count, n)
+        assert_true(os.path.isfile(fpath))
+        assert_list_equal(out, [n]*2)
             
     
