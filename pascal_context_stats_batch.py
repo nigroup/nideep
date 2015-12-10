@@ -79,34 +79,34 @@ def read_matfiles(paths_src, fieldname, lut=None):
     with open('eggs.csv', 'wb') as csvfile:
         w = csv.writer(csvfile, delimiter=',')
     
-    for path_ in paths_src:
-        content_field = io.loadmat(path_)[fieldname]
-        # get shape (1,H,W)
-        while len(content_field.shape) < 3:
-            content_field = np.expand_dims(content_field, axis=0)
-        content_field = content_field.astype(int)
-        
-        import matplotlib.pyplot as plt
-        content_field[0,0,0]=0
-        content_field[0,0,1]=454
-        #plt.figure()
-        #plt.imshow(content_field[0])
-        from sets import Set
-        set_1 = Set()
-        [set_1.add(x) for x in content_field.flatten()]
-        
-        if lut is not None:
-            content_field = lut(content_field)
-        
-        set_2 = Set()
-        [set_2.add(x) for x in content_field.flatten()]
-        
-        w.writerow([os.path.basename(path_), content_field.max(), len(set_1), len(set_2)])
-        
+        for path_ in paths_src:
+            content_field = io.loadmat(path_)[fieldname]
+            # get shape (1,H,W)
+            while len(content_field.shape) < 3:
+                content_field = np.expand_dims(content_field, axis=0)
+            content_field = content_field.astype(int)
             
-        #plt.figure()
-        #plt.imshow(content_field[0])
-        #plt.show()
+            import matplotlib.pyplot as plt
+            content_field[0,0,0]=0
+            content_field[0,0,1]=454
+            #plt.figure()
+            #plt.imshow(content_field[0])
+            from sets import Set
+            set_1 = Set()
+            [set_1.add(x) for x in content_field.flatten()]
+            
+            if lut is not None:
+                content_field = lut(content_field)
+            
+            set_2 = Set()
+            [set_2.add(x) for x in content_field.flatten()]
+            
+            w.writerow([os.path.basename(path_), content_field.max(), len(set_1), len(set_2)])
+            
+                
+            #plt.figure()
+            #plt.imshow(content_field[0])
+            #plt.show()
 
 
     return 0
