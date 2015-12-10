@@ -83,12 +83,10 @@ def read_matfiles(paths_src, fieldname, lut=None):
         content_field = content_field.astype(int)
         
         import matplotlib.pyplot as plt
-        import os
-        print os.path.basename(path_dst), content_field.max()
         content_field[0,0,0]=0
         content_field[0,0,1]=454
-        plt.figure()
-        plt.imshow(content_field[0])
+        #plt.figure()
+        #plt.imshow(content_field[0])
         from sets import Set
         set_1 = Set()
         [set_1.add(int(x)) for x in content_field.flatten()]
@@ -99,11 +97,11 @@ def read_matfiles(paths_src, fieldname, lut=None):
         set_2 = Set()
         [set_2.add(int(x)) for x in content_field.flatten()]
         
-        print os.path.basename(path_dst), content_field.max(), len(set_1), len(set_2)
+        print os.path.basename(paths_src), content_field.max(), len(set_1), len(set_2)
             
-        plt.figure()
-        plt.imshow(content_field[0])
-        plt.show()
+        #plt.figure()
+        #plt.imshow(content_field[0])
+        #plt.show()
 
     return 0
 
