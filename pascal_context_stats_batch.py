@@ -6,7 +6,6 @@ Created on Dec 10, 2015
 import os
 import numpy as np
 from scipy import io
-import to_lmdb
 import dataset_utils as du
 import fileSystemUtils as fs
 
@@ -157,7 +156,7 @@ def pascal_context_stats(dir_imgs,
 
 if __name__ == '__main__':
     
-    val_list_path = os.path.expanduser('/data/PASCAL-Context/val_59.txt')
+    val_list_path = os.path.expanduser('~/data/PASCAL-Context/val_59.txt')
     with open(val_list_path, 'r') as f:
         val_list = f.readlines()
         val_list = [l.translate(None, ''.join('\n')) for l in val_list if len(l) > 0]
