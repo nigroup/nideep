@@ -75,6 +75,10 @@ def read_matfiles(paths_src, fieldname, lut=None):
     credit: Evan Shelhamer
     
     '''
+    import csv
+    with open('eggs.csv', 'wb') as csvfile:
+        w = csv.writer(csvfile, delimiter=',')
+    
     for path_ in paths_src:
         content_field = io.loadmat(path_)[fieldname]
         # get shape (1,H,W)
@@ -97,11 +101,13 @@ def read_matfiles(paths_src, fieldname, lut=None):
         set_2 = Set()
         [set_2.add(x) for x in content_field.flatten()]
         
-        print os.path.basename(path_), content_field.max(), len(set_1), len(set_2)
+        w.writerow([os.path.basename(path_), content_field.max(), len(set_1), len(set_2)])
+        
             
         #plt.figure()
         #plt.imshow(content_field[0])
         #plt.show()
+
 
     return 0
 
