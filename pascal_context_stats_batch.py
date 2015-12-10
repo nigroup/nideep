@@ -89,15 +89,15 @@ def read_matfiles(paths_src, fieldname, lut=None):
         #plt.imshow(content_field[0])
         from sets import Set
         set_1 = Set()
-        [set_1.add(int(x)) for x in content_field.flatten()]
+        [set_1.add(x) for x in content_field.flatten()]
         
         if lut is not None:
             content_field = lut(content_field)
         
         set_2 = Set()
-        [set_2.add(int(x)) for x in content_field.flatten()]
+        [set_2.add(x) for x in content_field.flatten()]
         
-        print os.path.basename(paths_src), content_field.max(), len(set_1), len(set_2)
+        print os.path.basename(path_), content_field.max(), len(set_1), len(set_2)
             
         #plt.figure()
         #plt.imshow(content_field[0])
@@ -120,7 +120,7 @@ def pascal_context_stats(dir_imgs,
     
     #print labels_list
     #print labels_59_list
-    labels_lut = du.get_labels_lut(labels_list, labels_59_list)
+    labels_lut = get_labels_lut(labels_list, labels_59_list)
     def apply_labels_lut(m):
         return labels_lut[m]
     
@@ -141,13 +141,11 @@ def pascal_context_stats(dir_imgs,
                 
         # ground truth
         paths_segm_labels_train = [paths_segm_labels[i] for i in train_idx]
-        read_matfiles(paths_segm_labels_train, 'LabelMap',
-                                 lut=apply_labels_lut)
+        read_matfiles(paths_segm_labels_train, 'LabelMap', lut=apply_labels_lut)
         
         print 'val'
         paths_segm_labels_val = [paths_segm_labels[i] for i in val_idx]
-        read_matfiles(paths_segm_labels_val, 'LabelMap',
-                                 lut=apply_labels_lut)
+        read_matfiles(paths_segm_labels_val, 'LabelMap', lut=apply_labels_lut)
         
         
         
