@@ -89,8 +89,13 @@ def read_matfiles(paths_src, fieldname, lut=None):
             import matplotlib.pyplot as plt
             content_field[0,0,0]=0
             content_field[0,0,1]=454
-            #plt.figure()
-            #plt.imshow(content_field[0])
+            
+            plt.figure()
+            ax = plt.axes(frameon=False)
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            plt.imshow(content_field[0])
+            
             from sets import Set
             set_1 = Set()
             [set_1.add(x) for x in content_field.flatten()]
@@ -104,9 +109,12 @@ def read_matfiles(paths_src, fieldname, lut=None):
             w.writerow([os.path.basename(path_), content_field.max(), len(set_1), len(set_2)])
             
                 
-            #plt.figure()
-            #plt.imshow(content_field[0])
-            #plt.show()
+            plt.figure()
+            ax = plt.axes(frameon=False)
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+            plt.imshow(content_field[0])
+            plt.show()
 
 
     return 0
@@ -128,12 +136,17 @@ def pascal_context_stats(dir_imgs,
     #print labels_59_list
     labels_lut = get_labels_lut(labels_list, labels_59_list)
     def apply_labels_lut(m):
+        print m[0, 281, 138]
+        m[m != 72] = 0
         return labels_lut[m]
     
     paths_imgs = fs.gen_paths(dir_imgs, fs.filter_is_img)
     
     paths_segm_labels = fs.gen_paths(dir_segm_labels)
-     
+    print dir_segm_labels
+    read_matfiles([os.path.join(dir_segm_labels, '2008_007527.mat')],
+                   'LabelMap', lut=apply_labels_lut);
+    return
     paths_pairs = fs.fname_pairs(paths_imgs, paths_segm_labels)    
     paths_imgs, paths_segm_labels = map(list, zip(*paths_pairs))
     
