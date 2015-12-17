@@ -50,7 +50,7 @@ class TestInference:
         assert_equal(out['z'].shape, (3, 2), msg="unexpected shape for blob z")
         assert_array_equal(b['z'].data, out['z'])
 
-class TestHDF5Inference:
+class TestInferenceHDF5:
     
     @classmethod
     def setup_class(self):
@@ -156,5 +156,90 @@ class TestHDF5Inference:
         assert_equal(net.forward.call_count, n)
         assert_true(os.path.isfile(fpath))
         assert_list_equal(out, [n]*2)
+        
+class TestInferenceLMDB:
+    
+    @classmethod
+    def setup_class(self):
+        
+        self.dir_tmp = tempfile.mkdtemp()
+        
+    @classmethod
+    def teardown_class(self):
+        
+        shutil.rmtree(self.dir_tmp)
+    
+    @patch('inference.caffe.Net')
+    def test_infer_to_lmdb_fixed_dims(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(1, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        net = mock_net()
+        
+        dst_prefix = os.path.join(self.dir_tmp, 'test_infer_to_lmdb_fixed_dims_%s_lmdb')
+        for k in b.keys():
+            assert_false(os.path.isdir(dst_prefix % k))
+        
+        out = infr.infer_to_lmdb(net, ['x', 'z'], 1, dst_prefix)
+        
+        assert_equal(net.forward.call_count, 1)
+        assert_list_equal(out, [1, 1])
+        
+        for k in b.keys():
+            if k in ['x', 'z']:
+                assert_true(os.path.isdir(dst_prefix % k))
+            else:
+                assert_false(os.path.isdir(dst_prefix % k))
+                
+    @patch('inference.caffe.Net')
+    def test_infer_to_lmdb_fixed_dims_n(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(1, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
             
+        for n in range(1, 10):
+            
+            net = mock_net()
+            net.reset_mock()
+            
+            dst_prefix = os.path.join(self.dir_tmp, 'test_infer_to_lmdb_fixed_dims_n_%s_lmdb')
+            out = infr.infer_to_lmdb(net, ['x', 'z'], n, dst_prefix)
+            
+            assert_equal(net.forward.call_count, n)
+            assert_list_equal(out, [n, n])
+            
+    @patch('inference.caffe.Net')
+    def test_infer_to_lmdb_fixed_dims_preserve_batch_no(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(4, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        net = mock_net()
+        
+        dst_prefix = os.path.join(self.dir_tmp, 'test_infer_to_lmdb_fixed_dims_preserve_batch_no_%s_lmdb')
+        for k in b.keys():
+            assert_false(os.path.isdir(dst_prefix % k))
+        
+        n = 3
+        out = infr.infer_to_lmdb(net, ['x', 'z'], n, dst_prefix,
+                                 preserve_batch=False)
+        
+        assert_equal(net.forward.call_count, n)
+        assert_list_equal(out, [n*4]*2)
+        for k in b.keys():
+            if k in ['x', 'z']:
+                assert_true(os.path.isdir(dst_prefix % k))
+            else:
+                assert_false(os.path.isdir(dst_prefix % k))
     
