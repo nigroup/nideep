@@ -232,8 +232,7 @@ class TestInferenceLMDB:
             assert_false(os.path.isdir(dst_prefix % k))
         
         n = 3
-        out = infr.infer_to_lmdb(net, ['x', 'z'], n, dst_prefix,
-                                 preserve_batch=False)
+        out = infr.infer_to_lmdb(net, ['x', 'z'], n, dst_prefix)
         
         assert_equal(net.forward.call_count, n)
         assert_list_equal(out, [n*4]*2)
