@@ -54,30 +54,16 @@ def forward(net, keys):
 if __name__ == '__main__':
     
     from os.path import expanduser
-        
+         
     fpath_net = expanduser('~/models/dark/mnist/t0/lenet_train_test_inf.prototxt')
-    
     fpath_weights = expanduser('~/models/dark/mnist/t0/lenet_iter_10000.caffemodel')
     net = caffe.Net(fpath_net, fpath_weights, caffe.TRAIN)
+     
+    fpath = expanduser('~/models/dark/mnist/t0/mnist_ip2_train')
+    num_entries = read_lmdb.num_entries(expanduser('~/data/mnist/mnist_train_lmdb'))
     
-    fpath = expanduser('~/models/dark/mnist/t0/mnist_dark0_sm_train')
-    num_entries = read_lmdb.num_entries("/home/kashefy/data/mnist/mnist_train_lmdb")
-
-    
-    #infer_to_h5_fixed_dims(net, ['prob'], num_entries, "%s.h5" % fpath)
-    infer_to_lmdb(net, ['prob'], num_entries, "%s_lmdb" % fpath)
-    
-    net = caffe.Net(fpath_net, fpath_weights, caffe.TEST)
-    fpath = expanduser('~/models/dark/mnist/t0/mnist_dark0_sm_test')
-    num_entries = read_lmdb.num_entries("/home/kashefy/data/mnist/mnist_test_lmdb")
-    #infer_to_h5_fixed_dims(net, ['prob'], num_entries, "%s.h5" % fpath)
-    infer_to_lmdb(net, ['prob'], num_entries, "%s_lmdb" % fpath)
-    
-    print 'done'
-    
-    #l = read_lmdb.read_labels('/home/kashefy/data/mnist/mnist_train_lmdb')
-    #p = [x for x, _ in read_lmdb.read_values("~/models/dark/mnist/t0/mnist_dark0_sm_train_lmdb")]
-    
+    infer_to_h5_fixed_dims(net, ['ip2'], num_entries, "%s.h5" % fpath)
+    infer_to_lmdb(net, ['ip2'], num_entries, "%s_lmdb" % fpath)
     
 #     with h5py.File(fpath, "w") as f:
 #     
