@@ -5,6 +5,8 @@ A module to mock caffe structures for testing
 
 @author: kashefy
 '''
+TRAIN = 0
+TEST = 1
 
 class proto:
     class caffe_pb2:
@@ -22,4 +24,3 @@ class io:
     @staticmethod
     def array_to_datum(s):
         return proto.caffe_pb2.Datum()
-    
