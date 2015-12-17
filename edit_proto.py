@@ -3,11 +3,6 @@ Created on Sep 21, 2015
 
 @author: kashefy
 '''
-import os
-CAFFE_ROOT = '/home/kashefy/src/caffe/'
-if CAFFE_ROOT is not None:
-    import sys
-    sys.path.insert(0,  os.path.join(CAFFE_ROOT, 'python'))
 import caffe
 from caffe import layers as L
 from caffe import params as P
