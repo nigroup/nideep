@@ -8,7 +8,6 @@ import h5py
 import caffe
 import read_lmdb
 import to_lmdb
-from proto_utils import Parser
 
 def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
     """
@@ -61,6 +60,7 @@ def est_min_num_fwd_passes(fpath_net, mode_str):
     return
     minimum no. of forward passes to cover training set 
     """
+    from proto_utils import Parser
     np = Parser().from_net_params_file(fpath_net)
     
     num_passes = 0
