@@ -5,6 +5,8 @@ A module to mock caffe structures for testing
 
 @author: kashefy
 '''
+TRAIN = 0
+TEST = 1
 
 class proto:
     class caffe_pb2:
@@ -13,6 +15,10 @@ class proto:
                 return "mock_this"
             def ParseFromString(self, val):
                 return # do nothing
+            
+class Net:
+    def forward(self):
+        return "mock this"
             
 class io:
     @staticmethod
