@@ -28,18 +28,16 @@ def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
             
     return [len(dc[k]) for k in keys]
 
-def infer_to_lmdb(net, keys, n, dst_prefix, preserve_batch=False):
+def infer_to_lmdb(net, keys, n, dst_prefix):
     """
-    Run network inference for n batches and save results to file
+    Run network inference for n batches and save results to file,
+    lmdb cannot preserve batches
     """
     dc = {k:[] for k in keys}
     for _ in range(n):
         d = forward(net, keys)
         for k in keys:
-            if preserve_batch:
-                dc[k].append(np.copy(d[k].astype(float)))
-            else:
-                dc[k].extend(np.copy(d[k].astype(float)))
+            dc[k].extend(np.copy(d[k].astype(float)))
           
     for k in keys:
         to_lmdb.arrays_to_lmdb(dc[k], dst_prefix % k)
