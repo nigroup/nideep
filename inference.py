@@ -91,8 +91,7 @@ def response_to_lmdb(fpath_net,
         out[m] = infer_to_lmdb(caffe.Net(fpath_net, fpath_weights, m),
                                keys,
                                num_passes,
-                               dst_prefix + '%s_' + ['train', 'test'][m] + '_lmdb',
-                               preserve_batch=False)
+                               dst_prefix + '%s_' + ['train', 'test'][m] + '_lmdb')
     return out
 
 if __name__ == '__main__':
