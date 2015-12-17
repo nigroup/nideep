@@ -241,4 +241,40 @@ class TestInferenceLMDB:
                 assert_true(os.path.isdir(dst_prefix % k))
             else:
                 assert_false(os.path.isdir(dst_prefix % k))
+             
+    @patch('inference.est_min_num_fwd_passes')
+    @patch('inference.caffe.Net')
+    def test_response_to_lmdb(self, mock_net, mock_num):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(4, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_num.return_value = 3
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        net = mock_net()
+        
+        dst_prefix = os.path.join(self.dir_tmp, 'test_response_to_lmdb_')
+        for m in ['train', 'test']:
+            for k in b.keys():
+                assert_false(os.path.isdir(dst_prefix + ('%s_' + m + '_lmdb') % k))
+        
+        out = infr.response_to_lmdb("net.prototxt", "w.caffemodel",
+                                    ['x', 'z'],
+                                    dst_prefix)
+        
+        assert_equal(net.forward.call_count, 3*2) # double for both modes
+        from caffe import TRAIN, TEST
+        assert_list_equal(out.keys(), [TRAIN, TEST])
+        assert_list_equal(out[TRAIN], [3*4]*2)
+        assert_list_equal(out[TEST], [3*4]*2)
+        
+        for m in ['train', 'test']:
+            for k in b.keys():
+                if k in ['x', 'z']:
+                    assert_true(os.path.isdir(dst_prefix + ('%s_' + m + '_lmdb') % k))
+                else:
+                    assert_false(os.path.isdir(dst_prefix + ('%s_' + m + '_lmdb') % k))
+                
     
