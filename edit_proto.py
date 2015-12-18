@@ -54,7 +54,7 @@ def edit_net_params(path_src, target, path_dst):
     
     #print n.to_proto()
 
-def run_edit_net_params():
+if __name__ == '__main__':
     
     path_src = 'lenet_train_test.prototxt'
     path_dst = 'lenet_train_testX.prototxt'
@@ -68,8 +68,4 @@ def run_edit_net_params():
     count = edit_net_params(path_src, target, path_dst)
     
     print "Target edited %d times" % count
-
-if __name__ == '__main__':
-    
-    run_edit_net_params()
     pass
