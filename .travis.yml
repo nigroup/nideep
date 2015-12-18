@@ -47,6 +47,8 @@ before_install:
   
   # For mocking caffe
   - mv $TRAVIS_BUILD_DIR/caffe_mock.py $TRAVIS_BUILD_DIR/caffe.py
+  # Download caffe protobuf message definitions
+  - travis_retry wget -P $TRAVIS_BUILD_DIR https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
   
 install:
   - echo "Installing Coveralls if coverage:"
