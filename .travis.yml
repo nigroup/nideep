@@ -66,10 +66,6 @@ install:
   # list installed python packages
   #- pip freeze
   - protoc -I=$TRAVIS_BUILD_DIR/ --python_out=$TRAVIS_BUILD_DIR/ $TRAVIS_BUILD_DIR/caffe.proto
-  - tar -xzf $TRAVIS_BUILD_DIR/../protobuf-2.6.1.tar.gz -C $TRAVIS_BUILD_DIR/..
-  - cd $TRAVIS_BUILD_DIR/../protobuf-2.6.1 && ./configure --prefix=$HOME/protobuf && make && make install
-  #- export PATH="$TRAVIS_BUILD_DIR/../protobuf/bin:$PATH"
-  #- export LD_LIBRARY_PATH="$TRAVIS_BUILD_DIR/../protobuf/lib:$LD_LIBRARY_PATH"
   - ls $TRAVIS_BUILD_DIR
   
 script:
