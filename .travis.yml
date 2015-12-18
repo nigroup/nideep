@@ -8,8 +8,7 @@ compiler:
 addons:
   apt:
     packages:
-    - libprotoc-dev
-    - libprotoc9
+    - protobuf-compiler
     
 # blacklist
 branches:
