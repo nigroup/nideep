@@ -9,6 +9,7 @@ addons:
   apt:
     packages:
     - libprotoc-dev
+    - libprotoc9
     
 # blacklist
 branches:
