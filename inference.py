@@ -65,7 +65,6 @@ def est_min_num_fwd_passes(fpath_net, mode_str):
     
     for l in np.layer:
         if 'data' in l.type.lower() and mode_str.lower() in l.data_param.source.lower():
-            print l.data_param.batch_size, l.phase
             num_entries = read_lmdb.num_entries(l.data_param.source)
             num_passes = int(num_entries / l.data_param.batch_size)
             if num_entries % l.data_param.batch_size != 0:
