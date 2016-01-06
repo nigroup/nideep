@@ -9,8 +9,7 @@ import lmdb
 from read_img import read_img_cv2
 import caffe
 
-NUM_IDX_DIGITS = 10
-IDX_FMT = '{:0>%d' % NUM_IDX_DIGITS + 'd}'
+from lmdb_utils import IDX_FMT, MAP_SZ
 
 def imgs_to_lmdb(paths_src, path_dst):
     '''
@@ -19,7 +18,7 @@ def imgs_to_lmdb(paths_src, path_dst):
     credit: Evan Shelhamer
     '''
     
-    db = lmdb.open(path_dst, map_size=int(1e12))
+    db = lmdb.open(path_dst, map_size=MAP_SZ)
     
     with db.begin(write=True) as in_txn:
     
@@ -40,7 +39,7 @@ def matfiles_to_lmdb(paths_src, path_dst, fieldname,
     credit: Evan Shelhamer
     
     '''    
-    db = lmdb.open(path_dst, map_size=int(1e12))
+    db = lmdb.open(path_dst, map_size=MAP_SZ)
     
     with db.begin(write=True) as in_txn:
     
@@ -67,7 +66,7 @@ def scalars_to_lmdb(scalars, path_dst,
     '''
     Generate LMDB file from list of scalars
     '''    
-    db = lmdb.open(path_dst, map_size=int(1e12))
+    db = lmdb.open(path_dst, map_size=MAP_SZ)
     
     with db.begin(write=True) as in_txn:
         
@@ -105,7 +104,7 @@ def arrays_to_lmdb(arrs, path_dst):
     '''
     Generate LMDB file from list of ndarrays    
     '''
-    db = lmdb.open(path_dst, map_size=int(1e12))
+    db = lmdb.open(path_dst, map_size=MAP_SZ)
     
     with db.begin(write=True) as in_txn:
     
