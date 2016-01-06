@@ -5,9 +5,11 @@ Created on Dec 3, 2015
 '''
 import numpy as np
 import h5py
+import lmdb
 import caffe
 import read_lmdb
 import to_lmdb
+from lmdb_utils import MAP_SZ, IDX_FMT
 
 def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
     """
@@ -40,9 +42,37 @@ def infer_to_lmdb(net, keys, n, dst_prefix):
             dc[k].extend(np.copy(d[k].astype(float)))
           
     for k in keys:
-        to_lmdb.arrays_to_lmdb(dc[k], dst_prefix % k)
+        to_lmdb.arrays_to_lmdb(dc[k], dst_prefix % (k,))
             
     return [len(dc[k]) for k in keys]
+
+def infer_to_lmdb_cur(net, keys, n, dst_prefix):
+    '''
+    Generate LMDB file from list of ndarrays by cursor  
+    '''
+    dbs = {k : lmdb.open(dst_prefix % (k,), map_size=MAP_SZ) for k in keys}
+    idxs = [0] * len(keys)
+    
+        
+    for _ in range(n):
+        d = forward(net, keys)
+        for ik, k in enumerate(keys):
+            
+            with dbs[k].begin(write=True) as txn:
+            
+                l = []
+                l.extend(d[k].astype(float))
+                        
+                for x in l:
+                    while len(x.shape) < 3:
+                        x = np.expand_dims(x, axis=0)
+                    
+                    print k, idxs[ik]
+                    txn.put(IDX_FMT.format(idxs[ik]), caffe.io.array_to_datum(x).SerializeToString())
+                    
+                    idxs[ik] += 1
+            
+    return idxs
 
 def forward(net, keys):
     
@@ -112,11 +142,22 @@ if __name__ == '__main__':
     fpath_net = expanduser('~/models/dark/mnist/t0/lenet_train_test.prototxt')
     fpath_weights = expanduser('~/models/dark/mnist/t0/lenet_iter_10000.caffemodel')
     
-    x = response_to_lmdb(fpath_net, fpath_weights,
-                     ['ip2', 'ip1'],
-                     expanduser('~/models/dark/mnist/t0/mnistX_'))
+#     x = response_to_lmdb(fpath_net, fpath_weights,
+#                      ['ip2', 'ip1'],
+#                      expanduser('~/models/dark/mnist/t0/mnistX_'))
 
+    net = caffe.Net(fpath_net, fpath_weights, caffe.TRAIN)
+    keys = ['ip2', 'ip1']
+    x = infer_to_lmdb_cur(net, keys, 2,
+                      expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb'))
+    
     print x
+    
+    import os
+    print [os.path.isdir(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
+    print [read_lmdb.num_entries(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
+    print [read_lmdb.read_values(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
+
 #     with h5py.File(fpath, "w") as f:
 #     
 #         f['a'] = 0
