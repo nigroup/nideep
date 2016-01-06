@@ -67,7 +67,6 @@ def infer_to_lmdb_cur(net, keys, n, dst_prefix):
                     while len(x.shape) < 3:
                         x = np.expand_dims(x, axis=0)
                     
-                    print k, idxs[ik]
                     txn.put(IDX_FMT.format(idxs[ik]), caffe.io.array_to_datum(x).SerializeToString())
                     
                     idxs[ik] += 1
