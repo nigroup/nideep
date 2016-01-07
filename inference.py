@@ -32,7 +32,12 @@ def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
 
 def infer_to_lmdb(net, keys, n, dst_prefix):
     """
-    Run network inference for n batches and save results to file,
+    Run network inference for n batches and save results to an lmdb for each key.
+    Lower time complexity but much higher space complexity.
+    
+    Not recommended for large datasets or large number of keys
+    See: infer_to_lmdb_cur() for slower alternative with less memory overhead
+    
     lmdb cannot preserve batches
     """
     dc = {k:[] for k in keys}
@@ -48,9 +53,58 @@ def infer_to_lmdb(net, keys, n, dst_prefix):
 
 def infer_to_lmdb_cur(net, keys, n, dst_prefix):
     '''
-    Generate LMDB file from list of ndarrays by cursor  
+    Run network inference for n batches and save results to an lmdb for each key.
+    Higher time complexity but lower space complexity.
+    
+    Recommended for large datasets or large number of keys
+    See: infer_to_lmdb() for faster alternative but with higher memory overhead
+    
+    lmdb cannot preserve batches
     '''
     dbs = {k : lmdb.open(dst_prefix % (k,), map_size=MAP_SZ) for k in keys}
+    
+    if len(keys) == 1:
+        key_ = keys[0]
+        num_written = _infer_to_lmdb_cur_single_key(net, key_, n, dbs[key_])
+    else:
+        num_written = _infer_to_lmdb_cur_multi_key(net, keys, n, dbs)
+                    
+    for k in keys:
+        dbs[k].close()
+        
+    return num_written
+
+def _infer_to_lmdb_cur_single_key(net, key_, n, db):
+    '''
+    Run network inference for n batches and save results to an lmdb for each key.
+    Higher time complexity but lower space complexity.
+    
+    Takes advantage if there is only a single key
+    '''
+    idx = 0
+    
+    with db.begin(write=True) as txn:
+        for _ in range(n):
+            d = forward(net, [key_])
+                
+            l = []
+            l.extend(d[key_].astype(float))
+                    
+            for x in l:
+                while len(x.shape) < 3:
+                    x = np.expand_dims(x, axis=0)
+                
+                txn.put(IDX_FMT.format(idx), caffe.io.array_to_datum(x).SerializeToString())
+                idx += 1
+    return [idx]
+
+def _infer_to_lmdb_cur_multi_key(net, keys, n, dbs):
+    '''
+    Run network inference for n batches and save results to an lmdb for each key.
+    Higher time complexity but lower space complexity.
+    
+    See _infer_to_lmdb_cur_single_key() if there is only a single key
+    '''
     idxs = [0] * len(keys)
     
     for _ in range(n):
@@ -69,11 +123,12 @@ def infer_to_lmdb_cur(net, keys, n, dst_prefix):
                     txn.put(IDX_FMT.format(idxs[ik]), caffe.io.array_to_datum(x).SerializeToString())
                     
                     idxs[ik] += 1
-            
     return idxs
 
 def forward(net, keys):
-    
+    '''
+    Perform forward pass on network and extract values for a set of responses
+    '''
     net.forward()
     return {k : net.blobs[k].data for k in keys}
 
@@ -154,7 +209,7 @@ if __name__ == '__main__':
     import os
     print [os.path.isdir(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
     print [read_lmdb.num_entries(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
-    print [read_lmdb.read_values(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
+    #print [read_lmdb.read_values(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
 
 #     with h5py.File(fpath, "w") as f:
 #     
