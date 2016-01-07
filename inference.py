@@ -91,7 +91,7 @@ def _infer_to_lmdb_cur_single_key(net, key_, n, db):
             l.extend(d[key_].astype(float))
                     
             for x in l:
-                x = expand_dims(x, 4)
+                x = expand_dims(x, 3)
                 txn.put(IDX_FMT.format(idx), caffe.io.array_to_datum(x).SerializeToString())
                 idx += 1
     return [idx]
@@ -115,7 +115,7 @@ def _infer_to_lmdb_cur_multi_key(net, keys, n, dbs):
                 l.extend(d[k].astype(float))
                         
                 for x in l:
-                    x = expand_dims(x, 4)
+                    x = expand_dims(x, 3)
                     txn.put(IDX_FMT.format(idxs[ik]), caffe.io.array_to_datum(x).SerializeToString())
                     
                     idxs[ik] += 1
