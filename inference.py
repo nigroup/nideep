@@ -53,7 +53,6 @@ def infer_to_lmdb_cur(net, keys, n, dst_prefix):
     dbs = {k : lmdb.open(dst_prefix % (k,), map_size=MAP_SZ) for k in keys}
     idxs = [0] * len(keys)
     
-        
     for _ in range(n):
         d = forward(net, keys)
         for ik, k in enumerate(keys):
