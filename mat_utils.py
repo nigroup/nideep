@@ -3,6 +3,7 @@ Created on Oct 28, 2015
 
 @author: kashefy
 '''
+import numpy as np
 
 def hwc_to_chw(m):
     '''
@@ -25,4 +26,10 @@ def cwh_to_chw(m):
     else:
         raise AttributeError("No. of dimensions (%d) not supported." % m.ndim)
     
+    return m
+
+def expand_dims(m, d):
+    
+    while len(m.shape) < d:
+        m = np.expand_dims(m, axis=0)
     return m
