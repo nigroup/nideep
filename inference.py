@@ -10,6 +10,7 @@ import caffe
 import read_lmdb
 import to_lmdb
 from lmdb_utils import MAP_SZ, IDX_FMT
+from mat_utils import expand_dims
 
 def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
     """
@@ -86,14 +87,11 @@ def _infer_to_lmdb_cur_single_key(net, key_, n, db):
     with db.begin(write=True) as txn:
         for _ in range(n):
             d = forward(net, [key_])
-                
             l = []
             l.extend(d[key_].astype(float))
                     
             for x in l:
-                while len(x.shape) < 3:
-                    x = np.expand_dims(x, axis=0)
-                
+                x = expand_dims(x, 4)
                 txn.put(IDX_FMT.format(idx), caffe.io.array_to_datum(x).SerializeToString())
                 idx += 1
     return [idx]
@@ -117,9 +115,7 @@ def _infer_to_lmdb_cur_multi_key(net, keys, n, dbs):
                 l.extend(d[k].astype(float))
                         
                 for x in l:
-                    while len(x.shape) < 3:
-                        x = np.expand_dims(x, axis=0)
-                    
+                    x = expand_dims(x, 4)
                     txn.put(IDX_FMT.format(idxs[ik]), caffe.io.array_to_datum(x).SerializeToString())
                     
                     idxs[ik] += 1

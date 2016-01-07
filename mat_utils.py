@@ -29,7 +29,9 @@ def cwh_to_chw(m):
     return m
 
 def expand_dims(m, d):
-    
-    while len(m.shape) < d:
+    '''
+    Expand dimensions in-place starting from first axis (axis=0) until we reach d dims.
+    '''
+    while m.ndim < d:
         m = np.expand_dims(m, axis=0)
     return m
