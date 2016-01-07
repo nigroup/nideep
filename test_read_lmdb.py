@@ -3,7 +3,8 @@ Created on Oct 30, 2015
 
 @author: kashefy
 '''
-from nose.tools import assert_equal, assert_almost_equals, assert_list_equal
+from nose.tools import assert_equal, assert_almost_equals, assert_not_equal, \
+    assert_list_equal, assert_raises
 from mock import patch, PropertyMock
 import os
 import tempfile
@@ -224,20 +225,6 @@ class TestReadValuesWithLabelLMDB:
                     
         assert_equal(l, 0, "Unexpected 2nd label")
         
-    def test_num_entries(self):
-        
-        assert_equal(2, r.num_entries(self.path_lmdb))
-        
-    def test_num_entries_empty(self):
-        
-        path_lmdb_empty = os.path.join(self.dir_tmp, 'empty_lmdb')
-        db = lmdb.open(path_lmdb_empty, map_size=int(1e12))
-        with db.begin(write=True) as _:
-            _
-        db.close()
-        
-        assert_equal(0, r.num_entries(path_lmdb_empty))
-        
     # to generate mock data
 #     def test_gen_img_lmdb(self):
 #          
@@ -402,5 +389,131 @@ class TestReadArraysLMDB:
 #         v = r.read_values(path_lmdb)
 #         print v
 #         print "-------"
+
+class TestNumEntriesLMDB:
+    
+    def setup(self):
+        
+        self.dir_tmp = tempfile.mkdtemp()
+        
+        self.img1_data = np.array([[[ 1,  2,  3],
+                                    [ 4,  5,  6]
+                                    ],
+                                   [[ 7,  8,  9],
+                                    [10, 11, 12]
+                                    ],
+                                   [[13, 14, 15],
+                                    [16, 17, 18],
+                                    ],
+                                   [[19, 20, 21],
+                                    [22, 23, 24]
+                                    ]
+                                   ])
+                
+        img_data_str = ['\x08\x03\x10\x04\x18\x02"\x18\x01\x04\x07\n\r\x10\x13\x16\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18(\x01',
+                        '\x08\x03\x10\x02\x18\x01"\x06\x10\x16\x11\x17\x12\x18(\x00']
+        
+        # write fake data to lmdb
+        self.path_lmdb = os.path.join(self.dir_tmp, 'imgs_lmdb')
+        db = lmdb.open(self.path_lmdb, map_size=int(1e12))
+        with db.begin(write=True) as in_txn:
+            
+            for idx, data_str in enumerate(img_data_str):
+                in_txn.put('{:0>10d}'.format(idx), data_str)
+        db.close()
+        
+    def teardown(self):
+        
+        shutil.rmtree(self.dir_tmp)
+        
+    def test_num_entries(self):
+        
+        assert_equal(2, r.num_entries(self.path_lmdb))
+        assert_equal(2, r.num_entries(self.path_lmdb, is_num_ord_dense=True))
+        assert_equal(2, r.num_entries(self.path_lmdb, is_num_ord_dense=False))
+        
+    def test_num_entries_empty(self):
+        
+        path_lmdb_empty = os.path.join(self.dir_tmp, 'empty_lmdb')
+        db = lmdb.open(path_lmdb_empty, map_size=int(1e12))
+        with db.begin(write=True) as _:
+            _
+        db.close()
+        
+        assert_equal(0, r.num_entries(path_lmdb_empty))
+        
+class TestNumEntriesNumericOrderedLMDB:
+    
+    def setup(self):
+        
+        self.dir_tmp = tempfile.mkdtemp()
+        
+        self.img1_data = np.array([[[ 1,  2,  3],
+                                    [ 4,  5,  6]
+                                    ],
+                                   [[ 7,  8,  9],
+                                    [10, 11, 12]
+                                    ],
+                                   [[13, 14, 15],
+                                    [16, 17, 18],
+                                    ],
+                                   [[19, 20, 21],
+                                    [22, 23, 24]
+                                    ]
+                                   ])
+                
+        img_data_str = ['\x08\x03\x10\x04\x18\x02"\x18\x01\x04\x07\n\r\x10\x13\x16\x02\x05\x08\x0b\x0e\x11\x14\x17\x03\x06\t\x0c\x0f\x12\x15\x18(\x01',
+                        '\x08\x03\x10\x02\x18\x01"\x06\x10\x16\x11\x17\x12\x18(\x00']
+        
+        # write fake data to lmdb
+        self.path_lmdb_num_ord = os.path.join(self.dir_tmp, 'imgs_num_ord_lmdb')
+        db = lmdb.open(self.path_lmdb_num_ord, map_size=int(1e12))
+        with db.begin(write=True) as in_txn:
+            
+            for idx, data_str in enumerate(img_data_str):
+                in_txn.put('{:0>10d}'.format(idx), data_str)
+        db.close()
+        
+        self.path_lmdb_rand_ord = os.path.join(self.dir_tmp, 'imgs_rand_ord_lmdb')
+        db = lmdb.open(self.path_lmdb_rand_ord, map_size=int(1e12))
+        with db.begin(write=True) as in_txn:
+            
+            for data_str in img_data_str:
+                in_txn.put('{:0>10d}'.format(np.random.randint(10, 100)), data_str)
+        db.close()
+        
+        self.path_lmdb_non_num = os.path.join(self.dir_tmp, 'imgs_non_num_lmdb')
+        db = lmdb.open(self.path_lmdb_non_num, map_size=int(1e12))
+        with db.begin(write=True) as in_txn:
+            
+            for data_str in img_data_str:
+                in_txn.put('key'+data_str, data_str)
+        db.close()
+        
+        assert_not_equal(self.path_lmdb_num_ord, self.path_lmdb_rand_ord)
+        assert_not_equal(self.path_lmdb_num_ord, self.path_lmdb_non_num)
+        assert_not_equal(self.path_lmdb_rand_ord, self.path_lmdb_non_num)
+        
+    def teardown(self):
+        
+        shutil.rmtree(self.dir_tmp)
+        
+    def test_num_entries_num_ord(self):
+        
+        assert_equal(2, r.num_entries(self.path_lmdb_num_ord))
+        assert_equal(2, r.num_entries(self.path_lmdb_num_ord, is_num_ord_dense=True))
+        assert_equal(2, r.num_entries(self.path_lmdb_num_ord, is_num_ord_dense=False))
+        
+    def test_num_entries_rand_ord(self):
+        
+        assert_equal(2, r.num_entries(self.path_lmdb_rand_ord))
+        assert_equal(2, r.num_entries(self.path_lmdb_rand_ord, is_num_ord_dense=False))
+        assert_not_equal(2, r.num_entries(self.path_lmdb_rand_ord, is_num_ord_dense=True))
+        
+    def test_num_entries_non_num(self):
+        
+        assert_equal(2, r.num_entries(self.path_lmdb_non_num))
+        assert_equal(2, r.num_entries(self.path_lmdb_non_num, is_num_ord_dense=False))
+        assert_raises(ValueError, r.num_entries, self.path_lmdb_non_num, is_num_ord_dense=True)
         
     
