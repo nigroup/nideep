@@ -10,6 +10,7 @@ from read_img import read_img_cv2
 import caffe
 
 from lmdb_utils import IDX_FMT, MAP_SZ
+from mat_utils import expand_dims
 
 def imgs_to_lmdb(paths_src, path_dst):
     '''
@@ -47,8 +48,7 @@ def matfiles_to_lmdb(paths_src, path_dst, fieldname,
             
             content_field = io.loadmat(path_)[fieldname]
             # get shape (1,H,W)
-            while len(content_field.shape) < 3:
-                content_field = np.expand_dims(content_field, axis=0)
+            content_field = expand_dims(content_field, 4)
             content_field = content_field.astype(int)
             
             if lut is not None:
@@ -86,8 +86,7 @@ def scalars_to_lmdb(scalars, path_dst,
                                      % (idx, str(content_field.shape)))                
                 
             # guarantee shape (1,1,1)
-            while len(content_field.shape) < 3:
-                content_field = np.expand_dims(content_field, axis=0)
+            content_field = expand_dims(content_field, 4)
             content_field = content_field.astype(int)
             
             if lut is not None:
@@ -109,10 +108,7 @@ def arrays_to_lmdb(arrs, path_dst):
     with db.begin(write=True) as in_txn:
     
         for idx, x in enumerate(arrs):
-            
-            content_field = x
-            while len(content_field.shape) < 3:
-                content_field = np.expand_dims(content_field, axis=0)
+            content_field = expand_dims(x, 4)
             
             dat = caffe.io.array_to_datum(content_field)
             in_txn.put(IDX_FMT.format(idx), dat.SerializeToString())
