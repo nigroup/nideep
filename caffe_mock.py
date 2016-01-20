@@ -5,8 +5,7 @@ A module to mock caffe structures for testing
 
 @author: kashefy
 '''
-TRAIN = 0
-TEST = 1
+from .proto.caffe_pb2 import TRAIN, TEST
 
 class proto:
     class caffe_pb2:
