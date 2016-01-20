@@ -59,6 +59,7 @@ target/
 
 # Caffe files
 *.prototxt
+!test_data/*.prototxt
 *.caffemodel
 *lmdb/
 
