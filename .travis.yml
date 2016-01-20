@@ -57,7 +57,7 @@ before_install:
   - travis_retry wget -P $TRAVIS_BUILD_DIR/.. https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
   
 install:
-  - echo "Installing Coveralls if coverage:"
+  - echo "Installing Coveralls if coverage enabled:"
   - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
   - travis_retry pip install lmdb 
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
@@ -65,7 +65,7 @@ install:
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
   # list installed python packages
   #- pip freeze
-  - protoc -I=$TRAVIS_BUILD_DIR/ --python_out=$TRAVIS_BUILD_DIR/ $TRAVIS_BUILD_DIR/caffe.proto
+  - protoc -I=$TRAVIS_BUILD_DIR/ --python_out=$TRAVIS_BUILD_DIR/caffe/proto $TRAVIS_BUILD_DIR/caffe.proto
   - ls $TRAVIS_BUILD_DIR
   
 script:
