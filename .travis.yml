@@ -65,6 +65,7 @@ install:
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
   # list installed python packages
   #- pip freeze
+  - mkdir -p $TRAVIS_BUILD_DIR/caffe/proto/
   - protoc -I=$TRAVIS_BUILD_DIR/ --python_out=$TRAVIS_BUILD_DIR/caffe/proto/ $TRAVIS_BUILD_DIR/caffe.proto
   - ls $TRAVIS_BUILD_DIR
   
