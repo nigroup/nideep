@@ -5,15 +5,7 @@ A module to mock caffe structures for testing
 
 @author: kashefy
 '''
-from .proto.caffe_pb2 import TRAIN, TEST
-
-class proto:
-    class caffe_pb2:
-        class Datum:
-            def SerializeToString(self):
-                return "mock_this"
-            def ParseFromString(self, val):
-                return # do nothing
+from .proto.caffe_pb2 import TRAIN, TEST, Datum
             
 class Net:
     def forward(self):
@@ -22,4 +14,4 @@ class Net:
 class io:
     @staticmethod
     def array_to_datum(s):
-        return proto.caffe_pb2.Datum()
+        return Datum()
