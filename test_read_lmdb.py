@@ -479,7 +479,7 @@ class TestNumEntriesNumericOrderedLMDB:
         with db.begin(write=True) as in_txn:
             
             for data_str in img_data_str:
-                in_txn.put('{:0>10d}'.format(np.random.randint(10, 100)), data_str)
+                in_txn.put('{:0>10d}'.format(np.random.randint(10, 1000)), data_str)
         db.close()
         
         self.path_lmdb_non_num = os.path.join(self.dir_tmp, 'imgs_non_num_lmdb')
