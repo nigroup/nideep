@@ -26,13 +26,4 @@ class Parser(object):
         Constructor
         '''
         
-class Target(object):
-    
-    def __init__(self, name, key, new_value, conditions=[]):
-        '''
-        Constructor
-        '''
-        self.name = name
-        self.key = key
-        self.conditions = conditions
-        self.new_value = new_value
+        
