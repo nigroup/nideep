@@ -60,4 +60,15 @@ class TestArraysToHDF5:
             assert_equal(2, len(h['x']))
             for x, y in zip(self.arr, h['x'][:]):
                 assert_true(np.all(x==y))
+                
+    def test_arr_shape(self):
+        
+        fpath = os.path.join(self.dir_tmp, 'xarr_sh.h5')
+        to.arrays_to_h5_fixed(self.arr, 'x', fpath)
+
+        with h5py.File(fpath, 'r') as h:
+            assert_list_equal(h.keys(), ['x'])
+            assert_equal(2, len(h['x']))
+            for x, y in zip(self.arr, h['x'][:]):
+                assert_equal(x.shape, y.shape)
         
