@@ -10,7 +10,7 @@ from proto_utils import Parser
 
 def merge_indep_net_spec(net_specs):
     
-    data_tops = [l.top for l in n1.layer if l.type.lower() == 'data']
+    data_tops = [l.top for n in net_specs for l in n.layer if l.type.lower() == 'data']
     data_tops = Set([item for sublist in data_tops for item in sublist])
     
     for idx, n in enumerate(net_specs):
