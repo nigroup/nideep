@@ -54,7 +54,6 @@ before_install:
   - mv $TRAVIS_BUILD_DIR/caffe_mock.py $TRAVIS_BUILD_DIR/caffe.py
   # Download caffe protobuf message definitions
   - travis_retry wget -P $TRAVIS_BUILD_DIR https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
-  - travis_retry wget -P $TRAVIS_BUILD_DIR/.. https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
   
 install:
   - echo "Installing Coveralls if coverage enabled:"
