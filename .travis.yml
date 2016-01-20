@@ -62,7 +62,6 @@ install:
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
   # list installed python packages
   #- pip freeze
-  - mkdir -p $TRAVIS_BUILD_DIR/caffe/proto/
   - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR
   - ls $TRAVIS_BUILD_DIR
   - ls $TRAVIS_BUILD_DIR/caffe
