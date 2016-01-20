@@ -50,8 +50,6 @@ before_install:
   - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf
   - source activate $CONDA_ENV
   
-  # For mocking caffe
-  - mv $TRAVIS_BUILD_DIR/caffe_mock.py $TRAVIS_BUILD_DIR/caffe.py
   # Download caffe protobuf message definitions
   - travis_retry wget -P $TRAVIS_BUILD_DIR https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
   
@@ -65,8 +63,10 @@ install:
   # list installed python packages
   #- pip freeze
   - mkdir -p $TRAVIS_BUILD_DIR/caffe/proto/
-  - protoc -I=$TRAVIS_BUILD_DIR/ --python_out=$TRAVIS_BUILD_DIR/caffe/proto/ $TRAVIS_BUILD_DIR/caffe.proto
+  - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR
   - ls $TRAVIS_BUILD_DIR
+  - ls $TRAVIS_BUILD_DIR/caffe
+  - ls $TRAVIS_BUILD_DIR/caffe/proto
   
 script:
   - nosetests --with-coverage --logging-level=INFO
