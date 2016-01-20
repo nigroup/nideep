@@ -3,12 +3,8 @@ Created on Jan 20, 2016
 
 @author: kashefy
 '''
-from nose.tools import assert_equal, assert_true, assert_list_equal,\
-    assert_is_not_none
+from nose.tools import assert_is_not_none
 import os
-import tempfile
-import shutil
-import numpy as np
 import proto_utils as pu
 
 import sys
@@ -17,16 +13,6 @@ TEST_DATA_DIRNAME = 'test_data'
 TEST_NET_FILENAME = 'n1.prototxt'
         
 class TestProtoUtils:
-
-    @classmethod
-    def setup_class(self):
-        
-        self.dir_tmp = tempfile.mkdtemp()
-        
-    @classmethod
-    def teardown_class(self):
-        
-        shutil.rmtree(self.dir_tmp)
     
     def test_from_net_params_file(self):
         
