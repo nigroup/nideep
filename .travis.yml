@@ -4,7 +4,12 @@ language: cpp
 compiler:
   #- clang
   - gcc
-  
+
+addons:
+  apt:
+    packages:
+    - protobuf-compiler
+    
 # blacklist
 branches:
   except:
@@ -45,11 +50,11 @@ before_install:
   - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf
   - source activate $CONDA_ENV
   
-  # For mocking caffe
-  - mv $TRAVIS_BUILD_DIR/caffe_mock.py $TRAVIS_BUILD_DIR/caffe.py
+  # Download caffe protobuf message definitions
+  - travis_retry wget -P $TRAVIS_BUILD_DIR https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
   
 install:
-  - echo "Installing Coveralls if coverage:"
+  - echo "Installing Coveralls if coverage enabled:"
   - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
   - travis_retry pip install lmdb 
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
@@ -57,6 +62,10 @@ install:
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
   # list installed python packages
   #- pip freeze
+  - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR
+  - ls $TRAVIS_BUILD_DIR
+  - ls $TRAVIS_BUILD_DIR/caffe
+  - ls $TRAVIS_BUILD_DIR/caffe/proto
   
 script:
   - nosetests --with-coverage --logging-level=INFO

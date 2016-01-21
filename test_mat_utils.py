@@ -3,7 +3,7 @@ Created on Oct 28, 2015
 
 @author: kashefy
 '''
-from nose.tools import assert_equals, assert_raises
+from nose.tools import assert_equals, assert_true, assert_raises
 import numpy as np
 import mat_utils as mu
 
@@ -86,3 +86,78 @@ class TestTranspose:
             for j in range(2):
                 for k in range(3):
                     assert_equals(x[i][j][k], y[k][i][j])
+                    
+class TestExpandDims:
+    
+    def test_expand_dims_vector(self):
+        
+        m = np.random.rand(3)
+        
+        x = mu.expand_dims(np.copy(m), 1)
+        assert_equals(x.ndim, 1)
+        assert_equals(x.shape, (3,))
+        
+        x = mu.expand_dims(np.copy(m), 2)
+        assert_equals(x.ndim, 2)
+        assert_equals(x.shape, (1, 3))
+        
+        x = mu.expand_dims(np.copy(m), 2)
+        assert_equals(x.ndim, 2)
+        assert_equals(x.shape, (1, 3))
+        
+    def test_expand_dims(self):
+        
+        m = np.random.rand(3, 2)
+        for d in xrange(m.ndim+1, m.ndim*3):
+            x = mu.expand_dims(np.copy(m), d)
+            assert_equals(x.ndim, d)
+            assert_equals(x.shape[x.ndim-m.ndim:], m.shape)
+            assert_equals(x.shape[:x.ndim-m.ndim], (1,)*(x.ndim-m.ndim))
+            
+        m = np.random.rand(3, 2, 7)
+        for d in xrange(m.ndim+1, m.ndim*3):
+            x = mu.expand_dims(np.copy(m), d)
+            assert_equals(x.ndim, d)
+            assert_equals(x.shape[x.ndim-m.ndim:], m.shape)
+            assert_equals(x.shape[:x.ndim-m.ndim], (1,)*(x.ndim-m.ndim))
+            
+        m = np.random.rand(3, 2, 7, 1, 2)
+        for d in xrange(m.ndim+1, m.ndim*3):
+            x = mu.expand_dims(np.copy(m), d)
+            assert_equals(x.ndim, d)
+            assert_equals(x.shape[x.ndim-m.ndim:], m.shape)
+            assert_equals(x.shape[:x.ndim-m.ndim], (1,)*(x.ndim-m.ndim))
+            
+    def test_expand_dims_no_change(self):
+        
+        m = np.random.rand(3)
+        x = mu.expand_dims(np.copy(m), 0)
+        assert_equals(x.ndim, m.ndim)
+        assert_equals(x.shape, m.shape)
+        assert_true(np.any(x == m))
+        
+        x = mu.expand_dims(np.copy(m), 1)
+        assert_equals(x.ndim, m.ndim)
+        assert_equals(x.shape, m.shape)
+        assert_true(np.any(x == m))
+        
+        m = np.random.rand(3, 2)
+        for d in xrange(m.ndim):
+            x = mu.expand_dims(np.copy(m), d)
+            assert_equals(x.ndim, m.ndim)
+            assert_equals(x.shape, m.shape)
+            assert_true(np.any(x == m))
+        
+        m = np.random.rand(3, 2, 5)
+        for d in xrange(m.ndim):
+            x = mu.expand_dims(np.copy(m), d)
+            assert_equals(x.ndim, m.ndim)
+            assert_equals(x.shape, m.shape)
+            assert_true(np.any(x == m))
+        
+        m = np.random.rand(5, 4, 3, 2)
+        for d in xrange(m.ndim):
+            x = mu.expand_dims(np.copy(m), d)
+            assert_equals(x.ndim, m.ndim)
+            assert_equals(x.shape, m.shape)
+            assert_true(np.any(x == m))

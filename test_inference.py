@@ -241,6 +241,58 @@ class TestInferenceLMDB:
                 assert_true(os.path.isdir(dst_prefix % k))
             else:
                 assert_false(os.path.isdir(dst_prefix % k))
+                
+    @patch('inference.caffe.Net')
+    def test_infer_to_lmdb_cur_multi_key(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(4, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        net = mock_net()
+        
+        dst_prefix = os.path.join(self.dir_tmp, 'test_infer_to_lmdb_cur_multi_key_%s_lmdb')
+        for k in b.keys():
+            assert_false(os.path.isdir(dst_prefix % k))
+        
+        n = 3
+        out = infr.infer_to_lmdb_cur(net, ['x', 'z'], n, dst_prefix)
+        
+        assert_equal(net.forward.call_count, n)
+        assert_list_equal(out, [n*4]*2)
+        for k in b.keys():
+            if k in ['x', 'z']:
+                assert_true(os.path.isdir(dst_prefix % k))
+            else:
+                assert_false(os.path.isdir(dst_prefix % k))
+                
+    @patch('inference.caffe.Net')
+    def test_infer_to_lmdb_cur_single_key(self, mock_net):
+        
+        # fake minimal test data
+        b = {k : Bunch(data=np.random.rand(4, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        
+        # mock methods and properties of Net objects
+        mock_net.return_value.forward.return_value = np.zeros(1)
+        type(mock_net.return_value).blobs = PropertyMock(return_value=b)
+        net = mock_net()
+        
+        dst_prefix = os.path.join(self.dir_tmp, 'test_infer_to_lmdb_cur_single_key_%s_lmdb')
+        for k in b.keys():
+            assert_false(os.path.isdir(dst_prefix % k))
+        
+        n = 3
+        out = infr.infer_to_lmdb_cur(net, ['z'], n, dst_prefix)
+        
+        assert_equal(net.forward.call_count, n)
+        assert_list_equal(out, [n*4])
+        for k in b.keys():
+            if k in ['z']:
+                assert_true(os.path.isdir(dst_prefix % k))
+            else:
+                assert_false(os.path.isdir(dst_prefix % k))
              
     @patch('inference.est_min_num_fwd_passes')
     @patch('inference.caffe.Net')
