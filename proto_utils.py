@@ -6,6 +6,16 @@ Created on Sep 21, 2015
 from google.protobuf import text_format
 from caffe.proto import caffe_pb2
 
+def copy_msg(src, typ):
+    
+    dst = typ()
+    dst.CopyFrom(src)
+    return dst
+
+def copy_net_params(src):
+    
+    return copy_msg(src, caffe_pb2.NetParameter)
+
 class Parser(object):
     '''
     classdocs
@@ -26,13 +36,4 @@ class Parser(object):
         Constructor
         '''
         
-class Target(object):
-    
-    def __init__(self, name, key, new_value, conditions=[]):
-        '''
-        Constructor
-        '''
-        self.name = name
-        self.key = key
-        self.conditions = conditions
-        self.new_value = new_value
+        
