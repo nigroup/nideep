@@ -8,14 +8,14 @@ import numpy as np
 from google.protobuf import text_format
 from proto_utils import Parser
 
-def merge_indep_net_spec(net_specs):
+def merge_indep_net_spec(net_specs, suffix_fmt='_nidx_%02d'):
     
     data_tops = [l.top for n in net_specs for l in n.layer if l.type.lower() == 'data']
     data_tops = Set([item for sublist in data_tops for item in sublist])
     
     for idx, n in enumerate(net_specs):
     
-        suffix = '_'.join(['', 'nidx', "%02d" % idx])
+        suffix = suffix_fmt % idx
         throw_away = []
         for l in n.layer:
             if l.type.lower() != 'data':
