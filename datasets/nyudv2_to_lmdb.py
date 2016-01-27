@@ -9,8 +9,8 @@ import numpy as np
 from scipy import io
 import h5py
 from dataset_utils import get_train_val_split_from_idx
-import mat_utils as mu
-import to_lmdb
+from blobs import mat_utils as mu
+from iow import to_lmdb
 
 class NYUDV2DataType:
     IMAGES = 'images'

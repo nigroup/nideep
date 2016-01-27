@@ -9,7 +9,7 @@ fi;
     
 # For mocking caffe
 mkdir -p $ROOT_DIR/caffe
-mv $ROOT_DIR/caffe_mock.py $ROOT_DIR/caffe/__init__.py
+mv $ROOT_DIR/.ci/travis/caffe_mock.py $ROOT_DIR/caffe/__init__.py
 
 mkdir $ROOT_DIR/caffe/proto/
 protoc -I=$ROOT_DIR/ --python_out=$ROOT_DIR/caffe/proto/ $ROOT_DIR/caffe.proto

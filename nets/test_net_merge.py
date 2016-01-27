@@ -11,11 +11,12 @@ import tempfile
 import shutil
 from google.protobuf import text_format
 from caffe.proto.caffe_pb2 import NetParameter
-from proto_utils import Parser
+from proto.proto_utils import Parser
 import net_merge as mrg
 
 import sys
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
+ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)
 TEST_DATA_DIRNAME = 'test_data'
 TEST_NET_FILENAME = 'n1.prototxt'
 
@@ -33,7 +34,7 @@ class TestNetMerge:
     
     def test_duplicate(self):
         
-        fpath = os.path.join(os.path.dirname(CURRENT_MODULE_PATH),
+        fpath = os.path.join(os.path.dirname(ROOT_PKG_PATH),
                              TEST_DATA_DIRNAME, TEST_NET_FILENAME)
         
         n1 = Parser().from_net_params_file(fpath)

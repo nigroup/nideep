@@ -4,7 +4,7 @@ Created on Jan 15, 2016
 @author: kashefy
 '''
 import h5py
-from mat_utils import expand_dims
+from blobs.mat_utils import expand_dims
 
 def arrays_to_h5_fixed(arrs, key, path_dst):
     '''

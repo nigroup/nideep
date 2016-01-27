@@ -63,11 +63,9 @@ install:
   # list installed python packages
   #- pip freeze
   - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR
-  - ls $TRAVIS_BUILD_DIR
-  - ls $TRAVIS_BUILD_DIR/caffe
-  - ls $TRAVIS_BUILD_DIR/caffe/proto
   
 script:
+  - export PYTHONPATH="$TRAVIS_BUILD_DIR:$PYTHONPATH"
   - nosetests --with-coverage --logging-level=INFO
   - ls -a
   

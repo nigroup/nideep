@@ -3,12 +3,11 @@ Created on Jul 23, 2015
 
 @author: kashefy
 '''
-import os
 import numpy as np
 from PIL import Image
 import cv2 as cv2
 import caffe
-import mat_utils as mu
+from blobs import mat_utils as mu
 
 def read_img_PIL(fpath, mean=None):
     '''

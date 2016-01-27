@@ -6,7 +6,7 @@ Created on Dec 18, 2015
 from sets import Set
 import numpy as np
 from google.protobuf import text_format
-from proto_utils import Parser
+from proto.proto_utils import Parser
 
 def merge_indep_net_spec(net_specs, suffix_fmt='_nidx_%02d'):
     
