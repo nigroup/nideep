@@ -15,7 +15,4 @@ class io:
     @staticmethod
     def array_to_datum(s):
         return Datum()
-    
-    @staticmethod
-    def load_image(p):
-        return None
+        
