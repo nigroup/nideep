@@ -111,10 +111,10 @@ class TestReadImage:
                                                           ])
         assert_equal(r.read_img_caf(self.path_img1).shape, (3, 4, 2))
                     
-    @patch('iow.read_img.caffe')   
-    def test_read_img_caf_pixels(self, mock_caffe):
+    @patch('iow.read_img.caffe.io')   
+    def test_read_img_caf_pixels(self, mock_io):
         
-        mock_caffe.io.load_image.return_value = np.array([[[0.01176471,  0.00784314,  0.00392157],
+        mock_io.load_image.return_value = np.array([[[0.01176471,  0.00784314,  0.00392157],
                                                            [0.02352941,  0.01960784,  0.01568628]
                                                            ],
                                                           [[0.03529412,  0.03137255,  0.02745098],
@@ -135,10 +135,10 @@ class TestReadImage:
                 for col in range(2):
                     assert_almost_equals(img[ch][row][col], self.img1[row][col][ch], places=5)
                     
-    @patch('iow.read_img.caffe')   
-    def test_read_img_caf_subtract_mean(self, mock_caffe):
+    @patch('iow.read_img.caffe.io')    
+    def test_read_img_caf_subtract_mean(self, mock_io):
         
-        mock_caffe.io.load_image.return_value = np.array([[[0.01176471,  0.00784314,  0.00392157],
+        mock_io.load_image.return_value = np.array([[[0.01176471,  0.00784314,  0.00392157],
                                                            [0.02352941,  0.01960784,  0.01568628]
                                                            ],
                                                           [[0.03529412,  0.03137255,  0.02745098],
