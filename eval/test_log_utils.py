@@ -12,6 +12,7 @@ from nose.tools import assert_equal, assert_false, assert_raises, \
 import log_utils as lu
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
+ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)
 TEST_DATA_DIRNAME = 'test_data'
 TEST_LOG_FILENAME = 'caffe.hostname.username.log.INFO.20150917-163712.31405'
 
@@ -64,7 +65,7 @@ class TestPID:
         
     def test_read_pid(self):
         
-        fpath = os.path.join(os.path.dirname(CURRENT_MODULE_PATH),
+        fpath = os.path.join(os.path.dirname(ROOT_PKG_PATH),
                              TEST_DATA_DIRNAME,
                              TEST_LOG_FILENAME)
         
@@ -74,7 +75,7 @@ class TestPID:
         
     def test_read_pid_from_content(self):
         
-        fpath = os.path.join(os.path.dirname(CURRENT_MODULE_PATH),
+        fpath = os.path.join(os.path.dirname(ROOT_PKG_PATH),
                              TEST_DATA_DIRNAME,
                              TEST_LOG_FILENAME)
         
@@ -119,7 +120,7 @@ class TestCaffeLog:
     def setup_class(self):
         
         self.dir_tmp = tempfile.mkdtemp()
-        self.path_real_log = os.path.join(os.path.dirname(CURRENT_MODULE_PATH),
+        self.path_real_log = os.path.join(os.path.dirname(ROOT_PKG_PATH),
                                           TEST_DATA_DIRNAME,
                                           TEST_LOG_FILENAME)
         
