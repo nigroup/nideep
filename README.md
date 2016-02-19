@@ -30,6 +30,8 @@ Beware: The documentation is pretty scarce. I'm working on it.
 
 Download val_59.txt from [here](https://gist.github.com/kashefy/78415dd397accb47872a/raw/761b280d6de022958f8f8c9bc64fa56432124cb2/val_59.txt).
 
+Download 59_labels.txt from [here](https://gist.githubusercontent.com/kashefy/b598193e03d21432f327/raw/036272de91604991dd1daeccb69fa0cfc6611c1d/59_labels.txt).
+
     from datasets.pascal_context_to_lmdb import pascal_context_to_lmdb
     val_list_path = os.path.expanduser('~/data/PASCAL-Context/val_59.txt')
     with open(val_list_path, 'r') as f:
