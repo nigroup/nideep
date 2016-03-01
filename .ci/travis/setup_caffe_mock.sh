@@ -11,6 +11,7 @@ fi;
 mkdir -p $ROOT_DIR/caffe
 mv $ROOT_DIR/.ci/travis/caffe_mock.py $ROOT_DIR/caffe/__init__.py
 
+# compile protobuf message definitions
 mkdir $ROOT_DIR/caffe/proto/
 protoc -I=$ROOT_DIR/ --python_out=$ROOT_DIR/caffe/proto/ $ROOT_DIR/caffe.proto
 touch $ROOT_DIR/caffe/proto/__init__.py
