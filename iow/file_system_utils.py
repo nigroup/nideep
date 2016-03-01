@@ -2,7 +2,10 @@ import os
 import hashlib
 
 def gen_paths(dir_src, func_filter=None):
-    
+    """
+    Generate a list of files below a given directory.
+    A function can be passed to filter specific files (on return value: True)
+    """
     if func_filter is None:
         def func_filter(fileName):
             return True
@@ -21,13 +24,19 @@ def gen_paths(dir_src, func_filter=None):
     return dst
 
 def filter_is_img(fname):
-    
+    """
+    Determine if a file name is that of an image
+    """
     _, ext = os.path.splitext(fname)
     
     return ext in ['.bmp', '.jpg', '.png', '.tif']
 
 def fname_pairs(paths_a, paths_b):
-    
+    """
+    find filename pairs between two lists.
+    The filenames of the first list are used as a prefix to match with entries
+    in the second list
+    """
     paths_dst = []
     len_b = len(paths_b)
     cursor_b = 0
@@ -58,6 +67,9 @@ def fname_pairs(paths_a, paths_b):
     return paths_dst
 
 def hashfile(fpath, blocksize=65536):
+    """
+    Generate a unique hash value for a file's content
+    """
     with open(fpath, 'rb') as f:
         hasher = hashlib.sha256()
         buf = f.read(blocksize)
