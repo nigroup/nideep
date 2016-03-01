@@ -7,6 +7,8 @@ import os
 import numpy as np       
 import parse_log as pl
 from eval_utils import Phase
+from log_utils import is_caffe_info_log
+import iow.file_system_utils as fs
     
 def cleanup_caffe_logname(fname):
     
@@ -63,3 +65,17 @@ class LearningCurve(object):
         Constructor
         '''
         self.path_log = path_log
+        
+def LearningCurveFromPath(p):
+    
+    if os.path.isfile(p):
+        return LearningCurve(p)
+    elif os.path.isdir(p):
+        log_paths = fs.gen_paths(p, func_filter=is_caffe_info_log)
+        if len(log_paths) > 0:
+            return LearningCurve(log_paths[-1])
+        else:
+            return None
+    else:
+        raise IOError("%s: No such file or directory" % (p,))
+    

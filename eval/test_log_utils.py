@@ -172,6 +172,53 @@ class TestCaffeLog:
         
         assert_false(lu.is_caffe_info_log(fpath))
         
+    def test_is_complete(self):
+        
+        assert_true(lu.is_complete(self.path_real_log))
+                
+        fpath = os.path.join(self.dir_tmp,
+                             "foo.hostname.username.log.ERROR.20150917-163712.31405")
+        
+        with open(fpath, 'w') as f:
+            f.write('log file')
+        
+        assert_false(lu.is_complete(fpath))
+        
+class TestReadMeUtils:
+    
+    @classmethod
+    def setup_class(self):
+        
+        self.dir_tmp = tempfile.mkdtemp()
+        self.path_real_log = os.path.join(os.path.dirname(ROOT_PKG_PATH),
+                                          TEST_DATA_DIRNAME,
+                                          TEST_LOG_FILENAME)
+        shutil.copyfile(self.path_real_log,
+                        os.path.join(self.dir_tmp, TEST_LOG_FILENAME))
+        self.path_real_log = os.path.join(self.dir_tmp, TEST_LOG_FILENAME)
+        self.path_readme = os.path.join(self.dir_tmp, 'readme.txt')
+        with open(self.path_readme, 'w') as f:
+            f.write('foo')
+        
+    @classmethod
+    def teardown_class(self):
+        
+        shutil.rmtree(self.dir_tmp)
+    
+    def test_get_rel_readme_path_from_dir(self):
+        
+        p = lu.get_rel_readme_path(self.dir_tmp)
+        assert_equal(p, self.path_readme)
+        
+    def test_get_rel_readme_path_from_log(self):
+        
+        p = lu.get_rel_readme_path(self.path_real_log)
+        assert_equal(p, self.path_readme)
+        
+    def test_readme_to_str(self):
+        
+        assert_equal(lu.readme_to_str(self.path_readme), "foo")
+        
 class TestFindLine:
     
     @classmethod
@@ -198,3 +245,5 @@ class TestFindLine:
         assert_is_none(lu.find_line(fpath, 'hello'))
         assert_equal(lu.find_line(fpath, 'line'), 'line one' + os.linesep)
         assert_equal(lu.find_line(fpath, 'LINE'), 'LINE x' + os.linesep)
+        
+        
