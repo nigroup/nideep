@@ -1,4 +1,5 @@
 import os
+import hashlib
 
 def gen_paths(dir_src, func_filter=None):
     
@@ -55,3 +56,13 @@ def fname_pairs(paths_a, paths_b):
                 cursor_b = 0
     
     return paths_dst
+
+def hashfile(fpath, blocksize=65536):
+    with open(fpath, 'rb') as f:
+        hasher = hashlib.sha256()
+        buf = f.read(blocksize)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(blocksize)
+        return hasher.digest()
+

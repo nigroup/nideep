@@ -48,8 +48,15 @@ class TestFSUtils:
         
         flist = fs.gen_paths(self.dir_, fs.filter_is_img)
         assert_equal(len(flist), 0)
+
+    def test_hash_file(self):
+    
+        p = fs.gen_paths(self.dir_, is_caffe_info_log)[0]
+        h = fs.hashfile(p)
+        assert_is_instance(h, str)
+        assert_greater(len(h), 0)
         
-class FNamePairsTest:
+class TestFNamePairs:
     
     @classmethod
     def setup_class(self):
@@ -57,7 +64,7 @@ class FNamePairsTest:
         self.dir_tmp = tempfile.mkdtemp()
         self.dir_ = os.path.join(os.path.dirname(ROOT_PKG_PATH),
                                           TEST_DATA_DIRNAME)
-        shutil.copytree(self.dir_, self.dir_tmp)
+        shutil.copytree(self.dir_, os.path.join(self.dir_tmp, 'subdir'))
         
     @classmethod
     def teardown_class(self):
@@ -73,4 +80,6 @@ class FNamePairsTest:
         for x, y in pairs:
             assert_in(x, a)
             assert_in(y, b)
+            
+    
         
