@@ -52,6 +52,10 @@ before_install:
   
   # Download caffe protobuf message definitions
   - travis_retry wget -P $TRAVIS_BUILD_DIR https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
+  # Download caffe log parser from caffe repo
+  - mkdir -p $TRAVIS_BUILD_DIR/caffe/tools/extra
+  - travis_retry wget -P $TRAVIS_BUILD_DIR/caffe/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/extract_seconds.py
+  - travis_retry wget -P $TRAVIS_BUILD_DIR/caffe/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/parse_log.py
   
 install:
   - echo "Installing Coveralls if coverage enabled:"
@@ -65,7 +69,7 @@ install:
   - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR
   
 script:
-  - export PYTHONPATH="$TRAVIS_BUILD_DIR:$PYTHONPATH"
+  - export PYTHONPATH="$TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR/caffe/tools/extra:$PYTHONPATH"
   - nosetests --with-coverage --logging-level=INFO
   - ls -a
   
