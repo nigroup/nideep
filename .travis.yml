@@ -54,7 +54,7 @@ before_install:
   - travis_retry wget -P $TRAVIS_BUILD_DIR https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
   # Download caffe log parser from caffe repo
   - mkdir $TRAVIS_BUILD_DIR/caffe_extra
-  - travis_retry wget -r -P $TRAVIS_BUILD_DIR/caffe_extra https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/tools/extra/
+  - travis_retry wget -r -P $TRAVIS_BUILD_DIR/caffe_extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/
   - ls $TRAVIS_BUILD_DIR/caffe_extra
   
 install:
