@@ -89,4 +89,11 @@ def read_pid(p):
         id_ = pid_from_str(l.split(' ')[2])
         
     return id_
+
+def is_complete(p):
+    """
+    Determine if the logged optimization was completed
+    """
+    l = find_line(p, "Optimization Done")
+    return l is not None
     

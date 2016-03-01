@@ -172,6 +172,18 @@ class TestCaffeLog:
         
         assert_false(lu.is_caffe_info_log(fpath))
         
+    def test_is_complete(self):
+        
+        assert_true(lu.is_complete(self.path_real_log))
+                
+        fpath = os.path.join(self.dir_tmp,
+                             "foo.hostname.username.log.ERROR.20150917-163712.31405")
+        
+        with open(fpath, 'w') as f:
+            f.write('log file')
+        
+        assert_false(lu.is_complete(fpath))
+        
 class TestFindLine:
     
     @classmethod

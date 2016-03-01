@@ -6,7 +6,7 @@ Created on Oct 1, 2015
 import os
 import sys
 from nose.tools import assert_equal, assert_greater, assert_true,\
-    assert_list_equal, assert_false, assert_not_equal, assert_raises,\
+    assert_list_equal, assert_false, assert_raises,\
     assert_is_instance
 import numpy as np
 from eval_utils import Phase
