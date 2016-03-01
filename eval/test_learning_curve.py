@@ -7,10 +7,11 @@ import os
 import sys
 from nose.tools import assert_equal, assert_greater, assert_true,\
     assert_list_equal, assert_false, assert_raises,\
-    assert_is_instance
+    assert_is_instance, assert_is_not_none, assert_is_none
 import numpy as np
 from eval_utils import Phase
 from learning_curve import LearningCurve
+from eval.learning_curve import LearningCurveFromPath
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
 ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)
@@ -76,3 +77,28 @@ class TestLearningCurve:
         lc = LearningCurve(self.fpath)
         assert_is_instance(lc.name(), str)
         assert_greater(len(lc.name()), 0, 'name is empty')
+        
+    def test_learning_curve_from_fpath(self):
+        
+        lc = LearningCurveFromPath(self.fpath)
+        assert_is_not_none(lc)
+        train_keys, test_keys = lc.parse()
+        assert_list_equal(train_keys, ['NumIters', 'Seconds', 'LearningRate', 'loss'])
+        assert_list_equal(test_keys, ['NumIters', 'Seconds', 'LearningRate', 'accuracy', 'loss'])
+        
+    def test_learning_curve_from_dir(self):
+        
+        lc = LearningCurveFromPath(os.path.split(self.fpath)[0])
+        assert_is_not_none(lc)
+        train_keys, test_keys = lc.parse()
+        assert_list_equal(train_keys, ['NumIters', 'Seconds', 'LearningRate', 'loss'])
+        assert_list_equal(test_keys, ['NumIters', 'Seconds', 'LearningRate', 'accuracy', 'loss'])
+        
+    def test_learning_curve_from_no_exist(self):
+        
+        assert_raises(IOError, LearningCurveFromPath, os.path.join('foo', 'bar'))
+    
+    def test_learning_curve_from_dir_empty(self):
+        
+        assert_is_none(LearningCurveFromPath(os.curdir))
+        
