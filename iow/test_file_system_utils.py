@@ -4,7 +4,7 @@ Created on Oct 30, 2015
 @author: kashefy
 '''
 from nose.tools import assert_false, assert_true, assert_is_instance,\
-    assert_equal, assert_greater, assert_in
+    assert_equal, assert_greater, assert_in, assert_list_equal
 import os
 import tempfile
 import shutil
@@ -72,6 +72,21 @@ class TestFNamePairs:
         shutil.rmtree(self.dir_tmp)
         
     def test_fname_pairs(self):
+    
+        a = ['foo1_a.txt', os.path.join('foo', 'bar_x.txt'), 'foo5.txt']
+        b = [os.path.join('oof', 'bar_x.txt'), 'foo5_b.txt', 'foo2_b.txt']
+        pairs = fs.fname_pairs(a, b)
+        
+        for x, y in pairs:
+            assert_in(x, a)
+            assert_in(y, b)
+            
+        assert_list_equal(pairs, [[os.path.join('foo', 'bar_x.txt'),
+                                   os.path.join('oof', 'bar_x.txt')],
+                                  ['foo5.txt', 'foo5_b.txt'],
+                                  ])
+        
+    def test_fname_pairs_log_files(self):
     
         a = fs.gen_paths(self.dir_, is_caffe_info_log)
         b = fs.gen_paths(self.dir_tmp, is_caffe_info_log)
