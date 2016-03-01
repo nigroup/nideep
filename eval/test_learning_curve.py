@@ -100,5 +100,5 @@ class TestLearningCurve:
     
     def test_learning_curve_from_dir_empty(self):
         
-        assert_is_none(LearningCurveFromPath(os.curdir))
+        assert_is_none(LearningCurveFromPath(ROOT_PKG_PATH))
         
