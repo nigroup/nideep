@@ -19,9 +19,9 @@ class LearningCurve(object):
     '''
     classdocs
     '''
-    def list(self, key, mode=Phase.TEST):
+    def list(self, key, phase=Phase.TEST):
                 
-        if mode.lower() == Phase.TEST.lower():
+        if phase.lower() == Phase.TEST.lower():
             
             if 'loss' in key.lower() and 'loss' in self.test_keys:
                 key = 'loss'
