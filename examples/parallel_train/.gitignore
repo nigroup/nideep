@@ -1,4 +1,4 @@
-!./solver0.prototxt
-!./solver1.prototxt
-!./solver_m.prototxt
+!solver0.prototxt
+!solver1.prototxt
+!solver_m.prototxt
 tmp/

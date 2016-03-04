@@ -1,0 +1,20 @@
+# The train/test net protocol buffer definition
+net: "../parallel_train/tmp/trainval0.prototxt"
+# test_iter specifies how many forward passes the test should carry out.
+test_iter: 1
+# Carry out testing every test_interval training iterations.
+test_interval: 10
+# The base learning rate, momentum and the weight decay of the network.
+base_lr: 0.01
+momentum: 0.9
+weight_decay: 0.0005
+# The learning rate policy
+lr_policy: "inv"
+gamma: 0.0001
+power: 0.75
+display: 1
+snapshot_after_train: false
+# solver mode: CPU or GPU
+solver_mode: CPU
+test_initialization: false
+max_iter: 10
