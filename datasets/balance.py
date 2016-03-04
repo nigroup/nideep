@@ -5,23 +5,39 @@ Created on Mar 3, 2016
 '''
 import numpy as np
 import h5py
-from astropy.wcs.docstrings import delta
 
-def get_class_count_hdf5(fpath, key='label', other_clname='other'):
+def get_class_count_hdf5(fpath, key_label='label', other_clname='other'):
     
-    f = h5py.File(fpath, 'r')
-    l = np.squeeze(f[key])
+    h = h5py.File(fpath, 'r')
+    l = np.squeeze(h[key_label])
     b = Balancer(l)
-    x = b.get_class_count(key=key, other_clname=other_clname)
-    print x.values()
-    b.balance_class_count(x.values())
-    return x
+    return b.get_class_count(other_clname=other_clname)
 
+def balance_class_count_hdf5(fpath, key_feat, key_label='label', other_clname='other'):
+    
+    h = h5py.File(fpath, 'r')
+    labls = np.squeeze(h[key_label])
+    bal = Balancer(np.squeeze(labls))
+    class_count = bal.get_class_count(other_clname=other_clname)
+    idxs = bal.get_idxs_to_balance_class_count(class_count.values())
+    idxs = np.random.shuffle(idxs) # this only shuffles the array along the first index of a multi-dimensional array
+    return h[key_feat][idxs], labls[idxs]
+
+def balance_class_count(self, feats, labls, other_clname='other'):
+    
+    bal = Balancer(labls)
+    class_count = bal.get_class_count(other_clname=other_clname)
+    idxs = bal.get_idxs_to_balance_class_count(class_count.values())
+    idxs = np.random.shuffle(idxs) # this only shuffles the array along the first index of a multi-dimensional array
+    return feats[idxs], labls[idxs]
+    
 class Balancer(object):
     '''
     Balance class counts
     '''
-    def get_class_count(self, key='label', other_clname='other'):
+    def get_class_count(self, other_clname='other'):
+        
+        self.has_other_cl = other_clname is not None and other_clname != ''
         
         if self.l.ndim == 2:
             class_count = np.sum(self.l, axis=0)
@@ -29,27 +45,25 @@ class Balancer(object):
         d = {}
         for i, x in enumerate(class_count):
             d[i] = int(x)
-        if other_clname is not None and other_clname != '':
+        if self.has_other_cl:
             d[other_clname] = other_count
         return d
     
-    def balance_class_count(self, class_counts):
+    def get_idxs_to_balance_class_count(self, class_counts):
     
-        print class_counts, self.l.shape
         mx = np.max(class_counts)
-        
+        idxs = np.arange(self.l.size).reshape(-1, 1)
         for i, c in enumerate(class_counts):
-            
-            
-            delta = mx - c
-            if delta > 0:
+            delta_ = mx - c
+            if delta_ > 0:
                 rows = np.where(self.l[:, i]==1)[0]
-                print rows.size
-                rows_sampled = rows[np.random.randint(0, high=rows.size, size=(delta, 1))]
-                
-            #    if delta > c:
-        
-        print class_counts, mx
+                rows_to_sample = rows[np.random.randint(0, high=rows.size,
+                                                        size=(delta_, 1))
+                                      ]
+                np.vstack((idxs, rows_to_sample))
+        #if has_other_cl:
+        # TODO
+        return idxs
 
     def __init__(self, labls):
         '''
@@ -57,4 +71,5 @@ class Balancer(object):
         labls -- ground truth
         '''
         self.l = labls
+        self.has_other_cl = True
         
