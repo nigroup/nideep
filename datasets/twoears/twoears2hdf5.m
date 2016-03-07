@@ -1,18 +1,23 @@
 function [] = twoears2hdf5(fpath, dir_dst)
-% remove rows with zero entries in ground truth
+% TWOEARS2HDF  load twoears training data and reformat into caffe-friendly HDF5
+%   TWOEARS2HDF(fpath, dir_dst) loads data from .mat file designated by fpath
+%     and writes them to hdf5 files under directory dir_dst
+%   Assume rows are examples, labels are features/class columns
+% 
 load(fpath, 'x', 'y', 'featureNames', 'classnames');
 
 dir_src = fileparts(fpath);
 [~, phase] = fileparts(dir_src); % test or train from directory name
 assert( strcmp(phase, 'test') | strcmp(phase, 'train'), 'Unable to determine phase (test vs. train).' );
 
+% remove rows with zero entries in ground truth
 [nozero, ~] = find( all( y~=0, 2 ) );
 x2 = x( nozero, : );
 y2 = y( nozero, : );
-% exclude column for general class
 y2( y2==-1 ) = 0;
+% activate general class wherever all target classes are absent
 general_col = find( strcmp( classnames, 'general' ) );
-y2(:, general_col) = [];
+y2( sum(y2, 2)==0, general_col) = 1;
 
 % random shuffle
 o = randperm( length( y2 ) );
