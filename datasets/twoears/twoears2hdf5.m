@@ -6,6 +6,8 @@ function [] = twoears2hdf5(fpath, dir_dst, merge)
 %       rows are examples, labels are features/class columns
 %       label states are -1, 0, 1 for inactive, undefined, active
 %       respectively
+%   The general class is only present in the scalar representation of the
+%   ground truth. It is equivalent to an all-zero ground truth vector.
 % 
 if nargin < 3
     merge = false;
@@ -33,6 +35,9 @@ y2 = y2( o, : );
 
 [x_feat, feature_type_names, y] = twoears2Blob(x2, featureNames, y2);
 y_scalar = labelVec2ScalarsBlob(y);
+% Afer scalarizing the ground truth, we can remove the general class column
+% from the ground truths vectors.
+y = removeClassFromVec(y, general_col);
 
 if merge
     % merge all features and ground truth into same hdf5

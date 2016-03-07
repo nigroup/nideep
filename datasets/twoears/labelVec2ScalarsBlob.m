@@ -19,5 +19,3 @@ else
     y_scalar = y_scalar-1; % 1-based to zero-based class index
     y_scalar = reshape( y_scalar, 1, 1, 1, n ); % to 4-D Blob
 end
-
-
