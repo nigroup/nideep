@@ -1,4 +1,4 @@
-function [x_feat, feature_type_names, y, y_1hot] = twoears2Blob(x, featureNames, y)
+function [x_feat, feature_type_names, y] = twoears2Blob(x, featureNames, y)
 % twoears2Blob  reshape feature and ground truth vectors into 4-D Blob for caffe
 %   For the feature vector x it expects a shape of (N x D)
 %   where N is the number of samples and D is the total no. of features
@@ -47,13 +47,4 @@ end % format features
 
 % reshape multi-label ground truth vectors to 4-D Blob
 y = reshape( y, 1, [], 1, length( y ) );
-
-% labels in one-hot format for softmax loss
-y_1hot = reshape(y, [], length(y));
-[class_ids, sample_idx] = find(y_1hot==1);
-y_1hot = zeros(1, length(y_1hot));
-y_1hot(:, sample_idx) = class_ids;
-y_1hot = y_1hot-1; % 1-based to zero-based class index
-% to 4-D Blob
-y_1hot = reshape(y_1hot, 1, 1, 1, length(y));
 
