@@ -157,10 +157,5 @@ class TestLabelsLUT:
         assert_equals(lut.shape, (1,))
         
         assert_list_equal(lut.tolist(), [0])
-        
-class TestClassCount:
-    
-    def test_get_class_count_hdf5(self):
-        fpath = '/home/kashefy/data/x/labels_test.h5'
-        du.get_class_count_hdf5(fpath)
+
         
