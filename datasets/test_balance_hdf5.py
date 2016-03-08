@@ -4,7 +4,8 @@ Created on Oct 28, 2015
 @author: kashefy
 '''
 from nose.tools import assert_equals, assert_is_instance, \
-    assert_list_equal, assert_in, assert_almost_equal, assert_true
+    assert_list_equal, assert_in, assert_almost_equal, assert_true,\
+    assert_raises
 import os
 import tempfile
 import shutil
@@ -111,4 +112,14 @@ class TestBalanceClassCountHDF5:
         for cl in xrange(self.l.shape[2]):
             assert_almost_equal(np.count_nonzero(h['label'][:, :, cl, :]),
                                 140, 1)
+            
+    def test_save_balanced_class_count_hdf5_same_file(self):
+        
+        assert_raises(IOError,
+                      bal.save_balanced_class_count_hdf5,
+                      self.fpath,
+                      ['f1', 'f2'],
+                      self.fpath,
+                      key_label='label',
+                      other_clname=CLNAME_OTHER)
         

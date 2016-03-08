@@ -3,6 +3,7 @@ Created on Mar 7, 2016
 
 @author: kashefy
 '''
+import os
 import numpy as np
 import h5py
 from balance import Balancer, CLNAME_OTHER
@@ -66,6 +67,10 @@ def save_balanced_class_count_hdf5(fpath,
     key_label -- key for ground truth data in HDF5
     other_clname -- name for negative class (None if non-existent)
     """
+    if os.path.abspath(fpath) == os.path.abspath(fpath_dst):
+        raise IOError("Cannot read and write to the same file (%s) (%s)" %
+                      (fpath, fpath_dst))
+    
     h_src = h5py.File(fpath, 'r')
     labls = h_src[key_label][:]
     bal = Balancer(np.squeeze(labls))
