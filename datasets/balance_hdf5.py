@@ -67,28 +67,27 @@ def save_balanced_class_count_hdf5(fpath,
     Keyword arguments:
     key_label -- key for ground truth data in HDF5
     other_clname -- name for negative class (None if non-existent)
+    chunks -- forward chunks parameter to use during hdf5 writing
     """
     if os.path.abspath(fpath) == os.path.abspath(fpath_dst):
         raise IOError("Cannot read and write to the same file (%s) (%s)" %
                       (fpath, fpath_dst))
     
-    h_src = h5py.File(fpath, 'r')
-    labls = h_src[key_label][:]
-    bal = Balancer(np.squeeze(labls))
-    class_count = bal.get_class_count(other_clname=other_clname)
-    idxs = bal.get_idxs_to_balance_class_count(class_count.values())
-    np.random.shuffle(idxs) # shuffle the array along the first index of a multi-dimensional array, in-place
-    h_dst = h5py.File(fpath_dst, 'w')
-    h_dst[key_label] = labls[idxs]
-    for k in keys:
-        dataset_src = h_src[k]
-        shape_new = list(dataset_src.shape)
-        shape_new[0] = len(idxs)
-        dataset_dst = h_dst.create_dataset(k, tuple(shape_new),
-                                           dataset_src.dtype,
-                                           chunks=chunks)
-        for idx_dst, idx_src in enumerate(idxs):
-            dataset_dst[idx_dst] = dataset_src[idx_src]
-    h_src.close()
-    h_dst.close()
+    with h5py.File(fpath, 'r') as h_src:
+        labls = h_src[key_label][:]
+        bal = Balancer(np.squeeze(labls))
+        class_count = bal.get_class_count(other_clname=other_clname)
+        idxs = bal.get_idxs_to_balance_class_count(class_count.values())
+        np.random.shuffle(idxs) # shuffle the array along the first index of a multi-dimensional array, in-place
+        with h5py.File(fpath_dst, 'w') as h_dst:
+            h_dst[key_label] = labls[idxs]
+            for k in keys:
+                dataset_src = h_src[k]
+                shape_new = list(dataset_src.shape)
+                shape_new[0] = len(idxs)
+                dataset_dst = h_dst.create_dataset(k, tuple(shape_new),
+                                                   dataset_src.dtype,
+                                                   chunks=chunks)
+                for idx_dst, idx_src in enumerate(idxs):
+                    dataset_dst[idx_dst] = dataset_src[idx_src]
     return idxs
