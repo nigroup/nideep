@@ -2,20 +2,17 @@ import numpy as np
 
 CLNAME_OTHER = 'other'
 
-def balance_class_count(self, feats, labls, other_clname=CLNAME_OTHER):
-    
-    bal = Balancer(labls)
-    class_count = bal.get_class_count(other_clname=other_clname)
-    idxs = bal.get_idxs_to_balance_class_count(class_count.values())
-    idxs = np.random.shuffle(idxs) # this only shuffles the array along the first index of a multi-dimensional array
-    return feats[idxs], labls[idxs]
-
 class Balancer(object):
     '''
     Balance class counts
     '''
     def get_class_count(self, other_clname=CLNAME_OTHER):
+        """
+        Return per-class occurrence count
         
+        Keyword argumented:
+        other_clname -- a name for an overall negative class (all inactive)
+        """
         self.has_other_cl = other_clname is not None and other_clname != ''
         
         if self.l.ndim == 2:
@@ -29,7 +26,10 @@ class Balancer(object):
         return d
     
     def get_idxs_to_balance_class_count(self, class_counts):
-    
+        """
+        Determine indices with with which we can sample from the dataset
+        and get a balanced inter-class distribution
+        """
         mx = np.max(class_counts)
         num_examples, num_classes = self.l.shape
         idxs = np.arange(num_examples).reshape(-1, 1)
