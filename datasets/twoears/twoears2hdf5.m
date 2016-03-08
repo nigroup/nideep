@@ -10,7 +10,7 @@ function [] = twoears2hdf5(fpath, dir_dst, merge)
 %   ground truth. It is equivalent to an all-zero ground truth vector.
 % 
 if nargin < 3
-    merge = false;
+    merge = true;
 end
 load(fpath, 'x', 'y', 'featureNames', 'classnames');
 
