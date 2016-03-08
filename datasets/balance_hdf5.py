@@ -83,4 +83,6 @@ def save_balanced_class_count_hdf5(fpath,
     for k in keys:
         for i in idxs:
             h_dst[k] = h_src[k][:][i]
+    h_src.close()
+    h_dst.close()
     return idxs
