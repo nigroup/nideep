@@ -63,7 +63,6 @@ class TestBalanceClassCountHDF5:
                 assert_equals(counts[key], 140,
                               "Unexpected count for '%s' class" % (CLNAME_OTHER,))
             else:
-                print key, counts[key]
                 assert_equals(counts[key], np.sum(self.l[:, :, int(key), :]),
                               "Unexpected count for class '%s'" % (key,))
     
@@ -86,8 +85,30 @@ class TestBalanceClassCountHDF5:
             assert_true(np.all(self.x2[idx] == dict_balanced['f2'][count]))
 
         for cl in xrange(self.l.shape[2]):
-            print cl, np.count_nonzero(dict_balanced['label'][:, :, cl, :])
             assert_almost_equal(np.count_nonzero(dict_balanced['label'][:, :, cl, :]),
                                 140, 1)
         
+    def test_save_balanced_class_count_hdf5(self):
+        
+        fpath_dst = os.path.join(self.dir_tmp, "save_balanced_class_count_dst.h5")
+        
+        idxs = \
+            bal.save_balanced_class_count_hdf5(self.fpath,
+                                               ['f1', 'f2'],
+                                               fpath_dst)
+            
+        h = h5py.File(fpath_dst, 'r')
+        keys_actual = list(h.keys())
+        keys_actual.sort()        
+        assert_list_equal(['f1', 'f2', 'label'],
+                          keys_actual)
+        
+        for count, idx in enumerate(idxs):
+            assert_true(np.all(self.l[idx] == h['label'][count]))
+            assert_true(np.all(self.x1[idx] == h['f1'][count]))
+            assert_true(np.all(self.x2[idx] == h['f2'][count]))
+
+        for cl in xrange(self.l.shape[2]):
+            assert_almost_equal(np.count_nonzero(h['label'][:, :, cl, :]),
+                                140, 1)
         

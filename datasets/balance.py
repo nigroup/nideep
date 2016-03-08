@@ -44,7 +44,7 @@ class Balancer(object):
                                                         size=(delta_, 1))
                                       ]
                 idxs = np.vstack((idxs, rows_to_sample))
-        return idxs
+        return idxs.ravel()
 
     def __init__(self, labls):
         '''
