@@ -81,8 +81,11 @@ def save_balanced_class_count_hdf5(fpath,
     h_dst = h5py.File(fpath_dst, 'w')
     h_dst[key_label] = labls[idxs]
     for k in keys:
-        for i in idxs:
-            h_dst[k] = h_src[k][:][i]
+        shape_new = list(h_src[k].shape)
+        shape_new[0] = len(idxs)
+        dset = h_dst.create_dataset(k, tuple(shape_new), h_src[k].dtype)
+        for idx_dst, idx_src in enumerate(idxs):
+            dset[idx_dst] = h_src[k][idx_src]
     h_src.close()
     h_dst.close()
     return idxs
