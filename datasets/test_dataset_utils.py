@@ -157,4 +157,5 @@ class TestLabelsLUT:
         assert_equals(lut.shape, (1,))
         
         assert_list_equal(lut.tolist(), [0])
+
         
