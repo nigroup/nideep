@@ -6,7 +6,7 @@ Created on Jan 15, 2016
 import os
 import numpy as np
 import h5py
-from blobs.mat_utils import expand_dims
+from nideep.blobs.mat_utils import expand_dims
 
 def arrays_to_h5_fixed(arrs, key, path_dst):
     '''

@@ -7,8 +7,8 @@ import os
 import numpy as np       
 import parse_log as pl
 from eval_utils import Phase
+import nideep.iow.file_system_utils as fs
 from log_utils import is_caffe_info_log
-import iow.file_system_utils as fs
     
 def cleanup_caffe_logname(fname):
     

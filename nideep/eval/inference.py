@@ -7,9 +7,9 @@ import numpy as np
 import h5py
 import lmdb
 import caffe
-from iow import read_lmdb, to_lmdb
-from iow.lmdb_utils import MAP_SZ, IDX_FMT
-from blobs.mat_utils import expand_dims
+from nideep.iow import read_lmdb, to_lmdb
+from nideep.iow.lmdb_utils import MAP_SZ, IDX_FMT
+from nideep.blobs.mat_utils import expand_dims
 
 def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
     """

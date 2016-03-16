@@ -11,7 +11,7 @@ import tempfile
 import shutil
 from google.protobuf import text_format
 from caffe.proto.caffe_pb2 import NetParameter
-from proto.proto_utils import Parser
+from nideep.proto.proto_utils import Parser
 import net_merge as mrg
 
 import sys
