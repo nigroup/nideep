@@ -14,4 +14,4 @@ omit =
   test*.py
   caffe.py
   caffe_mock.py
-  caffe/*
+  */caffe/*
