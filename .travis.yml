@@ -76,6 +76,8 @@ script:
   - export PYTHONPATH="$TRAVIS_BUILD_DIR:$CAFFE_ROOT/python:$CAFFE_ROOT/tools/extra:$PYTHONPATH"
   - nosetests --with-coverage --logging-level=INFO --nocapture
   - ls -a
+  - ls $CAFFE_ROOT/src/caffe/python/
+  - ls $CAFFE_ROOT/src/caffe/python/proto
   
 after_success:
   # report test coverage
