@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import caffe
-from read_img import read_img_cv2, read_img_PIL
+from nideep.iow.read_img import read_img_cv2, read_img_PIL
 
 if __name__ == '__main__':
     

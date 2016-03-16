@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 import cv2 as cv2
 import caffe
-from blobs import mat_utils as mu
+from nideep.blobs import mat_utils as mu
 
 def read_img_PIL(fpath, mean=None):
     '''

@@ -12,7 +12,7 @@ import numpy as np
 from scipy import io
 import lmdb
 import cv2 as cv2
-from iow import to_lmdb as tol
+import to_lmdb as tol
 import caffe
 
 class DatumMock:
@@ -52,8 +52,8 @@ class TestImagesToLMDB:
         
         shutil.rmtree(self.dir_tmp)
             
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_img_str(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -84,8 +84,8 @@ class TestImagesToLMDB:
         
         assert_equal(count, 1, "Unexpected number of samples.")   
             
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_imgs_str(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -153,8 +153,8 @@ class TestMatFilesToLMDB:
         
         shutil.rmtree(self.dir_tmp)
             
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_matfile_str(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -185,8 +185,8 @@ class TestMatFilesToLMDB:
         
         assert_equal(count, 1, "Unexpected number of samples.")   
             
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_matfiles_str(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -249,8 +249,8 @@ class TestScalarsToLMDB:
         
         shutil.rmtree(self.dir_tmp)
         
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_scalars_str(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -276,8 +276,8 @@ class TestScalarsToLMDB:
         
         assert_equal(c, x.size, "Unexpected number of samples.")
         
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_scalars_lut(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -307,8 +307,8 @@ class TestScalarsToLMDB:
         
         assert_equal(c, x.size, "Unexpected number of samples.")
         
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_scalars_str_list_of_one(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -335,8 +335,8 @@ class TestScalarsToLMDB:
         
         assert_equal(c, 1, "Unexpected number of samples.")
         
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_scalars_str_single_int(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -403,8 +403,8 @@ class TestArraysToLMDB:
         
         shutil.rmtree(self.dir_tmp)
             
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_arr_single(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image
@@ -428,8 +428,8 @@ class TestArraysToLMDB:
                 count += 1
         assert_equal(count, 1, "Unexpected number of samples.")   
             
-    @patch('iow.to_lmdb.caffe')
-    @patch('iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.to_lmdb.caffe')
+    @patch('nideep.iow.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_arr(self, mock_dat, mock_caffe):
         
         # expected serialization of the test image

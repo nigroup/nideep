@@ -7,7 +7,7 @@ import caffe
 from caffe import layers as L
 from caffe import params as P
 
-from proto import proto_utils as pu
+from nideep.proto import proto_utils as pu
 
 class Bunch(object):
     def __init__(self, adict):

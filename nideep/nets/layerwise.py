@@ -8,7 +8,7 @@ import caffe
 from caffe import layers as L
 from caffe import params as P
 from caffe.proto.caffe_pb2 import NetParameter, LayerParameter
-import proto_utils as pu
+import nideep.proto.proto_utils as pu
 
 def stack(net, level):
     

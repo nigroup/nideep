@@ -10,7 +10,7 @@ from read_img import read_img_cv2
 import caffe
 
 from lmdb_utils import IDX_FMT, MAP_SZ
-from blobs.mat_utils import expand_dims
+from nideep.blobs.mat_utils import expand_dims
 
 def imgs_to_lmdb(paths_src, path_dst):
     '''

@@ -1,19 +1,22 @@
-# My Caffe Sandbox
+# NI Deep - Deep Learning Tools from the NI Group at TU-Berlin
 
-[![Build Status](https://travis-ci.org/kashefy/caffe_sandbox.svg?branch=master)](https://travis-ci.org/kashefy/caffe_sandbox)
-[![Coverage Status](https://coveralls.io/repos/kashefy/caffe_sandbox/badge.svg?branch=master&service=github)](https://coveralls.io/github/kashefy/caffe_sandbox?branch=master)
+[![Build Status](https://travis-ci.org/kashefy/nideep.svg?branch=master)](https://travis-ci.org/kashefy/nideep)
+[![Coverage Status](https://coveralls.io/repos/kashefy/nideep/badge.svg?branch=master&service=github)](https://coveralls.io/github/kashefy/nideep?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
-This is a collection of random scripts and utilities to use with [caffe](http://caffe.berkeleyvision.org/) that may be too specific to certain types of data and use cases and are therefore kept outside of the Caffe framework.
+This is a collection of scripts, utilities and examples to use with [caffe](http://caffe.berkeleyvision.org/). These are either too use case specific and are therefore kept outside of the Caffe framework.
+They may also be considered completely independent and potentially useful in combination with other frameworks.
+
 Use cases include:
 * i/o of custom data to/from lmdb
 * generating lmdb for select benchmark datasets (adding support for more is welcome)
 * parsing caffe logs (incomplete, wraps around existing parser from Caffe)
+* editing caffe protobuf messages for network definitions
 
 # Disclaimer:
-Some automated testing is in place. However, do not assume the functionality is free of bugs. Please feel free to inspect them, scrutinize them. Feedback on making them more usable for others is welcome.
+Some automated testing is in place. However, do not assume the functionality is free of bugs. Feel free to inspect them, scrutinize them. Feedback on making them more usable for others is welcome.
 
-Beware: The documentation is pretty scarce. I'm working on it.
+Beware: The documentation is pretty scarce. We're working on it.
 
 # Getting Started:
 
@@ -22,6 +25,7 @@ Beware: The documentation is pretty scarce. I'm working on it.
 * LMDB (apt-get and pip install)
 * cv2 (you probably already have this if you've built caffe)
 * PIL (pip install)
+* h5py
 
 # Examples:
 
@@ -31,7 +35,7 @@ Download val_59.txt from [here](https://gist.github.com/kashefy/78415dd397accb47
 
 Download 59_labels.txt from [here](https://gist.githubusercontent.com/kashefy/b598193e03d21432f327/raw/036272de91604991dd1daeccb69fa0cfc6611c1d/59_labels.txt).
 
-    from datasets.pascal_context_to_lmdb import pascal_context_to_lmdb
+    from nideep.datasets.pascal_context_to_lmdb import pascal_context_to_lmdb
     val_list_path = os.path.expanduser('~/data/PASCAL-Context/val_59.txt')
     with open(val_list_path, 'r') as f:
         val_list = f.readlines()

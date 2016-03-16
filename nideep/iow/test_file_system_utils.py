@@ -9,8 +9,8 @@ import os
 import tempfile
 import shutil
 import sys
-from iow import file_system_utils as fs
-from eval.log_utils import is_caffe_info_log
+import file_system_utils as fs
+from nideep.eval.log_utils import is_caffe_info_log
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
 ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)

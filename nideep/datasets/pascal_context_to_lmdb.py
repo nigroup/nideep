@@ -4,9 +4,8 @@ Created on Jul 21, 2015
 @author: kashefy
 '''
 import os
-import to_lmdb
-import dataset_utils as du
-import fileSystemUtils as fs
+import nideep.datasets.dataset_utils as du
+import nideep.iow.file_system_utils as fs
 
 def get_labels_list(fpath):
     """

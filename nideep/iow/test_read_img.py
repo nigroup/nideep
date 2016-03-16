@@ -93,7 +93,7 @@ class TestReadImage:
                 for col in range(2):
                     assert_equal(img[ch][row][col], self.img1[row][col][ch]-m[ch])
                  
-    @patch('iow.read_img.caffe.io')   
+    @patch('nideep.iow.read_img.caffe.io')   
     def test_read_img_caf_shape(self, mock_io):
         
         mock_io.load_image.return_value = \
@@ -112,7 +112,7 @@ class TestReadImage:
                       ])
         assert_equal(r.read_img_caf(self.path_img1).shape, (3, 4, 2))
                     
-    @patch('iow.read_img.caffe.io')   
+    @patch('nideep.iow.read_img.caffe.io')   
     def test_read_img_caf_pixels(self, mock_io):
         
         mock_io.load_image.return_value = \
@@ -137,7 +137,7 @@ class TestReadImage:
                 for col in range(2):
                     assert_almost_equals(img[ch][row][col], self.img1[row][col][ch], places=5)
                     
-    @patch('iow.read_img.caffe.io')    
+    @patch('nideep.iow.read_img.caffe.io')    
     def test_read_img_caf_subtract_mean(self, mock_io):
         
         mock_io.load_image.return_value = \

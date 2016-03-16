@@ -5,7 +5,7 @@ A module to mock caffe structures for testing
 
 @author: kashefy
 '''
-from .proto.caffe_pb2 import TRAIN, TEST, Datum
+from caffe.proto.caffe_pb2 import TRAIN, TEST, Datum
             
 class Net:
     def forward(self):
