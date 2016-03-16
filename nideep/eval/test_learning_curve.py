@@ -11,7 +11,7 @@ from nose.tools import assert_equal, assert_greater, assert_true,\
 import numpy as np
 from eval_utils import Phase
 from learning_curve import LearningCurve
-from eval.learning_curve import LearningCurveFromPath
+from learning_curve import LearningCurveFromPath
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
 ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)

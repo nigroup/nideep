@@ -59,8 +59,10 @@ target/
 
 # Caffe files
 *.prototxt
-!test_data/*.prototxt
 *.caffemodel
+
+# Test data, test artifacts
+!*/test_data/*.prototxt
 
 .ipynb_checkpoints/
 

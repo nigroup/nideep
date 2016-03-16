@@ -25,8 +25,11 @@ env:
     # since we've set language to cpp we have to define python vars ourselves
     - TRAVIS_PYTHON_VERSION="2.7"
     - WITH_COVERAGE=ON
+    - CAFFE_ROOT=$DEPS_DIR/caffe # created during install
 
-before_install:  
+before_install:
+  - ls -1
+  - ls nideep -1
   - which python
   - python --version
   
@@ -51,11 +54,12 @@ before_install:
   - source activate $CONDA_ENV
   
   # Download caffe protobuf message definitions
-  - travis_retry wget -P $TRAVIS_BUILD_DIR https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
+  - mkdir -p $CAFFE_ROOT/src/caffe/proto
+  - travis_retry wget -P $CAFFE_ROOT/src/caffe/proto https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
   # Download caffe log parser from caffe repo
-  - mkdir -p $TRAVIS_BUILD_DIR/caffe/tools/extra
-  - travis_retry wget -P $TRAVIS_BUILD_DIR/caffe/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/extract_seconds.py
-  - travis_retry wget -P $TRAVIS_BUILD_DIR/caffe/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/parse_log.py
+  - mkdir -p $DEPS_DIR/caffe/tools/extra
+  - travis_retry wget -P $CAFFE_ROOT/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/extract_seconds.py
+  - travis_retry wget -P $CAFFE_ROOT/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/parse_log.py
   
 install:
   - echo "Installing Coveralls if coverage enabled:"
@@ -66,11 +70,11 @@ install:
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
   # list installed python packages
   #- pip freeze
-  - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR
+  - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR $CAFFE_ROOT
   
 script:
-  - export PYTHONPATH="$TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR/caffe/tools/extra:$PYTHONPATH"
-  - nosetests --with-coverage --logging-level=INFO
+  - export PYTHONPATH="$TRAVIS_BUILD_DIR:$CAFFE_ROOT/python:$CAFFE_ROOT/tools/extra:$PYTHONPATH"
+  - nosetests --with-coverage --logging-level=INFO --nocapture
   - ls -a
   
 after_success:

@@ -136,7 +136,7 @@ def est_min_num_fwd_passes(fpath_net, mode_str):
     return
     minimum no. of forward passes to cover training set 
     """
-    from proto.proto_utils import Parser
+    from nideep.proto.proto_utils import Parser
     np = Parser().from_net_params_file(fpath_net)
     
     num_passes = 0

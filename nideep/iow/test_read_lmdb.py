@@ -34,7 +34,7 @@ class TestReadLabelsLMDB:
         
         shutil.rmtree(self.dir_tmp)
         
-    @patch('iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_read_labels(self, mock_dat):
         
         # mock methods and properties of Datum objects
@@ -79,7 +79,7 @@ class TestReadValuesNoLabelLMDB:
         
         shutil.rmtree(self.dir_tmp)
     
-    @patch('iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_read_values_pixels_no_labels(self, mock_dat):
         
         # expected content: img1_data, img1_data[2:,1:,:]
@@ -153,7 +153,7 @@ class TestReadValuesWithLabelLMDB:
         
         shutil.rmtree(self.dir_tmp)
         
-    @patch('iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_read_values_pixels_with_labels(self, mock_dat):
         
         # mocks
@@ -189,7 +189,7 @@ class TestReadValuesWithLabelLMDB:
                     
         assert_equal(l, 0, "Unexpected 2nd label")
         
-    @patch('iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_read_values_pixels_with_labels_uint8(self, mock_dat):
         
         # mocks
@@ -295,7 +295,7 @@ class TestReadArraysLMDB:
         
         shutil.rmtree(self.dir_tmp)
         
-    @patch('iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_read_values(self, mock_dat):
         
         img2_data = self.img1_data[2:,1:,:]
@@ -328,7 +328,7 @@ class TestReadArraysLMDB:
                 for col in range(3):
                     assert_equal(x[ch, row, col], img2_data[ch, row, col])
                     
-    @patch('iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.iow.read_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_read_values_float(self, mock_dat):
         
         img2_data = self.img1_data[2:,1:,:]

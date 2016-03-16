@@ -20,7 +20,7 @@ class Bunch:
 
 class TestInference:
         
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_forward(self, mock_net):
         
         # fake minimal test data
@@ -62,7 +62,7 @@ class TestInferenceHDF5:
         
         shutil.rmtree(self.dir_tmp)
     
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_h5_fixed_dims(self, mock_net):
         
         # fake minimal test data
@@ -92,7 +92,7 @@ class TestInferenceHDF5:
             assert_array_equal(b[k].data, f[k])
         
         
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_h5_fixed_dims_n(self, mock_net):
         
         # fake minimal test data
@@ -113,7 +113,7 @@ class TestInferenceHDF5:
             assert_equal(net.forward.call_count, n)
             assert_list_equal(out, [n, n])
             
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_h5_fixed_dims_preserve_batch_no(self, mock_net):
         
         # fake minimal test data
@@ -135,7 +135,7 @@ class TestInferenceHDF5:
         assert_true(os.path.isfile(fpath))
         assert_list_equal(out, [n*4]*2)
         
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_h5_fixed_dims_preserve_batch_yes(self, mock_net):
         
         # fake minimal test data
@@ -169,7 +169,7 @@ class TestInferenceLMDB:
         
         shutil.rmtree(self.dir_tmp)
     
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_lmdb_fixed_dims(self, mock_net):
         
         # fake minimal test data
@@ -195,7 +195,7 @@ class TestInferenceLMDB:
             else:
                 assert_false(os.path.isdir(dst_prefix % k))
                 
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_lmdb_fixed_dims_n(self, mock_net):
         
         # fake minimal test data
@@ -216,7 +216,7 @@ class TestInferenceLMDB:
             assert_equal(net.forward.call_count, n)
             assert_list_equal(out, [n, n])
             
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_lmdb_fixed_dims_preserve_batch_no(self, mock_net):
         
         # fake minimal test data
@@ -242,7 +242,7 @@ class TestInferenceLMDB:
             else:
                 assert_false(os.path.isdir(dst_prefix % k))
                 
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_lmdb_cur_multi_key(self, mock_net):
         
         # fake minimal test data
@@ -268,7 +268,7 @@ class TestInferenceLMDB:
             else:
                 assert_false(os.path.isdir(dst_prefix % k))
                 
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_lmdb_cur_single_key(self, mock_net):
         
         # fake minimal test data
@@ -294,8 +294,8 @@ class TestInferenceLMDB:
             else:
                 assert_false(os.path.isdir(dst_prefix % k))
              
-    @patch('eval.inference.est_min_num_fwd_passes')
-    @patch('eval.inference.caffe.Net')
+    @patch('nideep.eval.inference.est_min_num_fwd_passes')
+    @patch('nideep.eval.inference.caffe.Net')
     def test_response_to_lmdb(self, mock_net, mock_num):
         
         # fake minimal test data
@@ -311,10 +311,11 @@ class TestInferenceLMDB:
         for m in ['train', 'test']:
             for k in b.keys():
                 assert_false(os.path.isdir(dst_prefix + ('%s_' + m + '_lmdb') % k))
-        import eval
-        out = eval.inference.response_to_lmdb("net.prototxt", "w.caffemodel",
-                                    ['x', 'z'],
-                                    dst_prefix)
+        import nideep
+        out = nideep.eval.inference.response_to_lmdb("net.prototxt",
+                                                     "w.caffemodel",
+                                                     ['x', 'z'],
+                                                     dst_prefix)
         
         assert_equal(net.forward.call_count, 3*2) # double for both modes
         from caffe import TRAIN, TEST
