@@ -28,8 +28,10 @@ env:
     - CAFFE_ROOT=$DEPS_DIR/caffe # created during install
 
 before_install:
-  - ls -1
-  - ls nideep -1
+  - echo "Package root:"
+  - ls -1 $TRAVIS_BUILD_DIR
+  - echo "modules:"
+  - ls -1 $TRAVIS_BUILD_DIR/nideep
   - which python
   - python --version
   
@@ -57,7 +59,7 @@ before_install:
   - mkdir -p $CAFFE_ROOT/src/caffe/proto
   - travis_retry wget -P $CAFFE_ROOT/src/caffe/proto https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
   # Download caffe log parser from caffe repo
-  - mkdir -p $DEPS_DIR/caffe/tools/extra
+  - mkdir -p $CAFFE_ROOT/tools/extra
   - travis_retry wget -P $CAFFE_ROOT/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/extract_seconds.py
   - travis_retry wget -P $CAFFE_ROOT/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/parse_log.py
   
@@ -71,13 +73,13 @@ install:
   # list installed python packages
   #- pip freeze
   - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR $CAFFE_ROOT
+  - ls $CAFFE_ROOT/python/caffe/
+  - ls $CAFFE_ROOT/python/caffe/proto
   
 script:
   - export PYTHONPATH="$TRAVIS_BUILD_DIR:$CAFFE_ROOT/python:$CAFFE_ROOT/tools/extra:$PYTHONPATH"
   - nosetests --with-coverage --logging-level=INFO --nocapture
   - ls -a
-  - ls $CAFFE_ROOT/src/caffe/python/
-  - ls $CAFFE_ROOT/src/caffe/python/proto
   
 after_success:
   # report test coverage
