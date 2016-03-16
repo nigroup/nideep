@@ -35,7 +35,7 @@ Download val_59.txt from [here](https://gist.github.com/kashefy/78415dd397accb47
 
 Download 59_labels.txt from [here](https://gist.githubusercontent.com/kashefy/b598193e03d21432f327/raw/036272de91604991dd1daeccb69fa0cfc6611c1d/59_labels.txt).
 
-    from datasets.pascal_context_to_lmdb import pascal_context_to_lmdb
+    from nideep.datasets.pascal_context_to_lmdb import pascal_context_to_lmdb
     val_list_path = os.path.expanduser('~/data/PASCAL-Context/val_59.txt')
     with open(val_list_path, 'r') as f:
         val_list = f.readlines()
