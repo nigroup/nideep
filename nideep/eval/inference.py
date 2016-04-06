@@ -8,6 +8,7 @@ import h5py
 import lmdb
 import caffe
 from nideep.iow import read_lmdb, to_lmdb
+from nideep.iow import read_hdf5
 from nideep.iow.lmdb_utils import MAP_SZ, IDX_FMT
 from nideep.blobs.mat_utils import expand_dims
 
@@ -152,6 +153,32 @@ def est_min_num_fwd_passes(fpath_net, mode_str):
 
     return num_passes
 
+def est_min_num_fwd_passes_h5(fpath_net, mode_str, key_label):
+    """
+    hdf5 equivalent of est_min_num_fwd_passes
+    if multiple source for same mode, base num_passes on last
+    fpath_net -- path to network definition
+    mode_str -- train or test?
+
+    return
+    minimum no. of forward passes to cover training set
+    """
+    from nideep.proto.proto_utils import Parser
+    np = Parser().from_net_params_file(fpath_net)
+
+    num_passes = 0
+
+    for l in np.layer:
+        if 'data' in l.type.lower() and mode_str.lower() in l.hdf5_data_param.source.lower():
+            num_entries = read_hdf5.num_entries(l.hdf5_data_param.source, key_label)
+            num_passes = int(num_entries / l.hdf5_data_param.batch_size)
+            if num_entries % l.hdf5_data_param.batch_size != 0:
+                print("WARNING: db size not a multiple of batch size. Adding another fwd. pass.")
+                num_passes += 1
+            print("%d fwd. passes with batch size %d" % (num_passes, l.hdf5_data_param.batch_size))
+
+    return num_passes
+
 def response_to_lmdb(fpath_net,
                      fpath_weights,
                      keys,
@@ -170,90 +197,6 @@ def response_to_lmdb(fpath_net,
                                num_passes,
                                dst_prefix + '%s_' + ['train', 'test'][m] + '_lmdb')
     return out
-
-### CHANGES START HERE
-
-# Goes to iow?
-def num_entries_h5(path_hdf5):
-    num_entries = 0
-    with open(path_hdf5, 'r') as f:
-        for db_hdf5 in f:
-            with h5py.File(db_hdf5.rstrip()) as db:
-                num_entries += db['label'].shape[0]
-    f.close()
-    return num_entries
-
-# 1st method - just repeat code for hdf5
-def est_min_num_fwd_passes_h5(fpath_net, mode_str):
-    from nideep.proto.proto_utils import Parser
-    np = Parser().from_net_params_file(fpath_net)
-
-    num_passes = 0
-
-    for l in np.layer:
-        if 'data' in l.type.lower() and mode_str.lower() in l.hdf5_data_param.source.lower():
-            num_entries = num_entries_h5(l.hdf5_data_param.source)
-            num_passes = int(num_entries / l.hdf5_data_param.batch_size)
-            if num_entries % l.hdf5_data_param.batch_size != 0:
-                print("WARNING: db size not a multiple of batch size. Adding another fwd. pass.")
-                num_passes += 1
-            print("%d fwd. passes with batch size %d" % (num_passes, l.hdf5_data_param.batch_size))
-
-    return num_passes
-
-# 2nd method - one function
-def est_min_num_fwd_passes(fpath_net, mode_str):
-    from nideep.proto.proto_utils import Parser
-    np = Parser().from_net_params_file(fpath_net)
-
-    num_passes = 0
-
-    for l in np.layer:
-        if 'data' in l.type.lower():
-            # Check the type of database and retrieve useful informations
-            if 'hdf5' in l.type.lower():
-                data_param = l.hdf5_data_param
-                get_num_entries = num_entries_h5
-            else:
-                data_param = l.data_param
-                get_num_entries = read_lmdb.num_entries
-            # Check if the layer is in the corresponding phase (train or test)
-            if mode_str.lower() in data_param.source.lower():
-                num_entries = get_num_entries(data_param.source)
-                num_passes = int(num_entries / data_param.batch_size)
-                if num_entries % data_param.batch_size != 0:
-                    print("WARNING: db size not a multiple of batch size. Adding another fwd. pass.")
-                    num_passes += 1
-                print("%d fwd. passes with batch size %d" % (num_passes, data_param.batch_size))
-
-    return num_passes
-
-# 3rd method - functionnal
-def est_min_num_fwd_passes_for_data_layer(mode_str, layer, data_param, get_num_entries):
-    global num_passes
-    if 'data' in layer.type.lower() and mode_str.lower() in data_param.source:
-        num_entries = get_num_entries(data_param.source)
-        num_passes = int(num_entries / data_param.batch_size)
-        if num_entries % data_param.batch_size != 0:
-            print("WARNING: db size not a multiple of batch size. Adding another fwd. pass.")
-            num_passes += 1
-        print("%d fwd. passes with batch size %d" % (num_passes, data_param.batch_size))
-    return num_passes
-
-def est_min_num_fwd_passes(fpath_net, mode_str):
-    from nideep.proto.proto_utils import Parser
-    np = Parser().from_net_params_file(fpath_net)
-    num_passes = 0
-
-    for l in np.layer:
-        if 'hdf5' in l.type.lower():
-            num_passes = est_min_num_fwd_passes_for_data_layer(mode_str, l, l.hdf5_data_param, num_entries_h5)
-        else:
-            num_passes = est_min_num_fwd_passes_for_data_layer(mode_str, l, l.data_param, read_lmdb.num_entries)
-
-    return num_passes
-
-### CHANGES END HERE
 
 if __name__ == '__main__':
 
