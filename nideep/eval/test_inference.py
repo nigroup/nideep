@@ -295,7 +295,6 @@ class TestInferenceLMDB:
                 assert_false(os.path.isdir(dst_prefix % k))
 
     @patch('nideep.eval.inference.est_min_num_fwd_passes')
-    @patch('nideep.eval.inference.est_min_num_fwd_passes_h5')
     @patch('nideep.eval.inference.caffe.Net')
     def test_response_to_lmdb(self, mock_net, mock_num):
 
