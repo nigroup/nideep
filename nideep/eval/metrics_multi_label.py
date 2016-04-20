@@ -16,6 +16,9 @@ def get_inputs_outputs(fpath_h5, key_label, key_score, threshold=0):
     """
     with h5py.File(fpath_h5, "r") as f:
         y_true = np.squeeze(f[key_label][:])
+        if y_true.ndim == 1:
+            dim = y_true.shape[0]
+            y_true = y_true.reshape((1, dim))
         y_score = np.squeeze(f[key_score][:])
         y_pred = np.array([[prob>=threshold for prob in preds] for preds in y_score])
     return y_true, y_score, y_pred
