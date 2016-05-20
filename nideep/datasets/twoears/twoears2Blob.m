@@ -12,8 +12,8 @@ x = x';
 y = y';
 
 % assume first field contains feature name
-feature_type_names = unique(cellfun(@(v) v(1), featureNames(1,:)));
-x_feat = cell(size(feature_type_names));
+feature_type_names = unique( cellfun(@(v) v(1), featureNames(1,:)) );
+x_feat = cell( size(feature_type_names) );
 for ii = 1 : numel(feature_type_names)
     disp(feature_type_names{ii})
     
@@ -24,7 +24,8 @@ for ii = 1 : numel(feature_type_names)
     feat_idxs = find(not(cellfun('isempty', is_feat)));
     
     t_idxs_names = unique(cellfun(@(v) v(4), featureNames(feat_idxs)));
-    t_idxs = sort( cell2mat( cellfun(@(x) str2double(char(x(2:end))), t_idxs_names, 'un', false) ) );
+    t_idxs = sort( cell2mat( cellfun(@(x) str2double(char(x(2:end))), ...
+        t_idxs_names, 'un', false) ) );
     
     num_blocks = length( t_idxs );
     
@@ -32,17 +33,28 @@ for ii = 1 : numel(feature_type_names)
     
     if strcmp(feature_type_names{ii}, 'amsFeatures')
         % T x F x mF x N
-        [num_freqChannels, num_mod_freq] = getAMSFeaturesDims(featureNames(feat_idxs));
+        [num_freqChannels, num_mod] = getAMSFeaturesDims(featureNames(feat_idxs));
     elseif strcmp(feature_type_names{ii}, 'ratemap')
         %  T x F x 1 x N
-        num_freqChannels = str2double( char( strrep( featureNames{1}( 2 ), '-ch', '' ) ) );
-        num_mod_freq = 1;
+        num_freqChannels = str2double( char( strrep( featureNames{feat_idxs(1)}( 2 ), '-ch', '' ) ) );
+        num_mod = 1;
+    elseif strcmp(feature_type_names{ii}, 'crosscorrelation')
+        %  T x F x nLags x N
+        [num_freqChannels, num_mod] = getCrossCorrelationDims(featureNames(feat_idxs));
+    elseif strcmp(feature_type_names{ii}, 'ild')
+        %  T x F x 1 x N
+        num_freqChannels = str2double( char( strrep( featureNames{feat_idxs(1)}( 2 ), '-ch', '' ) ) );
+        num_mod = 1;
     else
-        error('feature %s type not supported', feature_type_names{ii});
+        warning('Skipping unsupported feature type %s.', feature_type_names{ii});
     end
     x_feat_tmp = x(feat_idxs, :);
-    x_feat_tmp = reshape( x_feat_tmp, num_blocks, num_freqChannels, num_mod_freq, length( x_feat_tmp ) );
-    x_feat{ii} = x_feat_tmp;
+    x_feat{ii} = reshape( x_feat_tmp, ...
+        num_blocks, num_freqChannels, num_mod, ...
+        size( x_feat_tmp, 2 ) );
+    clearvars x_feat_tmp;
+    x(feat_idxs, :) = []; % we don't need those features anymore
+    featureNames(feat_idxs) = [];
 end % format features
 
 % reshape multi-label ground truth vectors to 4-D Blob
