@@ -1,7 +1,7 @@
 # NI Deep - Deep Learning Tools from the NI Group at TU-Berlin
 
-[![Build Status](https://travis-ci.org/kashefy/nideep.svg?branch=master)](https://travis-ci.org/kashefy/nideep)
-[![Coverage Status](https://coveralls.io/repos/kashefy/nideep/badge.svg?branch=master&service=github)](https://coveralls.io/github/kashefy/nideep?branch=master)
+[![Build Status](https://travis-ci.org/nigroup/nideep.svg?branch=master)](https://travis-ci.org/kashefy/nideep)
+[![Coverage Status](https://coveralls.io/repos/nigroup/nideep/badge.svg?branch=master&service=github)](https://coveralls.io/github/nigroup/nideep?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
 This is a collection of scripts, utilities and examples to use with [caffe](http://caffe.berkeleyvision.org/). These are either too use case specific and are therefore kept outside of the Caffe framework.
