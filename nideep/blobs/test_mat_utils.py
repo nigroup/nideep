@@ -41,7 +41,7 @@ class TestTranspose:
         assert_equals(y.shape[1], 3)
         assert_equals(y.shape[2], 2)
         
-        assert_not_equals(x[3][1][2], y[3][2][1])
+        assert_equals(x[3][1][2], y[3][2][1])
         
         for i in range(4):
             for j in range(2):
