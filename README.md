@@ -1,6 +1,6 @@
 # NI Deep - Deep Learning Tools from the NI Group at TU-Berlin
 
-[![Build Status](https://travis-ci.org/nigroup/nideep.svg?branch=master)](https://travis-ci.org/kashefy/nideep)
+[![Build Status](https://travis-ci.org/nigroup/nideep.svg?branch=master)](https://travis-ci.org/nigroup/nideep)
 [![Coverage Status](https://coveralls.io/repos/nigroup/nideep/badge.svg?branch=master&service=github)](https://coveralls.io/github/nigroup/nideep?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
