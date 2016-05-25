@@ -48,11 +48,16 @@ for ii = 1 : numel(feature_type_names)
     else
         warning('Skipping unsupported feature type %s.', feature_type_names{ii});
     end
-    x_feat_tmp = x(feat_idxs, :);
-    x_feat{ii} = reshape( x_feat_tmp, ...
+    
+    % concatenate binaural features into last (modulation dim)
+    feat_binaural_idxs = find( isBinaural(featureNames(feat_idxs)) );
+    if isequal(length(feat_binaural_idxs), length(featureNames(feat_idxs)) )
+        disp('binaural feature');
+        num_mod = num_mod * 2;
+    end
+    x_feat{ii} = reshape( x(feat_idxs, :), ...
         num_blocks, num_freqChannels, num_mod, ...
-        size( x_feat_tmp, 2 ) );
-    clearvars x_feat_tmp;
+        size( x, 2 ) );
     x(feat_idxs, :) = []; % we don't need those features anymore
     featureNames(feat_idxs) = [];
 end % format features
