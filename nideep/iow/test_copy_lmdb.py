@@ -65,7 +65,7 @@ class TestCopySamplesLMDB:
         x = r.read_values(path_src)
         path_dst = os.path.join(self.dir_tmp, 'test_copy_samples_single_lmdb')
         assert_greater(len(x), 0, "This test needs non empty data.")
-        for i in xrange(len(x), 0):
+        for i in range(len(x))[::-1]:
             if os.path.isdir(path_dst):
                 shutil.rmtree(path_dst)
             c.copy_samples_lmdb(path_src, path_dst, [i])
@@ -73,8 +73,8 @@ class TestCopySamplesLMDB:
             
             y = r.read_values(path_dst)
             assert_equal(len(y), 1, "Single element expected.")
-            assert_true(np.all(x[len(x)-i-1][0]==y[0][0]), "Wrong content copied.")
-            assert_true(np.all(x[len(x)-i-1][1]==y[0][1]), "Wrong content copied.")
+            assert_true(np.all(x[i][0]==y[0][0]), "Wrong content copied.")
+            assert_true(np.all(x[i][1]==y[0][1]), "Wrong content copied.")
             
     def test_copy_samples_subset(self):
         
