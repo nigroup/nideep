@@ -164,7 +164,7 @@ class TestConcatentateLMDB:
         path_src2 = os.path.join(self.dir_tmp, 'x2_lmdb')
         x2 = r.read_values(path_src2)
         path_dst = os.path.join(self.dir_tmp, 'test_concatenate_lmdb')
-        c.concatente_lmdb([path_src0, path_src1, path_src2], path_dst)
+        c.concatenate_lmdb([path_src0, path_src1, path_src2], path_dst)
         assert_true(os.path.isdir(path_dst), "failed to save LMDB")
         
         y = r.read_values(path_dst)

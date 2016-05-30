@@ -30,7 +30,7 @@ def copy_samples_lmdb(path_lmdb, path_dst, keys):
                 key_dst += 1
     db.close()
     
-def concatente_lmdb(paths_lmdb, path_dst):
+def concatenate_lmdb(paths_lmdb, path_dst):
     """
     Copy select samples from an lmdb into another.
     Can be used for sampling from an lmdb into another and generating a random shuffle
