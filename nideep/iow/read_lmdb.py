@@ -6,6 +6,7 @@ Created on Sep 16, 2015
 import numpy as np
 import lmdb
 import caffe
+from lmdb_utils import IDX_FMT
 
 def read_labels(path_lmdb):
     """
@@ -72,7 +73,7 @@ def read_values_at(path_lmdb, key, dtype=None):
     with lmdb.open(path_lmdb, readonly=True).begin() as txn:
             
         if not isinstance(key, basestring):
-            key = b'{:0>10d}'.format(key)
+            key = IDX_FMT.format(key)
         dat, x = unpack_raw_datum(txn.get(key), dtype)
         return x, dat.label # scalar label
     
@@ -93,43 +94,3 @@ def num_entries(path_lmdb, is_num_ord_dense=False):
         else:
             n = len([_ for _ in cur])
     return n
-    
-if __name__ == '__main__':
-    
-    # CREDIT: Gustav Larsson http://deepdish.io/2015/04/28/creating-lmdb-in-python/
-    import os
-    path_lmdb = os.path.expanduser('~/src/caffe/examples/mnist/mnist_train_lmdb')
-    env = lmdb.open(path_lmdb, readonly=True)
-    
-    with env.begin() as txn:
-        cursor = txn.cursor()
-        for key, value in cursor:
-            #print(key, value)
-            
-            dat = caffe.proto.caffe_pb2.Datum()
-            dat.ParseFromString(value)
-             
-            flat_x = np.fromstring(dat.data, dtype=np.uint8)
-            x = flat_x.reshape(dat.channels, dat.height, dat.width)
-            y = dat.label
-            
-            print y
-            
-            
-    ###########################        
-    with lmdb.open(path_lmdb, readonly=True).begin() as txn:
-        
-        key = 10
-        
-        if not isinstance(key, basestring):
-            key = b'{:0>10d}'.format(key)
-        value = txn.get(key)
-        
-        if value is not None:
-            
-            dat, x = unpack_raw_datum(value)
-            y = dat.label # assume scalar
-            
-            
-            
-    pass
