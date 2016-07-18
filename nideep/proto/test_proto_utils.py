@@ -44,7 +44,6 @@ class TestCopyNetParams:
         
             fpath = os.path.join(os.path.dirname(ROOT_PKG_PATH),
                                  TEST_DATA_DIRNAME, TEST_NET_FILENAME)
-            print os.path.isfile(fpath), fpath
             parser = pu.Parser()
             x = parser.from_net_params_file(fpath)
             
