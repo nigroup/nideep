@@ -77,20 +77,10 @@ def read_values_at(path_lmdb, key, dtype=None):
         dat, x = unpack_raw_datum(txn.get(key), dtype)
         return x, dat.label # scalar label
     
-def num_entries(path_lmdb, is_num_ord_dense=False):
+def num_entries(path_lmdb):
     """
     Get no. of entries in lmdb (slow)
     """
-    n = 0
-    with lmdb.open(path_lmdb, readonly=True).begin() as txn:
-        cur = txn.cursor()
-        if is_num_ord_dense:
-            
-            has_items = cur.first()
-            if has_items:
-                first = int(cur.key())
-                cur.last()
-                n = int(cur.key()) - first+1
-        else:
-            n = len([_ for _ in cur])
+    with lmdb.open(path_lmdb, readonly=True) as env:
+        n = int(env.stat()['entries'])
     return n
