@@ -3,8 +3,8 @@ Created on Oct 30, 2015
 
 @author: kashefy
 '''
-from nose.tools import assert_equal, assert_almost_equals, assert_not_equal, \
-    assert_list_equal, assert_raises
+from nose.tools import assert_equal, assert_false, assert_almost_equals, \
+    assert_not_equal, assert_list_equal, assert_raises
 from mock import patch, PropertyMock
 import os
 import tempfile
@@ -429,8 +429,6 @@ class TestNumEntriesLMDB:
     def test_num_entries(self):
         
         assert_equal(2, r.num_entries(self.path_lmdb))
-        assert_equal(2, r.num_entries(self.path_lmdb, is_num_ord_dense=True))
-        assert_equal(2, r.num_entries(self.path_lmdb, is_num_ord_dense=False))
         
     def test_num_entries_empty(self):
         
@@ -441,6 +439,12 @@ class TestNumEntriesLMDB:
         db.close()
         
         assert_equal(0, r.num_entries(path_lmdb_empty))
+        
+    def test_num_entries_does_not_exist(self):
+        
+        path_lmdb = os.path.join(self.dir_tmp, 'test_num_entries_does_not_exist_lmdb')
+        assert_false(os.path.exists(path_lmdb))        
+        assert_raises(lmdb.Error, r.num_entries, path_lmdb)
         
 class TestNumEntriesNumericOrderedLMDB:
     
@@ -501,19 +505,13 @@ class TestNumEntriesNumericOrderedLMDB:
     def test_num_entries_num_ord(self):
         
         assert_equal(2, r.num_entries(self.path_lmdb_num_ord))
-        assert_equal(2, r.num_entries(self.path_lmdb_num_ord, is_num_ord_dense=True))
-        assert_equal(2, r.num_entries(self.path_lmdb_num_ord, is_num_ord_dense=False))
         
     def test_num_entries_rand_ord(self):
         
         assert_equal(2, r.num_entries(self.path_lmdb_rand_ord))
-        assert_equal(2, r.num_entries(self.path_lmdb_rand_ord, is_num_ord_dense=False))
-        assert_not_equal(2, r.num_entries(self.path_lmdb_rand_ord, is_num_ord_dense=True))
         
     def test_num_entries_non_num(self):
         
         assert_equal(2, r.num_entries(self.path_lmdb_non_num))
-        assert_equal(2, r.num_entries(self.path_lmdb_non_num, is_num_ord_dense=False))
-        assert_raises(ValueError, r.num_entries, self.path_lmdb_non_num, is_num_ord_dense=True)
         
     

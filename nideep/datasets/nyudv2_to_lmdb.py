@@ -10,7 +10,7 @@ from scipy import io
 import h5py
 from dataset_utils import get_train_val_split_from_idx
 from nideep.blobs import mat_utils as mu
-from nideep.iow import to_lmdb
+from nideep.iow import to_lmdb, read_lmdb, copy_lmdb
 
 class NYUDV2DataType:
     IMAGES = 'images'
@@ -42,6 +42,19 @@ def big_arr_to_arrs(a):
     Turn NxCxWxH array into list of CxHxW for Caffe
     """
     return [mu.cwh_to_chw(x) for x in a]
+
+def shift_label_lmdb(path_src, path_dst):
+    
+    def func_data_decrement_0to255(value):
+        import caffe
+        _, x = read_lmdb.unpack_raw_datum(value)
+        x[x==0] = 256
+        dat = caffe.io.array_to_datum(x-1) # 256 becomes 255
+        return dat.SerializeToString()
+    
+    idxs_all = range(read_lmdb.num_entries(path_src))
+    copy_lmdb.copy_samples_lmdb(path_src, path_dst, idxs_all,
+                                func_data=func_data_decrement_0to255)
 
 def nyudv2_to_lmdb(path_mat,
                    dst_prefix,

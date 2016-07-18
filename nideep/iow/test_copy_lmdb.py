@@ -3,12 +3,14 @@ Created on Oct 30, 2015
 
 @author: kashefy
 '''
-from nose.tools import assert_equal, assert_true, assert_raises, assert_greater
+from nose.tools import assert_equal, assert_false, \
+    assert_true, assert_greater
 import os
 import tempfile
 import shutil
 import numpy as np
 import lmdb
+import caffe
 from lmdb_utils import IDX_FMT, MAP_SZ
 import to_lmdb as tol
 import read_lmdb as r
@@ -34,7 +36,6 @@ class TestCopySamplesLMDB:
                        [22, 23, 24]
                        ]
                       ])
-        
         tol.arrays_to_lmdb([y for y in x], os.path.join(self.dir_tmp, 'x_lmdb'))
         
     @classmethod
@@ -58,6 +59,29 @@ class TestCopySamplesLMDB:
             assert_equal(len(y), 1, "Single element expected.")
             assert_true(np.all(x[i][0]==y[0][0]), "Wrong content copied.")
             assert_true(np.all(x[i][1]==y[0][1]), "Wrong content copied.")
+            
+    def test_copy_samples_single_with_data_func(self):
+        
+        path_src = os.path.join(self.dir_tmp, 'x_lmdb')
+        x = r.read_values(path_src)
+        path_dst = os.path.join(self.dir_tmp, 'test_copy_samples_single_with_data_func_lmdb')
+        assert_greater(len(x), 0, "This test needs non empty data.")
+        ALPHA = -10 # non-zero
+        def func_data_mul(value):
+            _, v = r.unpack_raw_datum(value)
+            dat = caffe.io.array_to_datum(ALPHA*v, int(v.flatten()[0]))
+            return dat.SerializeToString()
+        
+        for i in xrange(len(x)):
+            if os.path.isdir(path_dst):
+                shutil.rmtree(path_dst)
+            c.copy_samples_lmdb(path_src, path_dst, [i], func_data=func_data_mul)
+            assert_true(os.path.isdir(path_dst), "failed to save LMDB for i=%d" % (i,))
+            
+            y = r.read_values(path_dst)
+            assert_equal(len(y), 1, "Single element expected.")
+            assert_true(np.all(x[i][0]*ALPHA==y[0][0]), "Wrong content copied.")
+            assert_true(np.all(int(x[i][0].flatten()[0])==y[0][1]), "Wrong content copied for label.")
             
     def test_copy_samples_single_reverse(self):
         
@@ -90,9 +114,35 @@ class TestCopySamplesLMDB:
         
         y = r.read_values(path_dst)
         assert_equal(int(len(x)/2), len(y), "Wrong number of elements copied.")
-        for a, b in zip(x[0::2], y): # skip element in x
-            assert_true(np.all(a[0]==b[0]), "Wrong content copied.")
-            assert_true(np.all(a[1]==b[1]), "Wrong content copied.")
+        for (x_val, x_label), (y_val, y_label) in zip(x[0::2], y): # skip element in x
+            assert_true(np.all(x_val==y_val), "Wrong content copied.")
+            assert_true(np.all(x_label==y_label), "Wrong content copied.")
+            
+    def test_copy_samples_subset_with_data_func(self):
+        
+        path_src = os.path.join(self.dir_tmp, 'x_lmdb')
+        x = r.read_values(path_src)
+        assert_greater(len(x), 0, "This test needs non empty data.")
+        path_dst = os.path.join(self.dir_tmp, 'test_copy_samples_subset_with_data_func_lmdb')
+        keys = range(0, len(x), 2)
+        assert_greater(len(keys), 0, "This test needs a non-empty subset.")
+        assert_greater(len(x), len(keys), "Need subset, not all elements.")
+        
+        ALPHA = -10 # non-zero
+        def func_data_mul(value):
+            _, x = r.unpack_raw_datum(value)
+            dat = caffe.io.array_to_datum(ALPHA*x, int(x.flatten()[0]))
+            return dat.SerializeToString()
+        
+        c.copy_samples_lmdb(path_src, path_dst, keys, func_data=func_data_mul)
+        assert_true(os.path.isdir(path_dst), "failed to save LMDB")
+        
+        y = r.read_values(path_dst)
+        assert_equal(int(len(x)/2), len(y), "Wrong number of elements copied.")
+        for (x_val, x_label), (y_val, y_label) in zip(x[0::2], y): # skip element in x            
+            assert_true(np.all(x_val*ALPHA==y_val), "Wrong content copied.")
+            assert_true(np.all(int(x_val.flatten()[0])==y_label), "Wrong content copied for label.")
+            assert_false(np.all(x_label==y_label), "Wrong content copied for label.")
             
     def test_copy_samples_no_append(self):
         

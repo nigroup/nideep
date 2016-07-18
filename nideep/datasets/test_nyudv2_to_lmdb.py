@@ -1,5 +1,5 @@
-from nose.tools import assert_is_instance, assert_list_equal, assert_raises, \
-    assert_true, assert_equal
+from nose.tools import assert_false, assert_greater, assert_is_instance, \
+    assert_list_equal, assert_raises, assert_true, assert_equal
 from mock import patch
 import os
 import tempfile
@@ -8,6 +8,9 @@ import numpy as np
 from scipy import io
 import h5py
 import nyudv2_to_lmdb as n2l
+import nideep.iow.to_lmdb as tol
+import nideep.iow.read_lmdb as rl
+import nideep.iow.copy_lmdb as cl
 import caffe
     
 class TestHandlingSplitsFile:
@@ -294,4 +297,53 @@ class TestNYUDV2ToLMDB:
             
             if 'val' in os.path.basename(plmdb):
                 assert_equal(n, 0)
+
+class TestShiftLabelLMDB:
+
+    @classmethod
+    def setup_class(self):
         
+        self.dir_tmp = tempfile.mkdtemp()
+        
+        x = np.array([[[ 0,  2,  3],
+                       [ 4,  5,  6]
+                       ],
+                      [[ 7,  8,  9],
+                       [10, 11, 12]
+                       ],
+                      [[13, 14, 15],
+                       [16, 17, 18],
+                       ],
+                      [[19, 20, 21],
+                       [22, 23, 0]
+                       ]
+                      ])
+        
+        tol.arrays_to_lmdb([y for y in x], os.path.join(self.dir_tmp, 'x_lmdb'))
+        
+    @classmethod
+    def teardown_class(self):
+        
+        shutil.rmtree(self.dir_tmp)
+        
+    def test_shift_label_lmdb(self):
+        
+        path_src = os.path.join(self.dir_tmp, 'x_lmdb')
+        x = rl.read_values(path_src)
+        assert_greater(len(x), 0, "This test needs non empty data.")
+        path_dst = os.path.join(self.dir_tmp, 'test_shift_label_lmdb')
+        keys = range(0, len(x), 2)
+        assert_greater(len(keys), 0, "This test needs a non-empty subset.")
+        assert_greater(len(x), len(keys), "Need subset, not all elements.")
+        
+        n2l.shift_label_lmdb(path_src, path_dst)
+        assert_true(os.path.isdir(path_dst), "failed to save LMDB")
+        
+        y = rl.read_values(path_dst)
+        assert_equal(len(x), len(y), "Wrong number of elements copied.")
+        
+        #for x_val, x_label, y_val, y_label in [a+b for a, b in zip(x, y)]:
+        for (x_val, x_label), (y_val, y_label) in zip(x, y):
+            assert_true(np.all(x_val[x_val!=0]-1==y_val[x_val!=0]), "Wrong content copied for non-void label.")
+            assert_true(np.all(255==y_val[x_val==0]), "Wrong content copied for void label.")
+            assert_true(np.all(x_label==y_label), "Wrong content copied for label field.")

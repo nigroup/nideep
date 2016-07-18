@@ -18,7 +18,7 @@ def edit_net_params(path_src, target, path_dst):
     netfile_parser = pu.Parser()
     x = netfile_parser.from_net_params_file(path_src)
     
-    print len(x.layer)
+    #print len(x.layer)
     count = 0
     for l in x.layer:
         if target.name == l.name:
