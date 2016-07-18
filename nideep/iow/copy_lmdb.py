@@ -7,7 +7,7 @@ import lmdb
 
 from lmdb_utils import IDX_FMT, MAP_SZ
 
-def copy_samples_lmdb(path_lmdb, path_dst, keys):
+def copy_samples_lmdb(path_lmdb, path_dst, keys, func_data=None):
     """
     Copy select samples from an lmdb into another.
     Can be used for sampling from an lmdb into another and generating a random shuffle
@@ -26,7 +26,10 @@ def copy_samples_lmdb(path_lmdb, path_dst, keys):
             for key_src in keys:
                 if not isinstance(key_src, basestring):
                     key_src = IDX_FMT.format(key_src)
-                txn_dst.put(IDX_FMT.format(key_dst), txn_src.get(key_src))
+                if func_data is None:
+                    txn_dst.put(IDX_FMT.format(key_dst), txn_src.get(key_src))
+                else:
+                    txn_dst.put(IDX_FMT.format(key_dst), func_data(txn_src.get(key_src)))
                 key_dst += 1
     db.close()
     
