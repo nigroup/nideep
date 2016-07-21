@@ -129,4 +129,3 @@ if __name__ == '__main__':
     
     print "size: %d" % nt, nv, fpath_imgs_train, fpath_labels_train, fpath_imgs_val, fpath_labels_val
     
-    pass

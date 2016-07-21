@@ -216,5 +216,3 @@ if __name__ == '__main__':
 #         f['d'] = [np.array([[1,2],[4,5]], dtype=float), np.array([[1,2],[4, 5]], dtype=float)+10]
             
     #infer_to_h5(net, 1, ['accuracy'], fpath)
-    
-    pass
