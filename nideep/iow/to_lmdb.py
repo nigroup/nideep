@@ -114,6 +114,5 @@ def arrays_to_lmdb(arrs, path_dst):
             in_txn.put(IDX_FMT.format(idx), dat.SerializeToString())
     
     db.close()
-
     return 0
 
