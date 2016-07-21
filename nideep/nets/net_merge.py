@@ -72,5 +72,3 @@ if __name__ == '__main__':
     import caffe
     n = caffe.Net("/home/kashefy/models/dark/mnist/tx/m.prototxt", caffe.TRAIN)
     n = caffe.Net("/home/kashefy/models/dark/mnist/tx/m.prototxt", caffe.TEST)
-    
-    pass

@@ -111,5 +111,3 @@ if __name__ == '__main__':
     #print s
     
     stack(n, 2)
-    
-    pass
