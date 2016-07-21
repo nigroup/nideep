@@ -84,7 +84,7 @@ class TestBalancerBalanceIdxs:
         
         # generate fake data
         num_examples = 100
-        num_classes = 2 # EXCLUDING other class
+        num_classes = 2 # EXCLUDING "other" class
         self.l = np.zeros((num_examples, num_classes))
         self.l[0:10, 0] = 1
         self.l[10:60, 1] = 1
@@ -161,3 +161,36 @@ class TestBalancerBalanceIdxs:
                       50, 1)
         assert_almost_equal(np.count_nonzero(idxs >= 60),
                             40+(50-40), tolerance_order)
+
+class TestBalancerBalanceIdxsTargetCount:
+    
+    def setup(self):
+        
+        # generate fake data
+        num_examples = 100
+        self.num_classes = 2 # EXCLUDING "other" class
+        self.l = np.zeros((num_examples, self.num_classes))
+        self.l[0:10, 0] = 1
+        self.l[10:60, 1] = 1
+    
+    def test_get_idxs_to_balance_class_count_other_not_highest(self):
+        
+        bal = Balancer(np.copy(self.l))
+        counts = bal.get_class_count(other_clname=CLNAME_OTHER)
+        assert_in(CLNAME_OTHER, counts.keys())
+        
+        assert_equals(counts[0], 10)
+        assert_equals(counts[1], 50)
+        assert_equals(counts[CLNAME_OTHER], 40)
+        
+        for target_count in [10, 20, 500]:
+            idxs = bal.sample_idxs_to_target_count(counts.values(),
+                                                   target_count)
+            
+            assert_equals(idxs.size, (self.num_classes+1)*target_count)
+            
+            assert_equals(np.count_nonzero(idxs < 10), target_count)
+            assert_equals(np.count_nonzero(np.logical_and(idxs >= 10, idxs < 60)),
+                          target_count)
+            assert_equals(np.count_nonzero(idxs >= 60), target_count)
+        
