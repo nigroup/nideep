@@ -113,6 +113,79 @@ class TestBalanceClassCountHDF5:
             assert_almost_equal(np.count_nonzero(h['label'][:, :, cl, :]),
                                 140, 1)
             
+    def test_save_balanced_sampled_class_count_hdf5_target_count_max(self):
+        
+        fpath_dst = os.path.join(self.dir_tmp, "save_balanced_class_count_dst.h5")
+        
+        idxs = \
+            bal.save_balanced_sampled_class_count_hdf5(self.fpath,
+                                                       ['f1', 'f2'],
+                                                       fpath_dst,
+                                                       target_count=None)
+            
+        h = h5py.File(fpath_dst, 'r')
+        keys_actual = list(h.keys())
+        keys_actual.sort()        
+        assert_list_equal(['f1', 'f2', 'label'],
+                          keys_actual)
+        
+        for count, idx in enumerate(idxs):
+            assert_true(np.all(self.l[idx] == h['label'][count]))
+            assert_true(np.all(self.x1[idx] == h['f1'][count]))
+            assert_true(np.all(self.x2[idx] == h['f2'][count]))
+
+        for cl in xrange(self.l.shape[2]):
+            assert_almost_equal(np.count_nonzero(h['label'][:, :, cl, :]),
+                                140, 1)
+            
+    def test_save_balanced_sampled_class_count_hdf5_target_count_lt_max(self):
+        
+        fpath_dst = os.path.join(self.dir_tmp, "save_balanced_class_count_dst.h5")
+        
+        idxs = \
+            bal.save_balanced_sampled_class_count_hdf5(self.fpath,
+                                                       ['f1', 'f2'],
+                                                       fpath_dst,
+                                                       target_count=99)
+            
+        h = h5py.File(fpath_dst, 'r')
+        keys_actual = list(h.keys())
+        keys_actual.sort()        
+        assert_list_equal(['f1', 'f2', 'label'],
+                          keys_actual)
+        
+        for count, idx in enumerate(idxs):
+            assert_true(np.all(self.l[idx] == h['label'][count]))
+            assert_true(np.all(self.x1[idx] == h['f1'][count]))
+            assert_true(np.all(self.x2[idx] == h['f2'][count]))
+
+        for cl in xrange(self.l.shape[2]):
+            assert_equals(np.count_nonzero(h['label'][:, :, cl, :]), 99)
+            
+    def test_save_balanced_sampled_class_count_hdf5_target_count_gt_max(self):
+        
+        fpath_dst = os.path.join(self.dir_tmp, "save_balanced_class_count_dst.h5")
+        
+        idxs = \
+            bal.save_balanced_sampled_class_count_hdf5(self.fpath,
+                                                       ['f1', 'f2'],
+                                                       fpath_dst,
+                                                       target_count=200)
+            
+        h = h5py.File(fpath_dst, 'r')
+        keys_actual = list(h.keys())
+        keys_actual.sort()        
+        assert_list_equal(['f1', 'f2', 'label'],
+                          keys_actual)
+        
+        for count, idx in enumerate(idxs):
+            assert_true(np.all(self.l[idx] == h['label'][count]))
+            assert_true(np.all(self.x1[idx] == h['f1'][count]))
+            assert_true(np.all(self.x2[idx] == h['f2'][count]))
+
+        for cl in xrange(self.l.shape[2]):
+            assert_equals(np.count_nonzero(h['label'][:, :, cl, :]), 200)
+            
     def test_save_balanced_class_count_hdf5_same_file(self):
         
         assert_raises(IOError,
