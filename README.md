@@ -4,6 +4,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/nigroup/nideep/badge.svg?branch=master)](https://coveralls.io/github/nigroup/nideep?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
+[![Code Climate](https://codeclimate.com/github/kashefy/nideep/badges/gpa.svg)](https://codeclimate.com/github/kashefy/nideep)
+
 This is a collection of scripts, utilities and examples to use with [caffe](http://caffe.berkeleyvision.org/). These are either too use case specific and are therefore kept outside of the Caffe framework.
 They may also be considered completely independent and potentially useful in combination with other frameworks.
 
