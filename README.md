@@ -3,8 +3,8 @@
 [![Build Status](https://travis-ci.org/nigroup/nideep.svg?branch=master)](https://travis-ci.org/nigroup/nideep)
 [![Coverage Status](https://coveralls.io/repos/github/nigroup/nideep/badge.svg?branch=master)](https://coveralls.io/github/nigroup/nideep?branch=master)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
-
-[![Code Climate](https://codeclimate.com/github/kashefy/nideep/badges/gpa.svg)](https://codeclimate.com/github/kashefy/nideep)
+[![Code Climate](https://codeclimate.com/github/nigroup/nideep/badges/gpa.svg)](https://codeclimate.com/github/nigroup/nideep)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a4bd5597857a428eb0d2a8c37a0f6559)](https://www.codacy.com/app/youssef-kashef/nideep_2?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nigroup/nideep&amp;utm_campaign=Badge_Grade)
 
 This is a collection of scripts, utilities and examples to use with [caffe](http://caffe.berkeleyvision.org/). These are either too use case specific and are therefore kept outside of the Caffe framework.
 They may also be considered completely independent and potentially useful in combination with other frameworks.
