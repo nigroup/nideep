@@ -60,9 +60,8 @@ def nyudv2_to_lmdb(path_mat,
                    dst_prefix,
                    dir_dst,
                    val_list=None):
-    
-    val_list = val_list or [] 
-    
+
+    val_list = val_list or []
     if not os.path.isfile(path_mat):
         raise IOError("Path is not a regular file (%s)" % path_mat)
     
