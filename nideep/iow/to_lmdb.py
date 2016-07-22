@@ -38,7 +38,6 @@ def matfiles_to_lmdb(paths_src, path_dst, fieldname,
     Generate LMDB file from set of mat files with integer data
     Source: https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045
     credit: Evan Shelhamer
-    
     '''
     db = lmdb.open(path_dst, map_size=MAP_SZ)
 
@@ -101,7 +100,7 @@ def scalars_to_lmdb(scalars, path_dst,
 
 def arrays_to_lmdb(arrs, path_dst):
     '''
-    Generate LMDB file from list of ndarrays    
+    Generate LMDB file from list of ndarrays
     '''
     db = lmdb.open(path_dst, map_size=MAP_SZ)
 

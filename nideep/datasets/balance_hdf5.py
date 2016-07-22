@@ -13,7 +13,7 @@ def get_class_count_hdf5(fpath,
                          other_clname=CLNAME_OTHER):
     """ Count per-class instances in HDF5 and return a dictionary of class ids
     and per-class count
-    
+
     fpath -- path to HDF5 file
     Keyword arguments:
     key_label -- key for ground truth data in HDF5

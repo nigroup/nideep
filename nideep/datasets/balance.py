@@ -9,7 +9,7 @@ class Balancer(object):
     def get_class_count(self, other_clname=CLNAME_OTHER):
         """
         Return per-class occurrence count
-        
+
         Keyword argumented:
         other_clname -- a name for an overall negative class (all inactive)
         """
