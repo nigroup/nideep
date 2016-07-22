@@ -112,6 +112,7 @@ def save_balanced_sampled_class_count_hdf5(fpath,
     key_label -- key for ground truth data in HDF5
     other_clname -- name for negative class (None if non-existent)
     chunks -- forward chunks parameter to use during hdf5 writing
+    target_count -- per-class count to target when sampling
     """
     if os.path.abspath(fpath) == os.path.abspath(fpath_dst):
         raise IOError("Cannot read and write to the same file (%s) (%s)" %
