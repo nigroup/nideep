@@ -42,8 +42,8 @@ def balance_class_count_hdf5(fpath, keys,
     bal = Balancer(np.squeeze(labls))
     class_count = bal.get_class_count(other_clname=other_clname)
     idxs = bal.get_idxs_to_balance_class_count(class_count.values())
-    np.random.shuffle(idxs) # shuffle the array along the first index of a multi-dimensional array, in-place
-    
+    np.random.shuffle(idxs)  # shuffle the array along the first index of a multi-dimensional array, in-place
+
     dict_balanced = {key_label : labls[idxs]}
     for k in keys:
         dict_balanced[k] = h_src[k][:][idxs]
@@ -72,13 +72,13 @@ def save_balanced_class_count_hdf5(fpath,
     if os.path.abspath(fpath) == os.path.abspath(fpath_dst):
         raise IOError("Cannot read and write to the same file (%s) (%s)" %
                       (fpath, fpath_dst))
-    
+
     with h5py.File(fpath, 'r') as h_src:
         labls = h_src[key_label][:]
         bal = Balancer(np.squeeze(labls))
         class_count = bal.get_class_count(other_clname=other_clname)
         idxs = bal.get_idxs_to_balance_class_count(class_count.values())
-        np.random.shuffle(idxs) # shuffle the array along the first index of a multi-dimensional array, in-place
+        np.random.shuffle(idxs)  # shuffle the array along the first index of a multi-dimensional array, in-place
         with h5py.File(fpath_dst, 'w') as h_dst:
             h_dst[key_label] = labls[idxs]
             for k in keys:
@@ -116,14 +116,14 @@ def save_balanced_sampled_class_count_hdf5(fpath,
     if os.path.abspath(fpath) == os.path.abspath(fpath_dst):
         raise IOError("Cannot read and write to the same file (%s) (%s)" %
                       (fpath, fpath_dst))
-    
+
     with h5py.File(fpath, 'r') as h_src:
         labls = h_src[key_label][:]
         bal = Balancer(np.squeeze(labls))
         class_count = bal.get_class_count(other_clname=other_clname)
         idxs = bal.get_idxs_to_balance_class_count(class_count.values(),
                                                    target_count)
-        np.random.shuffle(idxs) # shuffle the array along the first index of a multi-dimensional array, in-place
+        np.random.shuffle(idxs)  # shuffle the array along the first index of a multi-dimensional array, in-place
         with h5py.File(fpath_dst, 'w') as h_dst:
             h_dst[key_label] = labls[idxs]
             for k in keys:

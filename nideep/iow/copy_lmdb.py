@@ -22,7 +22,7 @@ def copy_samples_lmdb(path_lmdb, path_dst, keys, func_data=None):
     key_dst = 0
     with db.begin(write=True) as txn_dst:
         with lmdb.open(path_lmdb, readonly=True).begin() as txn_src:
-             
+
             for key_src in keys:
                 if not isinstance(key_src, basestring):
                     key_src = IDX_FMT.format(key_src)
@@ -32,7 +32,7 @@ def copy_samples_lmdb(path_lmdb, path_dst, keys, func_data=None):
                     txn_dst.put(IDX_FMT.format(key_dst), func_data(txn_src.get(key_src)))
                 key_dst += 1
     db.close()
-    
+
 def concatenate_lmdb(paths_lmdb, path_dst):
     """
     Copy select samples from an lmdb into another.
