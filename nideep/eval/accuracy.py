@@ -20,7 +20,7 @@ def hamming_accuracy_from_blob(y_true, y_prob, threshold=0):
         dim = y_true.shape[0]
         y_true = y_true.reshape((1, dim))
     # Generate predictions
-    y_pred = np.array([[prob>=threshold for prob in preds] for preds in y_prob])
+    y_pred = np.array([[prob >= threshold for prob in preds] for preds in y_prob])
     return hamming_accuracy(y_true, y_pred)
 
 def hamming_accuracy(y_true, y_pred):
