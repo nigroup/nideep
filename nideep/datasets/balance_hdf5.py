@@ -13,7 +13,7 @@ def get_class_count_hdf5(fpath,
                          other_clname=CLNAME_OTHER):
     """ Count per-class instances in HDF5 and return a dictionary of class ids
     and per-class count
-    
+
     fpath -- path to HDF5 file
     Keyword arguments:
     key_label -- key for ground truth data in HDF5
@@ -104,7 +104,11 @@ def save_balanced_sampled_class_count_hdf5(fpath,
     and save into a new HDF5.
     Returns indicies from the original label that were sampled.
     Not suitable for very large datasets.
-    
+
+    Classes with count < target_count will sub-sampled without replacement.
+    Classes with count > target_count will get over-sampled.
+    Classes with count equal to target_count will be copied.
+
     fpath -- path to source HDF5 file
     keys -- keys to resample (e.g. features)
     fpath_dst -- path to destination HDF5 file

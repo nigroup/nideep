@@ -9,7 +9,7 @@ class Balancer(object):
     def get_class_count(self, other_clname=CLNAME_OTHER):
         """
         Return per-class occurrence count
-        
+
         Keyword argumented:
         other_clname -- a name for an overall negative class (all inactive)
         """
@@ -52,9 +52,9 @@ class Balancer(object):
         """
         Determine indices with with which we can sample from the dataset
         and get a balanced inter-class distribution
-        Classes with count < target_count will sub-sampled.
+        Classes with count < target_count will sub-sampled without replacement.
         Classes with count > target_count will get over-sampled.
-        Classes with count equal to target_count will get re-sampled.
+        Classes with count equal to target_count will be copied.
         """
         _, num_classes = self.l.shape
         idxs = None  # some classes might get sub-sampled
@@ -64,9 +64,24 @@ class Balancer(object):
                 rows = np.where(self.l[:, i] == 1)[0]
             else:  # cannot index 'other' class / negative class, all absent
                 rows = np.where(np.sum(self.l, axis=-1) <= 0)[0]
-            rows_to_sample = rows[np.random.randint(0, high=rows.size,
-                                                    size=(target_count, 1))
-                                      ]
+            # over-sample OR sub-sample?
+            if rows.size <= target_count:
+
+                # include each once and reshape to column vector
+                rows_idxs = np.arange(rows.size).reshape(-1, 1)
+                tile_factor = int(target_count / rows.size)
+                rows_idxs = np.tile(rows_idxs, (tile_factor, 1))
+                rows_to_sample = rows[rows_idxs]
+                if rows_idxs.size < target_count:
+
+                    remain = target_count - rows_idxs.size
+                    # sample without replacement
+                    rows_remain = np.random.choice(rows, size=(remain, 1),
+                                                   replace=False)
+                    rows_to_sample = np.vstack((rows_to_sample, rows_remain))
+            else:
+                rows_to_sample = np.random.choice(rows, size=(target_count, 1),
+                                                  replace=False)
             if i > 0:
                 idxs = np.vstack((idxs, rows_to_sample))
             else:
