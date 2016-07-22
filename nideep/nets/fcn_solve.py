@@ -51,6 +51,3 @@ if __name__ == '__main__':
     solver = caffe.SGDSolver(os.path.expanduser('~/models/fcn_segm/fcn-32s-Pascal-context/tx3/solver.prototxt'))
     init_up_bilinear(solver.net, os.path.expanduser('~/models/vgg-16/VGG_ILSVRC_16_layers_fcn.caffemodel'))
     solver.net.save(os.path.expanduser('~/models/fcn_segm/fcn-32s-Pascal-context/tx3/fcn.caffemodel'))
-    
-    pass
-

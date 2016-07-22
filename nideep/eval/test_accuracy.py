@@ -68,7 +68,7 @@ class TestHammingAccuracyFromBlob:
             y_prob = np.ones((n,n))/n
             assert_equals(accuracy.hamming_accuracy_from_blob(y_true, y_prob, threshold), 1)
 
-    def test_accuracy_1_with_threshold(self):
+    def test_accuracy_1_with_threshold_0(self):
         """
         Accuracy 0 if all values under threshold
         """

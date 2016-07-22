@@ -72,4 +72,3 @@ def run_edit_net_params():
 if __name__ == '__main__':
     
     run_edit_net_params()
-    pass

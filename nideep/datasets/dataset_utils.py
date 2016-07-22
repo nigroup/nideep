@@ -8,7 +8,7 @@ import numpy as np
 def get_train_val_split_from_names(src, val_list):
     """
     Get indices split for train and validation entity names subset
-    
+
     src -- list of all entities in dataset
     val_list -- contains entities that belong to the validation subset
     
@@ -37,7 +37,7 @@ def get_train_val_split_from_names(src, val_list):
 def get_train_val_split_from_idx(src, val_list):
     """
     Get indices split for train and validation subsets
-    
+
     src -- dataset size (int) or full range of indices (list)
     val_list -- indices that belong to the validation subset
     
@@ -60,7 +60,7 @@ def get_labels_lut(labels_list, labels_subset):
     Generate a look-up-table for mapping labels from a list to a subset
     Unmapped labels are mapped to class id zero.
     Can be used for selecting a subset of classes and grouping everything else.
-    
+
     labels_list -- full list of (label name, class id) pairs
     labels_subset -- subset of pairs to keep
     """

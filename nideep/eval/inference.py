@@ -156,11 +156,12 @@ def response_to_lmdb(fpath_net,
                      fpath_weights,
                      keys,
                      dst_prefix,
-                     modes=[caffe.TRAIN, caffe.TEST],
+                     modes=None,
                      ):
     """
     keys -- name of responses to extract. Must be valid for all requested modes
     """
+    modes = modes or [caffe.TRAIN, caffe.TEST]
     out = dict.fromkeys(modes)
     
     for m in modes:
@@ -216,5 +217,3 @@ if __name__ == '__main__':
 #         f['d'] = [np.array([[1,2],[4,5]], dtype=float), np.array([[1,2],[4, 5]], dtype=float)+10]
             
     #infer_to_h5(net, 1, ['accuracy'], fpath)
-    
-    pass

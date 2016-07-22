@@ -63,4 +63,3 @@ if __name__ == '__main__':
                     param_pairs,
                     os.path.expanduser('~/models/vgg-16/VGG_ILSVRC_16_layers_fcn_151208.caffemodel'),
                     )
-    pass
