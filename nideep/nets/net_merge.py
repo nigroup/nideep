@@ -18,7 +18,7 @@ def merge_indep_net_spec(net_specs, suffix_fmt='_nidx_%02d'):
         suffix = suffix_fmt % idx
         throw_away = []
         for l in n.layer:
-            if l.type.lower() != 'data':
+            if l.type.lower() != 'data' or l.type.lower() != 'hdf5data':
 
                 l.name += suffix
 
