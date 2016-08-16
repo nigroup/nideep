@@ -41,17 +41,10 @@ def split_hdf5(fpath_src, dir_dst, tot_floats=(20 * 1024 * 1024)):
             fpath_dst = os.path.join(dir_dst, '%s_%03d%s' % (name_,
                                                              split_count,
                                                              ext))
-            if num_saved == 0:
-                h_dst = h5py.File(fpath_dst, 'w')
-            else:
-                h_dst = h5py.File(fpath_dst, 'a')
-
-            for key in keys:
-                h_dst[key] = h_src[key][num_saved:num_saved + split_sz]
-
-            dst_paths.append(fpath_dst)
-
-            h_dst.close()
+            with h5py.File(fpath_dst, ['a', 'w'][num_saved == 0]) as h_dst:
+                for key in keys:
+                    h_dst[key] = h_src[key][num_saved:num_saved + split_sz]
+                dst_paths.append(fpath_dst)
             num_saved += split_sz
             split_count += 1
 
