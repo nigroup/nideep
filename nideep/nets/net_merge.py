@@ -8,9 +8,13 @@ import numpy as np
 from google.protobuf import text_format
 from nideep.proto.proto_utils import Parser
 
+def is_singular_layer_type(layer_type_name):
+    return 'data' in layer_type_name.lower() \
+        and 'output' not in layer_type_name.lower()
+
 def merge_indep_net_spec(net_specs, suffix_fmt='_nidx_%02d'):
 
-    data_tops = [l.top for n in net_specs for l in n.layer if l.type.lower() == 'data']
+    data_tops = [l.top for n in net_specs for l in n.layer if is_singular_layer_type(l.type)]
     data_tops = Set([item for sublist in data_tops for item in sublist])
 
     for idx, n in enumerate(net_specs):
@@ -18,10 +22,8 @@ def merge_indep_net_spec(net_specs, suffix_fmt='_nidx_%02d'):
         suffix = suffix_fmt % idx
         throw_away = []
         for l in n.layer:
-            if l.type.lower() != 'data' or l.type.lower() != 'hdf5data':
-
+            if not is_singular_layer_type(l.type):
                 l.name += suffix
-
                 if np.prod([p.lr_mult for p in l.param]) == 0:
                     print "LAYER WITH FIXED WEIGHTS. MAKE SHARED?"
 
