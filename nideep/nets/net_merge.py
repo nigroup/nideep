@@ -23,9 +23,7 @@ def merge_indep_net_spec(net_specs, suffix_fmt='_nidx_%02d'):
         throw_away = []
         for l in n.layer:
             if not is_singular_layer_type(l.type):
-
                 l.name += suffix
-
                 if np.prod([p.lr_mult for p in l.param]) == 0:
                     print "LAYER WITH FIXED WEIGHTS. MAKE SHARED?"
 
