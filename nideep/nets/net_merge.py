@@ -12,14 +12,20 @@ def is_singular_layer_type(layer_type_name):
     return 'data' in layer_type_name.lower() \
         and 'output' not in layer_type_name.lower()
 
-def merge_indep_net_spec(net_specs, suffix_fmt='_nidx_%02d'):
+def suffix_fmt_idx(idx):
+    return '_nidx_%02d' % (idx,)
 
+def merge_indep_net_spec(net_specs, suffix_fmt=suffix_fmt_idx):
+    """
+    list of network specification instances
+    suffix formatter given index
+    """
     data_tops = [l.top for n in net_specs for l in n.layer if is_singular_layer_type(l.type)]
     data_tops = Set([item for sublist in data_tops for item in sublist])
 
     for idx, n in enumerate(net_specs):
 
-        suffix = suffix_fmt % idx
+        suffix = suffix_fmt(idx)
         throw_away = []
         for l in n.layer:
             if not is_singular_layer_type(l.type):

@@ -184,6 +184,13 @@ def test_is_singular_layer_type():
     assert_false(mrg.is_singular_layer_type('Convolution'))
     assert_false(mrg.is_singular_layer_type('convolution'))
 
+def test_suffix_fmt_idx():
+    assert_equal(mrg.suffix_fmt_idx(0), '_nidx_00')
+    assert_equal(mrg.suffix_fmt_idx(00), '_nidx_00')
+    assert_equal(mrg.suffix_fmt_idx(1), '_nidx_01')
+    assert_equal(mrg.suffix_fmt_idx(01), '_nidx_01')
+    assert_equal(mrg.suffix_fmt_idx(10), '_nidx_10')
+    assert_equal(mrg.suffix_fmt_idx(99999990), '_nidx_99999990')
 
 
 
