@@ -192,5 +192,11 @@ def test_suffix_fmt_idx():
     assert_equal(mrg.suffix_fmt_idx(10), '_nidx_10')
     assert_equal(mrg.suffix_fmt_idx(99999990), '_nidx_99999990')
 
-
+def test_suffix_fmt_custom():
+    
+    def custom_suffix(idx):
+        return mrg.suffix_fmt_idx(idx) + 'custom'
+    assert_equal(custom_suffix(0), '_nidx_00' + 'custom')
+    assert_equal(custom_suffix(1), '_nidx_01' + 'custom')
+    assert_equal(custom_suffix(99999990), '_nidx_99999990' + 'custom')
 
