@@ -102,7 +102,8 @@ class TestNetMerge:
                     continue  # skip for data layers
                 assert_true(found, "Failed to find %s in merged network!" % (l1.name,))
 
-    def test_duplicate_hdf5data(self):
+    @staticmethod
+    def test_duplicate_hdf5data():
 
         fpath = os.path.join(os.path.dirname(ROOT_PKG_PATH),
                              TEST_DATA_DIRNAME, TEST_NET_HDF5DATA_FILENAME)
@@ -172,7 +173,6 @@ class TestNetMerge:
                 assert_true(found, "Failed to find %s in merged network!" % (l1.name,))
 
 def test_is_singular_layer_type():
-    
     assert_true(mrg.is_singular_layer_type('data'))
     assert_true(mrg.is_singular_layer_type('Data'))
     assert_true(mrg.is_singular_layer_type('DATA'))
