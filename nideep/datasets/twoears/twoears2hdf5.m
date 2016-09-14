@@ -18,13 +18,6 @@ if isempty(phase)
         'Unable to determine phase (test vs. train).' );
 end
 
-% random shuffle
-o = randperm( length( y ) );
-%x = x( o, : );
-%y = y( o, : );
-x = x(1:1000, :);
-y = y(1:1000, :);
-
 [x_feat, feature_type_names, y] = twoears2Blob(x, featureNames, y, numClasses);
 
 % merge all features and ground truth into same hdf5
