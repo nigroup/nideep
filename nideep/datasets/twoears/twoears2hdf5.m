@@ -39,7 +39,4 @@ end
 hdf5write( fpath_h5, ...
     '/label', y, ...
     'WriteMode', 'append');
-% write hdf5 list files
-file_id = fopen( fullfile(dir_dst, sprintf('%s_%s.txt', prefix_h5, phase) ), 'w');
-fprintf(file_id, fpath_h5 );
-fclose(file_id);
+
