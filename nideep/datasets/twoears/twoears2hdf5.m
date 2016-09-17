@@ -1,4 +1,7 @@
-function [fpath_h5] = twoears2hdf5(fpath, dir_dst, phase, featureNames, numClasses)
+function [fpath_h5] = twoears2hdf5(fpath, dir_dst, ...
+                                   phase,
+                                   featureNames, numClasses,
+                                   labelkey)
 % TWOEARS2HDF  load twoears training data and reformat into caffe-friendly HDF5
 %   TWOEARS2HDF(fpath, dir_dst) loads data from .mat file designated by fpath
 %     and writes them to hdf5 files under directory dir_dst
@@ -11,6 +14,9 @@ function [fpath_h5] = twoears2hdf5(fpath, dir_dst, phase, featureNames, numClass
 % 
 load(fpath, 'x', 'y');
 
+if nargin < 6
+    labelkey = 'label';
+end
 dir_src = fileparts(fpath);
 if isempty(phase)
     [~, phase] = fileparts(dir_src); % test or train from directory name
@@ -37,6 +43,6 @@ for ii = 1 : numel(feature_type_names)
 end
 % append ground truth to hdf5
 hdf5write( fpath_h5, ...
-    '/label_id_loc', y, ...
+    ['/', labelkey], y, ...
     'WriteMode', 'append');
 
