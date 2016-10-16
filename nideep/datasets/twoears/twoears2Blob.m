@@ -1,4 +1,4 @@
-function [x_feat, feature_type_names, y] = twoears2Blob(x, featureNames, y)
+function [x_feat, feature_type_names, y] = twoears2Blob(x, featureNames)
 % twoears2Blob  reshape feature and ground truth vectors into 4-D Blob for caffe
 %   For the feature vector x it expects a shape of (N x D)
 %   where N is the number of samples and D is the total no. of features
@@ -9,7 +9,6 @@ function [x_feat, feature_type_names, y] = twoears2Blob(x, featureNames, y)
 %
 %   See also twoears2hdf5.
 x = x';
-y = y';
 
 % assume first field contains feature name
 feature_type_names = unique( cellfun(@(v) v(1), featureNames(1,:)) );
@@ -62,6 +61,5 @@ for ii = 1 : numel(feature_type_names)
     featureNames(feat_idxs) = [];
 end % format features
 
-% reshape multi-label ground truth vectors to 4-D Blob
-y = reshape( y, 1, [], 1, length( y ) );
+
 
