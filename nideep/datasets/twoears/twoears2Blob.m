@@ -1,4 +1,4 @@
-function [x_feat, feature_type_names, y] = twoears2Blob(x, featureNames, y, numClasses)
+function [x_feat, feature_type_names, y] = twoears2Blob(x, featureNames)
 % twoears2Blob  reshape feature and ground truth vectors into 4-D Blob for caffe
 %   For the feature vector x it expects a shape of (N x D)
 %   where N is the number of samples and D is the total no. of features
@@ -61,7 +61,5 @@ for ii = 1 : numel(feature_type_names)
     featureNames(feat_idxs) = [];
 end % format features
 
-% reshape multi-label ground truth vectors to 4-D Blob
-y = reshape(y, length(y), numClasses, 1, []);
-y = permute(y, [4, 3, 2, 1]);
+
 

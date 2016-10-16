@@ -1,7 +1,6 @@
 function [fpath_h5] = twoears2hdf5(fpath, dir_dst, ...
-                                   phase,
-                                   featureNames, numClasses,
-                                   labelkey)
+                                   phase,...
+                                   featureNames, numClasses)
 % TWOEARS2HDF  load twoears training data and reformat into caffe-friendly HDF5
 %   TWOEARS2HDF(fpath, dir_dst) loads data from .mat file designated by fpath
 %     and writes them to hdf5 files under directory dir_dst
@@ -14,9 +13,6 @@ function [fpath_h5] = twoears2hdf5(fpath, dir_dst, ...
 % 
 load(fpath, 'x', 'y');
 
-if nargin < 6
-    labelkey = 'label';
-end
 dir_src = fileparts(fpath);
 if isempty(phase)
     [~, phase] = fileparts(dir_src); % test or train from directory name
@@ -24,7 +20,7 @@ if isempty(phase)
         'Unable to determine phase (test vs. train).' );
 end
 
-[x_feat, feature_type_names, y] = twoears2Blob(x, featureNames, y, numClasses);
+[x_feat, feature_type_names] = twoears2Blob(x, featureNames);
 
 % merge all features and ground truth into same hdf5
 prefix_h5 = 'twoears_data';
@@ -42,7 +38,17 @@ for ii = 1 : numel(feature_type_names)
         'WriteMode', write_mode);
 end
 % append ground truth to hdf5
+
+% reshape multi-label ground truth vectors to 4-D Blob
+y_id_loc = y(:,1:end-1);
+y_id_loc = reshape(y_id_loc, length(y), numClasses, 1, []);
+y_id_loc = permute(y_id_loc, [4, 3, 2, 1]);
 hdf5write( fpath_h5, ...
-    ['/', labelkey], y, ...
+    '/label_id_loc', y_id_loc, ...
+    'WriteMode', 'append');
+y_nSrcs = y(:, end);
+y_nSrcs = reshape( y_nSrcs, 1, [], 1, length( y ) );
+hdf5write( fpath_h5, ...
+    '/label_nSrcs', y_nSrcs, ...
     'WriteMode', 'append');
 
