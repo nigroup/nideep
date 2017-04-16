@@ -96,7 +96,14 @@ class AMFED(object):
         
         common_entity_names = list(set(lists[0]).intersection(*lists[1:]))
         common_entities = self.from_list_to_typle(common_entity_names, lists, list_names)
+        self.entities = common_entities
         return common_entities
+    
+    def set_subset(self, entities):
+        self.entities = entities
+        
+    def dense_labels(self):
+        raise NotImplementedError # TODO: Implement
 
     def __init__(self, dir_prefix, video_type=DIRNAME_FLV):
         '''
@@ -117,4 +124,5 @@ class AMFED(object):
             self.logger.debug("Use FLVs")
         if not os.path.isdir(self.dir_videos):
             self.logger.warning("Videos directory does not exist (%s)" % self.dir_videos)
+        self.entities = []
             
