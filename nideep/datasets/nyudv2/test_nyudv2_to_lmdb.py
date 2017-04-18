@@ -112,8 +112,8 @@ class TestNYUDV2ToLMDB:
         assert_true(os.path.isfile(p))
         assert_raises(IOError, n2l.nyudv2_to_lmdb, p, "", self.dir_tmp)
 
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe')
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_nyudv2_to_lmdb_info(self, mock_dat, mock_caffe):
 
         # mock caffe calls made by our module
@@ -160,8 +160,8 @@ class TestNYUDV2ToLMDB:
             if 'val' in os.path.basename(plmdb):
                 assert_equal(n, 0)
 
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe')
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_nyudv2_to_lmdb_info_mat73(self, mock_dat, mock_caffe):
 
         # mock caffe calls made by our module
@@ -206,8 +206,8 @@ class TestNYUDV2ToLMDB:
             if 'val' in os.path.basename(plmdb):
                 assert_equal(n, 0)
 
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe')
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_nyudv2_to_lmdb_info_hdf5(self, mock_dat, mock_caffe):
 
         # mock caffe calls made by our module
@@ -252,8 +252,8 @@ class TestNYUDV2ToLMDB:
             if 'val' in os.path.basename(plmdb):
                 assert_equal(n, 0)
 
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe')
-    @patch('nideep.datasets.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe')
+    @patch('nideep.datasets.nyudv2.nyudv2_to_lmdb.to_lmdb.caffe.proto.caffe_pb2.Datum')
     def test_nyudv2_to_lmdb_info_hdf5_2(self, mock_dat, mock_caffe):
 
         # mock caffe calls made by our module
