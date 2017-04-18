@@ -17,27 +17,28 @@ class Entity(object):
         cap.release()
         return t
     
+    def dense_labels_dict(self):
+        
+        labels, col_names = self.dense_labels()
+        labels_dict = {}
+        for idx, c in enumerate(col_names):
+            labels_dict[c] = labels[:, idx]
+        return labels_dict
+    
     def dense_labels(self):
         
-        #header = np.loadtxt(self.path_au_labels, delimiter=',', skiprows=1)
-        #labels = np.loadtxt(self.path_au_labels, delimiter=',', skiprows=1)
         onsets = np.genfromtxt(self.path_au_labels, dtype=float, delimiter=',', names=True)
-        print onsets.shape
-        print onsets.dtype.names
-        #print onsets
         t_dense = self.timestamps_sec()
-        cols = onsets.dtype.names[1:] # omit Time from header
+        cols = list(onsets.dtype.names[1:]) # omit Time from header
         labels = np.zeros((len(t_dense), len(cols)), dtype='float')
-#        t_onsets = [l[0] for l in onsets]
-#        while onset_idx < len(t_onsets)
-#        for t in t_dense:
-        if len(onsets) > 1: 
+        if onsets.shape and len(onsets) > 1: 
             for cur, next in zip(onsets[:-1], onsets[1:]):
                 t_on = cur[0]
                 t_off = next[0]
                 valid_rows = np.logical_and(t_dense >= t_on, t_dense < t_off)
                 labels[valid_rows, :] = list(cur)[1:]
-        return labels
+            labels[t_dense >= t_off, :] = list(next)[1:] # fill remaining rows
+        return labels, cols
     
     def __init__(self, path_video, path_au_labels, path_landmarks):
         '''
