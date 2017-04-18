@@ -6,6 +6,7 @@ import cv2
 class Entity(object):
     
     def timestamps_sec(self):
+         """ Get timestamp of each frame from video file """
         cap = cv2.VideoCapture(self.path_video)
         ret = True
         t = []
@@ -18,7 +19,7 @@ class Entity(object):
         return t
     
     def dense_labels_dict(self):
-        
+         """ Load dense labels for each column in au labels file into dictionary"""
         labels, col_names = self.dense_labels()
         labels_dict = {}
         for idx, c in enumerate(col_names):
@@ -26,7 +27,7 @@ class Entity(object):
         return labels_dict
     
     def dense_labels(self):
-        
+         """ Get dense labels for all columns in au labels """
         onsets = np.genfromtxt(self.path_au_labels, dtype=float, delimiter=',', names=True)
         t_dense = self.timestamps_sec()
         cols = list(onsets.dtype.names[1:]) # omit Time from header
