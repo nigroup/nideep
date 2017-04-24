@@ -115,9 +115,9 @@ class AMFED(object):
             result = []
             for _, e in entities.iterrows():
                 entity_records = self.load_file(e)
-            result += entity_records
-            print 'Finished video %d/%d' % (count + 1, len(entities))
-            count += 1
+                result += entity_records
+                print 'Finished video %d/%d' % (count + 1, len(entities))
+                count += 1
 
             result_df = pd.DataFrame(result)
             result_df.to_csv(index_path)
@@ -127,10 +127,9 @@ class AMFED(object):
     def as_numpy_array(self):
         df = self.as_dataframe()
         df = df[df.valid]
-        get_image = lambda x: cv2.imread(x)
-        get_labels = lambda x: pickle.load(open(x, 'rb'))
-        X_train = np.array([get_image(e) for e in df['features'].tolist()])
-        y_train = np.array([get_labels(e) for e in df['labels'].tolist()])
+        # X_train = np.array([cv2.imread(e, cv2.IMREAD_GRAYSCALE) for e in df['features'].tolist()])
+        X_train = np.array([cv2.imread(e) for e in df['features'].tolist()])
+        y_train = np.array([pickle.load(open(e, 'rb')) for e in df['labels'].tolist()])
         return X_train, y_train
 
     def load_file(self, entity):
@@ -205,7 +204,9 @@ class AMFED(object):
                 return False, 'Tracker fail: human labeled failure'
 
             cropped = np.array(crop_face(Image.fromarray(frame), eye_left=left_eye, eye_right=right_eye,
-                                         offset_pct=(0.25, 0.25), dest_sz=(128, 128)))
+                                         offset_pct=(0.25, 0.25), dest_sz=(64, 64)))
+
+            # gray_image = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
 
             pickle.dump(labels[:-1], open(label_file, 'wb'))
             cv2.imwrite(frame_file, cropped)  # save frame as JPEG file
@@ -228,6 +229,12 @@ class AMFED(object):
     @staticmethod
     def __frame_to_timestamp(frame):
         return frame * (1.0 / 14)
+
+    def set_subset(self, entities):
+        self.entities = entities
+        
+    def dense_labels(self):
+        raise NotImplementedError # TODO: Implement
 
     def __init__(self, dir_prefix, video_type=VIDEO_TYPE_FLV, cache_dir=None):
         '''

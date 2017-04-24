@@ -8,7 +8,7 @@ from random import shuffle
 import numpy as np
 from scipy import io
 import h5py
-from dataset_utils import get_train_val_split_from_idx
+from nideep.datasets.dataset_utils import get_train_val_split_from_idx
 from nideep.blobs import mat_utils as mu
 from nideep.iow import to_lmdb, read_lmdb, copy_lmdb
 
