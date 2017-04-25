@@ -7,11 +7,10 @@ import os
 import tempfile
 import shutil
 import numpy as np
-from nose.tools import assert_false, assert_true, \
-    assert_list_equal, assert_greater, assert_not_in, assert_in, assert_equal
-from mock import patch, MagicMock, mock_open, Mock
-import label_utils as lu
+from nose.tools import assert_true, \
+    assert_list_equal, assert_not_in, assert_in, assert_equal
 from h5py import File
+import label_utils as lu
 
 class TestLabelUtils:
     
