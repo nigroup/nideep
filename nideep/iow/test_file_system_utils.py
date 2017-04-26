@@ -33,13 +33,13 @@ class TestFSUtils:
         
     def test_filter_is_h5(self):
 
-        assert_false(fs.filter_is_img('foo.bar'))
-        assert_false(fs.filter_is_img('foo.png.bar'))
-        assert_false(fs.filter_is_img('foo.hdf'))
-        assert_false(fs.filter_is_img('foo.h4'))
-        assert_false(fs.filter_is_img('foo.hdf4'))
-        assert_true(fs.filter_is_img('foo.h5'))
-        assert_true(fs.filter_is_img('foo.hdf5'))
+        assert_false(fs.filter_is_h5('foo.bar'))
+        assert_false(fs.filter_is_h5('foo.h5.bar'))
+        assert_false(fs.filter_is_h5('foo.hdf'))
+        assert_false(fs.filter_is_h5('foo.h4'))
+        assert_false(fs.filter_is_h5('foo.hdf4'))
+        assert_true(fs.filter_is_h5('foo.h5'))
+        assert_true(fs.filter_is_h5('foo.hdf5'))
 
     def test_gen_paths_no_filter(self):
 
