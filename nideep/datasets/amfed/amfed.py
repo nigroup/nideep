@@ -138,9 +138,8 @@ class AMFED(object):
         Constructor
         '''
         self.logger = logging.getLogger(__name__)
-        logging.basicConfig(level=logging.INFO)
         self.cache_dir = cache_dir
-        if not os.path.exists(cache_dir):
+        if cache_dir and not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
         self.dir_au_labels = os.path.join(dir_prefix, AMFED.DIRNAME_AU_LABELS)
         if not os.path.isdir(self.dir_au_labels):
@@ -159,6 +158,7 @@ class AMFED(object):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     amfed = AMFED(dir_prefix='/mnt/raid/data/ni/dnn/AMFED/', video_type=AMFED.VIDEO_TYPE_AVI,
                   cache_dir='/mnt/raid/data/ni/dnn/rparra/cache/')
     amfed.as_numpy_array()
