@@ -98,7 +98,7 @@ class TestLabelUtils:
                 k2.sort()
                 assert_list_equal(keys, k2)
 
-    
+
     def test_walk_id_loc_to_loc(self):
         for i in xrange(3):
             fpath = os.path.join(self.dir_tmp, 'x%d.h5' % i)
@@ -112,7 +112,7 @@ class TestLabelUtils:
             with File(fpath, 'w') as h:
                 h['label_id_loc'] = fake_data
                 assert_not_in(new_key, h)
-            
+
         flist = lu.walk_id_loc_to_loc(self.dir_tmp, new_key)
         assert_equal(len(flist), 3)
         for fpath in flist:
