@@ -46,7 +46,6 @@ class TestLabelUtils:
                 np.array([[[[111, 222, 333]]],
                           [[[444, 555, 666]]]])
             assert_true(np.all(x == expected[..., :-1]))
-        pass
 
     def test_id_loc_to_loc_incl_void(self):
 
@@ -73,7 +72,6 @@ class TestLabelUtils:
                 np.array([[[[111, 222, 333]]],
                           [[[444, 555, 666]]]])
             assert_true(np.all(x == expected))
-        pass
 
     def test_id_loc_to_loc_keys(self):
 
@@ -99,7 +97,6 @@ class TestLabelUtils:
                 sorted(k2)
                 k2.sort()
                 assert_list_equal(keys, k2)
-        pass
 
     
     def test_walk_id_loc_to_loc(self):
@@ -129,4 +126,3 @@ class TestLabelUtils:
                     np.array([[[[111, 222, 333]]],
                               [[[444, 555, 666]]]])
                 assert_true(np.all(x == expected[..., :-1]))
-        pass
