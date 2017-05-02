@@ -97,7 +97,7 @@ class TestLabelUtils:
                 sorted(k2)
                 k2.sort()
                 assert_list_equal(keys, k2)
-
+                assert_true(np.all(fake_data == h['label_id_loc'][:]))
 
     def test_walk_id_loc_to_loc(self):
         for i in xrange(3):

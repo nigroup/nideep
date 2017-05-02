@@ -21,7 +21,6 @@ def walk_id_loc_to_loc(dir_src, key_dst):
     
     def runner(fpath):
         if filter_is_h5(fpath):
-            print fpath
             id_loc_to_loc(fpath, key_dst)
             return True # otherwise gen_paths won't append to list
     flist = gen_paths(dir_src, func_filter=runner)
