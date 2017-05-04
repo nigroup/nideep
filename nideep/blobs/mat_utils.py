@@ -11,10 +11,10 @@ def hwc_to_chw(m):
     '''
     if m.ndim == 3:
         m = m.transpose((2, 0, 1))
-    #elif m.ndim == 2:
+    # elif m.ndim == 2:
     else:
         raise AttributeError("No. of dimensions (%d) not supported." % m.ndim)
-    
+
     return m
 
 def cwh_to_chw(m):
@@ -25,7 +25,7 @@ def cwh_to_chw(m):
         m = m.transpose((0, 2, 1))
     else:
         raise AttributeError("No. of dimensions (%d) not supported." % m.ndim)
-    
+
     return m
 
 def expand_dims(m, d):

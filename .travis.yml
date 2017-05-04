@@ -52,12 +52,15 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf scikit-learn
+  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf scikit-learn scikit-image
   - source activate $CONDA_ENV
   
   # Download caffe protobuf message definitions
   - mkdir -p $CAFFE_ROOT/src/caffe/proto
   - travis_retry wget -P $CAFFE_ROOT/src/caffe/proto https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
+  # Download caffe python modules
+  - mkdir -p $CAFFE_ROOT/python/caffe
+  - travis_retry wget -P $CAFFE_ROOT/python/caffe https://raw.githubusercontent.com/BVLC/caffe/master/python/caffe/io.py
   # Download caffe log parser from caffe repo
   - mkdir -p $CAFFE_ROOT/tools/extra
   - travis_retry wget -P $CAFFE_ROOT/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/extract_seconds.py

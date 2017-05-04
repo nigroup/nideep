@@ -34,23 +34,20 @@ def init_up_bilinear(net, path_base_weights, key='up'):
     base net -- follow the editing model parameters example to make a fully convolutional VGG16 net.
     http://nbviewer.ipython.org/github/BVLC/caffe/blob/master/examples/net_surgery.ipynb
     """
-    
+
     # do net surgery to set the deconvolution weights for bilinear interpolation
     interp_layers = [k for k in net.params.keys() if key in k]
     interp_surgery(net, interp_layers)
-    
+
     # copy base weights for fine-tuning
     net.copy_from(path_base_weights)
-    
+
     return
 
 if __name__ == '__main__':
-    
+
     caffe.set_mode_cpu()
-    
+
     solver = caffe.SGDSolver(os.path.expanduser('~/models/fcn_segm/fcn-32s-Pascal-context/tx3/solver.prototxt'))
     init_up_bilinear(solver.net, os.path.expanduser('~/models/vgg-16/VGG_ILSVRC_16_layers_fcn.caffemodel'))
     solver.net.save(os.path.expanduser('~/models/fcn_segm/fcn-32s-Pascal-context/tx3/fcn.caffemodel'))
-    
-    pass
-

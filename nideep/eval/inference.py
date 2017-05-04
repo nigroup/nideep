@@ -183,11 +183,12 @@ def response_to_lmdb(fpath_net,
                      fpath_weights,
                      keys,
                      dst_prefix,
-                     modes=[caffe.TRAIN, caffe.TEST],
+                     modes=None,
                      ):
     """
     keys -- name of responses to extract. Must be valid for all requested modes
     """
+    modes = modes or [caffe.TRAIN, caffe.TEST]
     out = dict.fromkeys(modes)
 
     for m in modes:
@@ -231,7 +232,7 @@ if __name__ == '__main__':
     import os
     print [os.path.isdir(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
     print [read_lmdb.num_entries(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
-    #print [read_lmdb.read_values(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
+    # print [read_lmdb.read_values(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
 
 #     with h5py.File(fpath, "w") as f:
 #
@@ -242,6 +243,10 @@ if __name__ == '__main__':
 #         f['c'] = np.arange(3)
 #         f['d'] = [np.array([[1,2],[4,5]], dtype=float), np.array([[1,2],[4, 5]], dtype=float)+10]
 
+<<<<<<< HEAD
     #infer_to_h5(net, 1, ['accuracy'], fpath)
 
     pass
+=======
+    # infer_to_h5(net, 1, ['accuracy'], fpath)
+>>>>>>> master

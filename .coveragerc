@@ -11,7 +11,7 @@ omit =
   fabfile.py
   setup.py
   tests/*
-  test*.py
+  */test*.py
   caffe.py
   caffe_mock.py
   */caffe/*

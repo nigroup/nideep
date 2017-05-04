@@ -133,7 +133,11 @@ class TestInferenceHDF5:
 
         assert_equal(net.forward.call_count, n)
         assert_true(os.path.isfile(fpath))
+<<<<<<< HEAD
         assert_list_equal(out, [n*4]*2)
+=======
+        assert_list_equal(out, [n * 4] * 2)
+>>>>>>> master
 
     @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_h5_fixed_dims_preserve_batch_yes(self, mock_net):
@@ -235,7 +239,7 @@ class TestInferenceLMDB:
         out = infr.infer_to_lmdb(net, ['x', 'z'], n, dst_prefix)
 
         assert_equal(net.forward.call_count, n)
-        assert_list_equal(out, [n*4]*2)
+        assert_list_equal(out, [n * 4] * 2)
         for k in b.keys():
             if k in ['x', 'z']:
                 assert_true(os.path.isdir(dst_prefix % k))
@@ -261,7 +265,7 @@ class TestInferenceLMDB:
         out = infr.infer_to_lmdb_cur(net, ['x', 'z'], n, dst_prefix)
 
         assert_equal(net.forward.call_count, n)
-        assert_list_equal(out, [n*4]*2)
+        assert_list_equal(out, [n * 4] * 2)
         for k in b.keys():
             if k in ['x', 'z']:
                 assert_true(os.path.isdir(dst_prefix % k))
@@ -287,7 +291,7 @@ class TestInferenceLMDB:
         out = infr.infer_to_lmdb_cur(net, ['z'], n, dst_prefix)
 
         assert_equal(net.forward.call_count, n)
-        assert_list_equal(out, [n*4])
+        assert_list_equal(out, [n * 4])
         for k in b.keys():
             if k in ['z']:
                 assert_true(os.path.isdir(dst_prefix % k))
@@ -329,3 +333,4 @@ class TestInferenceLMDB:
                     assert_true(os.path.isdir(dst_prefix + ('%s_' + m + '_lmdb') % k))
                 else:
                     assert_false(os.path.isdir(dst_prefix + ('%s_' + m + '_lmdb') % k))
+
