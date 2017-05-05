@@ -133,11 +133,7 @@ class TestInferenceHDF5:
 
         assert_equal(net.forward.call_count, n)
         assert_true(os.path.isfile(fpath))
-<<<<<<< HEAD
         assert_list_equal(out, [n*4]*2)
-=======
-        assert_list_equal(out, [n * 4] * 2)
->>>>>>> master
 
     @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_h5_fixed_dims_preserve_batch_yes(self, mock_net):

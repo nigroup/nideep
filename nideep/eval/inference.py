@@ -255,11 +255,4 @@ if __name__ == '__main__':
 #         f['b'] = [1, 2]
 #         f['c'] = np.arange(3)
 #         f['d'] = [np.array([[1,2],[4,5]], dtype=float), np.array([[1,2],[4, 5]], dtype=float)+10]
-
-<<<<<<< HEAD
     #infer_to_h5(net, 1, ['accuracy'], fpath)
-
-    pass
-=======
-    # infer_to_h5(net, 1, ['accuracy'], fpath)
->>>>>>> master
