@@ -3,6 +3,7 @@ Created on Dec 3, 2015
 
 @author: kashefy
 '''
+import logging
 import numpy as np
 import h5py
 import lmdb
@@ -11,6 +12,8 @@ from nideep.iow import read_lmdb, to_lmdb
 from nideep.iow import read_hdf5
 from nideep.iow.lmdb_utils import MAP_SZ, IDX_FMT
 from nideep.blobs.mat_utils import expand_dims
+
+logger = logging.getLogger(__name__)
 
 def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
     """
@@ -152,7 +155,6 @@ def est_min_num_fwd_passes(fpath_net, mode_str):
     """
     from nideep.proto.proto_utils import Parser
     np = Parser().from_net_params_file(fpath_net)
-
     num_passes = 0
 
     for l in np.layer:
@@ -160,10 +162,9 @@ def est_min_num_fwd_passes(fpath_net, mode_str):
             num_entries = read_lmdb.num_entries(l.data_param.source)
             num_passes = int(num_entries / l.data_param.batch_size)
             if num_entries % l.data_param.batch_size != 0:
-                print("WARNING: db size not a multiple of batch size. Adding another fwd. pass.")
+                logger.warning("db size not a multiple of batch size. Adding another fwd. pass.")
                 num_passes += 1
-            print("%d fwd. passes with batch size %d" % (num_passes, l.data_param.batch_size))
-
+            logger.info("%d fwd. passes with batch size %d" % (num_passes, l.data_param.batch_size))
     return num_passes
 
 def est_min_num_fwd_passes_h5(fpath_net, mode_str, key_label):
@@ -186,9 +187,9 @@ def est_min_num_fwd_passes_h5(fpath_net, mode_str, key_label):
             num_entries = read_hdf5.num_entries(l.hdf5_data_param.source, key_label)
             num_passes = int(num_entries / l.hdf5_data_param.batch_size)
             if num_entries % l.hdf5_data_param.batch_size != 0:
-                print("WARNING: db size not a multiple of batch size. Adding another fwd. pass.")
+                logger.warning("db size not a multiple of batch size. Adding another fwd. pass.")
                 num_passes += 1
-            print("%d fwd. passes with batch size %d" % (num_passes, l.hdf5_data_param.batch_size))
+            logger.info("%d fwd. passes with batch size %d" % (num_passes, l.hdf5_data_param.batch_size))
 
     return num_passes
 
