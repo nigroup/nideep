@@ -9,7 +9,7 @@ import h5py
 import lmdb
 import caffe
 from nideep.iow import read_lmdb, to_lmdb
-from nideep.iow import read_hdf5
+from nideep.iow.dataSource import CreateDatasource
 from nideep.iow.lmdb_utils import MAP_SZ, IDX_FMT
 from nideep.blobs.mat_utils import expand_dims
 
@@ -144,7 +144,7 @@ def forward(net, keys):
     net.forward()
     return {k : net.blobs[k].data for k in keys}
 
-def est_min_num_fwd_passes(fpath_net, mode_str):
+def est_min_num_fwd_passes(fpath_net, mode_str, key=None):
     """
     if multiple source for same mode, base num_passes on last
     fpath_net -- path to network definition
@@ -155,43 +155,24 @@ def est_min_num_fwd_passes(fpath_net, mode_str):
     """
     from nideep.proto.proto_utils import Parser
     np = Parser().from_net_params_file(fpath_net)
-    num_passes = 0
-
+    num_passes_each = []
     for l in np.layer:
         if 'data' in l.type.lower() and mode_str.lower() in l.data_param.source.lower():
-            num_entries = read_lmdb.num_entries(l.data_param.source)
+            num_entries = CreateDatasource(l.data_param.source, key=key).num_entries()
             num_passes = int(num_entries / l.data_param.batch_size)
             if num_entries % l.data_param.batch_size != 0:
                 logger.warning("db size not a multiple of batch size. Adding another fwd. pass.")
                 num_passes += 1
             logger.info("%d fwd. passes with batch size %d" % (num_passes, l.data_param.batch_size))
-    return num_passes
-
-def est_min_num_fwd_passes_h5(fpath_net, mode_str, key_label):
-    """
-    hdf5 equivalent of est_min_num_fwd_passes
-    if multiple source for same mode, base num_passes on last
-    fpath_net -- path to network definition
-    mode_str -- train or test?
-
-    return
-    minimum no. of forward passes to cover training set
-    """
-    from nideep.proto.proto_utils import Parser
-    np = Parser().from_net_params_file(fpath_net)
-
-    num_passes = 0
-
-    for l in np.layer:
-        if 'data' in l.type.lower() and mode_str.lower() in l.hdf5_data_param.source.lower():
-            num_entries = read_hdf5.num_entries(l.hdf5_data_param.source, key_label)
+        elif 'hdf5data' in l.type.lower() and mode_str.lower() in l.data_param.source.lower():
+            num_entries = CreateDatasource(l.hdf5_data_param.source, key=key).num_entries()
             num_passes = int(num_entries / l.hdf5_data_param.batch_size)
             if num_entries % l.hdf5_data_param.batch_size != 0:
                 logger.warning("db size not a multiple of batch size. Adding another fwd. pass.")
                 num_passes += 1
             logger.info("%d fwd. passes with batch size %d" % (num_passes, l.hdf5_data_param.batch_size))
-
-    return num_passes
+        num_passes_each.append(num_passes)
+    return max(num_passes_each)
 
 def response_to_lmdb(fpath_net,
                      fpath_weights,

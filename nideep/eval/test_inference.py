@@ -13,6 +13,12 @@ import numpy as np
 from numpy.testing import assert_array_equal
 import h5py
 import inference as infr
+import sys
+CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
+ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)
+TEST_DATA_DIRNAME = 'test_data'
+TEST_NET_FILENAME = 'n1.prototxt'
+TEST_NET_HDF5DATA_FILENAME = 'n1h.prototxt'
 
 class Bunch:
     def __init__(self, **kwds):
@@ -101,7 +107,6 @@ class TestInferenceHDF5:
         # mock methods and properties of Net objects
         mock_net.return_value.forward.return_value = np.zeros(1)
         type(mock_net.return_value).blobs = PropertyMock(return_value=b)
-
 
         for n in range(1, 10):
 
