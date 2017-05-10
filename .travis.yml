@@ -54,8 +54,6 @@ before_install:
   - conda info -a
   - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf scikit-learn scikit-image
   - source activate $CONDA_ENV
-  - echo "Installing Coveralls if coverage enabled:"
-  - if [[ $WITH_COVERAGE == ON ]]; then conda install coveralls; fi
   # Download caffe protobuf message definitions
   - mkdir -p $CAFFE_ROOT/src/caffe/proto
   - travis_retry wget -P $CAFFE_ROOT/src/caffe/proto https://raw.githubusercontent.com/BVLC/caffe/master/src/caffe/proto/caffe.proto
@@ -68,15 +66,16 @@ before_install:
   - travis_retry wget -P $CAFFE_ROOT/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/parse_log.py
   
 install:
-  - travis_retry pip install lmdb 
+  - travis_retry pip install lmdb
+  - echo "Installing Coveralls if coverage enabled:"
+  - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
   - export C_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$C_INCLUDE_PATH"
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
-  # list installed python packages
-  #- pip freeze
+  #- pip freeze # list installed python packages
   - chmod +x $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh; $TRAVIS_BUILD_DIR/.ci/travis/setup_caffe_mock.sh $TRAVIS_BUILD_DIR $CAFFE_ROOT
-  - ls $CAFFE_ROOT/python/caffe/
-  - ls $CAFFE_ROOT/python/caffe/proto
+  #- ls $CAFFE_ROOT/python/caffe/
+  #- ls $CAFFE_ROOT/python/caffe/proto
   
 script:
   - export PYTHONPATH="$TRAVIS_BUILD_DIR:$CAFFE_ROOT/python:$CAFFE_ROOT/tools/extra:$PYTHONPATH"
