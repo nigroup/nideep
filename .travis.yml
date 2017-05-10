@@ -80,9 +80,8 @@ install:
 script:
   - export PYTHONPATH="$TRAVIS_BUILD_DIR:$CAFFE_ROOT/python:$CAFFE_ROOT/tools/extra:$PYTHONPATH"
   - if [[ $WITH_COVERAGE == ON ]]; then
-      nosetests --with-coverage --logging-level=INFO --nocapture
-    else
-      nosetests --logging-level=INFO --nocapture
+      nosetests --with-coverage --logging-level=INFO --nocapture;
+      nosetests --logging-level=INFO --nocapture;
     fi
       
 after_success:
