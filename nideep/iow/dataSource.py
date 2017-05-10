@@ -17,19 +17,19 @@ class CreateDatasource(object):
         if os.path.splitext(p)[-1] == '.txt':
             return DataSourceH5List(p, key)
         if p.endswith('lmdb'):
-            return DataSourceLMDB(p)        
+            return DataSourceLMDB(p)
         return None
-    
+
 class AbstractDataSource(object):
     '''
     classdocs
     '''
     __metaclass__ = ABCMeta
-    
+
     @abstractmethod
     def num_entries(self):
         pass
-    
+
     @abstractmethod
     def exists(self):
         pass
@@ -41,14 +41,14 @@ class AbstractDataSource(object):
         self.p = p
         self.logger = logging.getLogger(__name__)
         self.exists()
-        
+
 class DataSourceLMDB(AbstractDataSource):
     '''
     classdocs
     '''
     def num_entries(self):
         return read_lmdb.num_entries(self.p)
-        
+
     def exists(self):
         if not os.path.isdir(self.p):
             raise lmdb.Error("LMDB not found (%s)")
@@ -58,7 +58,7 @@ class DataSourceLMDB(AbstractDataSource):
         Constructor
         '''
         super(DataSourceLMDB, self).__init__(p)
-        
+
 class DataSourceH5(AbstractDataSource):
     '''
     classdocs
@@ -66,7 +66,7 @@ class DataSourceH5(AbstractDataSource):
     def num_entries(self):
         with h5py.File(self.p, 'r') as h:
             return len(h[self.key])
-        
+
     def exists(self):
         with h5py.File(self.p, 'r') as h:
             if self.key not in h.keys():
@@ -78,7 +78,7 @@ class DataSourceH5(AbstractDataSource):
         '''
         self.key = key
         super(DataSourceH5, self).__init__(p)
-        
+
 class DataSourceH5List(AbstractDataSource):
     '''
     classdocs
@@ -88,7 +88,7 @@ class DataSourceH5List(AbstractDataSource):
         for h in self.h5list:
             num_total += h.num_entries()
         return num_total
-        
+
     def exists(self):
         with open(self.p, 'r') as f:
             for l in f:
@@ -101,4 +101,3 @@ class DataSourceH5List(AbstractDataSource):
         self.key = key
         self.h5list = []
         super(DataSourceH5List, self).__init__(p)
-        

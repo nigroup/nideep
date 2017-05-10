@@ -12,7 +12,6 @@ from nideep.iow import to_lmdb
 from nideep.iow.dataSource import CreateDatasource
 from nideep.iow.lmdb_utils import MAP_SZ, IDX_FMT
 from nideep.blobs.mat_utils import expand_dims
-from _ast import Or
 
 logger = logging.getLogger(__name__)
 
@@ -39,10 +38,10 @@ def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
                         batch_sz = d[k].shape[0]
                         for k2 in keys:
                             shape_all = list(d[k2].shape)
-                            shape_all[0] = n*batch_sz
+                            shape_all[0] = n * batch_sz
                             f.create_dataset(k2, tuple(shape_all), d[k].dtype)
                     d_copy = np.copy(d[k])
-                    f[k][idx_start:idx_start+batch_sz] = d_copy
+                    f[k][idx_start:idx_start + batch_sz] = d_copy
             if not preserve_batch:
                 idx_start += batch_sz
         l = [len(f[k]) for k in f.keys()]
@@ -155,7 +154,7 @@ def est_min_num_fwd_passes(fpath_net, mode_str, key=None):
     minimum no. of forward passes to cover training set
     """
     from nideep.proto.proto_utils import Parser
-    mode_num = {'train' : caffe.TRAIN, 
+    mode_num = {'train' : caffe.TRAIN,
                 'test' : caffe.TEST}[mode_str]
     np = Parser().from_net_params_file(fpath_net)
     num_passes_each = []

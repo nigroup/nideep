@@ -55,49 +55,32 @@ class TestInference:
         assert_list_equal(out.keys(), ['z'])
         assert_equal(out['z'].shape, (3, 2), msg="unexpected shape for blob z")
         assert_array_equal(b['z'].data, out['z'])
-        
+
 class TestInferenceEstNumFwdPasses():
-    
-    @classmethod
-    def setup_class(self):
-        import re
-        self.dir_tmp = tempfile.mkdtemp()
-#        fpath_net_src = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_FILENAME)
-#        self.fpath_net = os.path.join(self.dir_tmp, TEST_NET_FILENAME)
-#        with open(fpath_net_src, "rt") as fin:
-#            with open(self.fpath_net, "wt") as fout:
-#                for line in fin:
-#                    re.sub('source:*?\n','', line, flags=re.DOTALL)
-#                    fout.write(line.replace('A', 'Orange'))
 
-    @classmethod
-    def teardown_class(self):
-
-        shutil.rmtree(self.dir_tmp)
-    
     @patch('nideep.iow.dataSource.DataSourceLMDB')
     def test_est_num_fwd_passes_caffe_lmdb(self, mock_ds):
-        
+
         # we know the batch sizes from the prototxt file
         fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_FILENAME)
-        
-        mock_ds.return_value.num_entries.return_value = 77*64 # got batch size 64 from files directly
+
+        mock_ds.return_value.num_entries.return_value = 77 * 64  # got batch size 64 from files directly
         assert_equal(77, infr.est_min_num_fwd_passes(fpath_net, 'train'))
-        
-        mock_ds.return_value.num_entries.return_value = 33*100 # got batch size 64 from files directly
+
+        mock_ds.return_value.num_entries.return_value = 33 * 100  # got batch size 64 from files directly
         fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_FILENAME)
         assert_equal(33, infr.est_min_num_fwd_passes(fpath_net, 'test'))
-        
+
     @patch('nideep.iow.dataSource.DataSourceH5List')
     def test_est_num_fwd_passes_caffe_h5list(self, mock_ds):
-        
+
         # we know the batch sizes from the prototxt file
         fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_HDF5DATA_FILENAME)
-        
-        mock_ds.return_value.num_entries.return_value = 44*64 # got batch size 64 from files directly
+
+        mock_ds.return_value.num_entries.return_value = 44 * 64  # got batch size 64 from files directly
         assert_equal(44, infr.est_min_num_fwd_passes(fpath_net, 'train'))
-        
-        mock_ds.return_value.num_entries.return_value = 11*128 # got batch size 64 from files directly
+
+        mock_ds.return_value.num_entries.return_value = 11 * 128  # got batch size 64 from files directly
         fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_HDF5DATA_FILENAME)
         assert_equal(11, infr.est_min_num_fwd_passes(fpath_net, 'test'))
 
@@ -117,7 +100,7 @@ class TestInferenceHDF5:
     def test_infer_to_h5_fixed_dims(self, mock_net):
 
         # fake minimal test data
-        b = {k : Bunch(data=np.random.rand(1, 1+idx, 3, 2*(idx+1))) for idx, k in enumerate(['x', 'y', 'z'])}
+        b = {k : Bunch(data=np.random.rand(1, 1 + idx, 3, 2 * (idx + 1))) for idx, k in enumerate(['x', 'y', 'z'])}
 
         # mock methods and properties of Net objects
         mock_net.return_value.forward.return_value = np.zeros(1)
@@ -141,7 +124,7 @@ class TestInferenceHDF5:
                 if k == 'y':
                     assert_false(k in f, "Unexpected key found (%s)" % k)
                 else:
-                    assert_equal(f[k].shape, (1, 1+idx, 3, 2*(idx+1)),
+                    assert_equal(f[k].shape, (1, 1 + idx, 3, 2 * (idx + 1)),
                                  msg="unexpected shape for blob %s" % k)
             assert_array_equal(b[k].data, f[k])
 
@@ -186,7 +169,7 @@ class TestInferenceHDF5:
 
         assert_equal(net.forward.call_count, n)
         assert_true(os.path.isfile(fpath))
-        assert_list_equal(out, [n*4]*2)
+        assert_list_equal(out, [n * 4] * 2)
 
     @patch('nideep.eval.inference.caffe.Net')
     def test_infer_to_h5_fixed_dims_preserve_batch_yes(self, mock_net):
@@ -208,7 +191,7 @@ class TestInferenceHDF5:
 
         assert_equal(net.forward.call_count, n)
         assert_true(os.path.isfile(fpath))
-        assert_list_equal(out, [n]*2)
+        assert_list_equal(out, [n] * 2)
 
 class TestInferenceLMDB:
 
@@ -370,11 +353,11 @@ class TestInferenceLMDB:
                                                      ['x', 'z'],
                                                      dst_prefix)
 
-        assert_equal(net.forward.call_count, 3*2) # double for both modes
+        assert_equal(net.forward.call_count, 3 * 2)  # double for both modes
         from caffe import TRAIN, TEST
         assert_list_equal(out.keys(), [TRAIN, TEST])
-        assert_list_equal(out[TRAIN], [3*4]*2)
-        assert_list_equal(out[TEST], [3*4]*2)
+        assert_list_equal(out[TRAIN], [3 * 4] * 2)
+        assert_list_equal(out[TEST], [3 * 4] * 2)
 
         for m in ['train', 'test']:
             for k in b.keys():
