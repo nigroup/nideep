@@ -9,7 +9,7 @@ import string
 import shutil
 import tempfile
 from nose.tools import assert_equals, assert_false, \
-    assert_raises, assert_true, assert_is_instance, assert_raises
+    assert_raises, assert_true, assert_is_instance
 import numpy as np
 import lmdb
 import h5py
