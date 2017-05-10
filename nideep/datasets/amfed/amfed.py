@@ -139,8 +139,9 @@ class AMFED(object):
         '''
         self.logger = logging.getLogger(__name__)
         self.cache_dir = cache_dir
-        if cache_dir and not os.path.exists(cache_dir):
+        if cache_dir and not os.path.isdir(cache_dir):
             os.makedirs(cache_dir)
+            self.logger.info("Creating cache directory at %s" % os.path.abspath(self.cache_dir))
         self.dir_au_labels = os.path.join(dir_prefix, AMFED.DIRNAME_AU_LABELS)
         if not os.path.isdir(self.dir_au_labels):
             self.logger.warning("AU Labels directory does not exist (%s)" % self.dir_au_labels)
