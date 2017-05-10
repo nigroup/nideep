@@ -15,7 +15,7 @@ import h5py
 import inference as infr
 import sys
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
-ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)
+ROOT_PKG_PATH = os.path.dirname(os.path.dirname(CURRENT_MODULE_PATH))
 TEST_DATA_DIRNAME = 'test_data'
 TEST_NET_FILENAME = 'n1.prototxt'
 TEST_NET_HDF5DATA_FILENAME = 'n1h.prototxt'
@@ -60,16 +60,46 @@ class TestInferenceEstNumFwdPasses():
     
     @classmethod
     def setup_class(self):
-
+        import re
         self.dir_tmp = tempfile.mkdtemp()
+#        fpath_net_src = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_FILENAME)
+#        self.fpath_net = os.path.join(self.dir_tmp, TEST_NET_FILENAME)
+#        with open(fpath_net_src, "rt") as fin:
+#            with open(self.fpath_net, "wt") as fout:
+#                for line in fin:
+#                    re.sub('source:*?\n','', line, flags=re.DOTALL)
+#                    fout.write(line.replace('A', 'Orange'))
 
     @classmethod
     def teardown_class(self):
 
         shutil.rmtree(self.dir_tmp)
     
-    def test_est_num_fwd_passes(self):
-        pass # TODO
+    @patch('nideep.iow.dataSource.DataSourceLMDB')
+    def test_est_num_fwd_passes_caffe_lmdb(self, mock_ds):
+        
+        # we know the batch sizes from the prototxt file
+        fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_FILENAME)
+        
+        mock_ds.return_value.num_entries.return_value = 77*64 # got batch size 64 from files directly
+        assert_equal(77, infr.est_min_num_fwd_passes(fpath_net, 'train'))
+        
+        mock_ds.return_value.num_entries.return_value = 33*100 # got batch size 64 from files directly
+        fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_FILENAME)
+        assert_equal(33, infr.est_min_num_fwd_passes(fpath_net, 'test'))
+        
+    @patch('nideep.iow.dataSource.DataSourceH5List')
+    def test_est_num_fwd_passes_caffe_h5list(self, mock_ds):
+        
+        # we know the batch sizes from the prototxt file
+        fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_HDF5DATA_FILENAME)
+        
+        mock_ds.return_value.num_entries.return_value = 44*64 # got batch size 64 from files directly
+        assert_equal(44, infr.est_min_num_fwd_passes(fpath_net, 'train'))
+        
+        mock_ds.return_value.num_entries.return_value = 11*128 # got batch size 64 from files directly
+        fpath_net = os.path.join(ROOT_PKG_PATH, TEST_DATA_DIRNAME, TEST_NET_HDF5DATA_FILENAME)
+        assert_equal(11, infr.est_min_num_fwd_passes(fpath_net, 'test'))
 
 class TestInferenceHDF5:
 
