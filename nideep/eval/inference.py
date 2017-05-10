@@ -8,7 +8,7 @@ import numpy as np
 import h5py
 import lmdb
 import caffe
-from nideep.iow import read_lmdb, to_lmdb
+from nideep.iow import to_lmdb
 from nideep.iow.dataSource import CreateDatasource
 from nideep.iow.lmdb_utils import MAP_SZ, IDX_FMT
 from nideep.blobs.mat_utils import expand_dims
@@ -37,7 +37,7 @@ def infer_to_h5_fixed_dims(net, keys, n, dst_fpath, preserve_batch=False):
                     if batch_sz is None:
                         batch_sz = d[k].shape[0]
                         for k2 in keys:
-                            shape_all = list(d[k].shape)
+                            shape_all = list(d[k2].shape)
                             shape_all[0] = n*batch_sz
                             f.create_dataset(k2, tuple(shape_all), d[k].dtype)
                     d_copy = np.copy(d[k])
@@ -195,46 +195,4 @@ def response_to_lmdb(fpath_net,
     return out
 
 if __name__ == '__main__':
-
-#     from os.path import expanduser
-#
-#     fpath_net = expanduser('~/models/dark/mnist/t0/lenet_train_test_inf.prototxt')
-#     fpath_weights = expanduser('~/models/dark/mnist/t0/lenet_iter_10000.caffemodel')
-#     net = caffe.Net(fpath_net, fpath_weights, caffe.TRAIN)
-#
-#     fpath = expanduser('~/models/dark/mnist/t0/mnist_ip2_train')
-#     num_entries = read_lmdb.num_entries(expanduser('~/data/mnist/mnist_train_lmdb'))
-#
-#     infer_to_h5_fixed_dims(net, ['ip2'], num_entries, "%s.h5" % fpath)
-#     infer_to_lmdb(net, ['ip2'], num_entries, "%s_lmdb" % fpath)
-
-    from os.path import expanduser
-
-    fpath_net = expanduser('~/models/dark/mnist/t0/lenet_train_test.prototxt')
-    fpath_weights = expanduser('~/models/dark/mnist/t0/lenet_iter_10000.caffemodel')
-
-#     x = response_to_lmdb(fpath_net, fpath_weights,
-#                      ['ip2', 'ip1'],
-#                      expanduser('~/models/dark/mnist/t0/mnistX_'))
-
-    net = caffe.Net(fpath_net, fpath_weights, caffe.TRAIN)
-    keys = ['ip2', 'ip1']
-    x = infer_to_lmdb_cur(net, keys, 2,
-                      expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb'))
-
-    print x
-
-    import os
-    print [os.path.isdir(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
-    print [read_lmdb.num_entries(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
-    # print [read_lmdb.read_values(expanduser('~/models/dark/mnist/t0/Xmnist_%s_train_lmdb') % (k,)) for k in keys]
-
-#     with h5py.File(fpath, "w") as f:
-#
-#         f['a'] = 0
-#
-#
-#         f['b'] = [1, 2]
-#         f['c'] = np.arange(3)
-#         f['d'] = [np.array([[1,2],[4,5]], dtype=float), np.array([[1,2],[4, 5]], dtype=float)+10]
-    #infer_to_h5(net, 1, ['accuracy'], fpath)
+    pass

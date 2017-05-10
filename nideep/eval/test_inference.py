@@ -55,6 +55,21 @@ class TestInference:
         assert_list_equal(out.keys(), ['z'])
         assert_equal(out['z'].shape, (3, 2), msg="unexpected shape for blob z")
         assert_array_equal(b['z'].data, out['z'])
+        
+class TestInferenceEstNumFwdPasses():
+    
+    @classmethod
+    def setup_class(self):
+
+        self.dir_tmp = tempfile.mkdtemp()
+
+    @classmethod
+    def teardown_class(self):
+
+        shutil.rmtree(self.dir_tmp)
+    
+    def test_est_num_fwd_passes(self):
+        pass # TODO
 
 class TestInferenceHDF5:
 
@@ -72,7 +87,7 @@ class TestInferenceHDF5:
     def test_infer_to_h5_fixed_dims(self, mock_net):
 
         # fake minimal test data
-        b = {k : Bunch(data=np.random.rand(1, 1, 3, 2)) for k in ['x', 'y', 'z']}
+        b = {k : Bunch(data=np.random.rand(1, 1+idx, 3, 2*(idx+1))) for idx, k in enumerate(['x', 'y', 'z'])}
 
         # mock methods and properties of Net objects
         mock_net.return_value.forward.return_value = np.zeros(1)
@@ -92,9 +107,12 @@ class TestInferenceHDF5:
         with h5py.File(fpath, "r") as f:
             assert_list_equal([str(k) for k in f.keys()], ['x', 'z'])
 
-            for k in ['x', 'z']:
-                assert_equal(f[k].shape, (1, 1, 3, 2),
-                             msg="unexpected shape for blob %s" % k)
+            for idx, k in enumerate(['x', 'y', 'z']):
+                if k == 'y':
+                    assert_false(k in f, "Unexpected key found (%s)" % k)
+                else:
+                    assert_equal(f[k].shape, (1, 1+idx, 3, 2*(idx+1)),
+                                 msg="unexpected shape for blob %s" % k)
             assert_array_equal(b[k].data, f[k])
 
 
