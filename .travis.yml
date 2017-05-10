@@ -87,5 +87,5 @@ script:
       
 after_success:
   # report test coverage
-  - if [[ $WITH_COVERAGE == ON ]]; coveralls --verbose; fi
+  - if [[ $WITH_COVERAGE == ON ]]; then coveralls --verbose; fi
 
