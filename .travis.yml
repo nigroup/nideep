@@ -52,7 +52,7 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf scikit-learn scikit-image
+  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf scikit-learn scikit-image pandas
   - source activate $CONDA_ENV
   
   # Download caffe protobuf message definitions
