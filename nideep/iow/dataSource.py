@@ -18,7 +18,7 @@ class CreateDatasource(object):
             return DataSourceH5List(p, key)
         if p.endswith('lmdb'):
             return DataSourceLMDB(p)
-        return None
+        raise ValueError("Unrecognized data source (%s)" % p)
 
 class AbstractDataSource(object):
     '''

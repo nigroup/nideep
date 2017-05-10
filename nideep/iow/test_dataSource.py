@@ -9,7 +9,7 @@ import string
 import shutil
 import tempfile
 from nose.tools import assert_equals, assert_false, \
-    assert_raises, assert_true, assert_is_instance
+    assert_raises, assert_true, assert_is_instance, assert_raises
 import numpy as np
 import lmdb
 import h5py
@@ -29,14 +29,14 @@ class TestCreateDatasource:
     def teardown(self):
         shutil.rmtree(self.dir_tmp)
 
-    def test_create_lmdb(self):
+    def test_from_path_lmdb(self):
 
         for fname in ['x_lmdb', 'x.lmdb']:
             fpath = os.path.join(self.dir_tmp, fname)
             create_empty_lmdb(fpath)
             assert_is_instance(ds.CreateDatasource.from_path(fpath), ds.DataSourceLMDB)
 
-    def test_create_h5list(self):
+    def test_from_path_h5list(self):
         for fname in ['foo.txt']:
             fpath = os.path.join(self.dir_tmp, fname)
             with open(fpath, 'a') as f:
@@ -46,6 +46,13 @@ class TestCreateDatasource:
                 h['a'] = np.random.rand(10, 20)
                 h['b'] = np.random.rand(20, 10, 20)
             assert_is_instance(ds.CreateDatasource.from_path(fpath, 'a'), ds.DataSourceH5List)
+
+    def test_from_path_invalid(self):
+        for fname in ['foo.png', 'foo.abc']:
+            fpath = os.path.join(self.dir_tmp, fname)
+            with open(fpath, 'wb') as f:
+                f.write("bla")
+            assert_raises(ValueError, ds.CreateDatasource.from_path, fpath)
 
 class TestDataSourceLMDB:
     @staticmethod
