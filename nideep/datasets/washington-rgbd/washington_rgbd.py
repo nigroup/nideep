@@ -21,10 +21,11 @@ class WashingtonRGBD(object):
     
     """
 
-    def __init__(self, root_dir='', csv_default='', csv_interpolated_default=''):
+    def __init__(self, root_dir='', csv_default='', csv_perframe_default='', csv_interpolated_default=''):
         self.logger = logging.getLogger(__name__)
         self.root_dir = root_dir
         self.csv_default = csv_default
+        self.csv_perframe_default = csv_perframe_default
         self.csv_interpolated_default = csv_interpolated_default
 
     # Load the dataset metadata to a Pandas dataframe and save the result to a csv file
@@ -126,6 +127,45 @@ class WashingtonRGBD(object):
 
         return sorted_df
 
+    # Get a new dataframe where each row represent all information about 1 frame including the rgb and depth locations
+    # structure: ['category', 'instance_number', 'video_no', 'frame_no', 'crop_location', 'depthcrop_location']
+    def get_df_per_frame(self):
+        if os.path.isfile(self.csv_perframe_default):
+            return pd.read_csv(self.csv_perframe_default)
+
+        raw_df = self.interpolate_poses(self.load_metadata())
+        raw_rgb_df = raw_df[raw_df.data_type == 'crop']
+        data = []
+
+        for i in range(len(raw_rgb_df.index)):
+            current_row = raw_df.iloc[[i]]
+            current_category = current_row['category'].values[0]
+            current_instance_number = current_row['instance_number'].values[0]
+            current_video_no = current_row['video_no'].values[0]
+            current_frame_no = current_row['frame_no'].values[0]
+            current_crop_location = current_row['location'].values[0]
+            current_depthcrop_location = raw_df[(raw_df.category == current_category)
+                                                & (raw_df.instance_number == current_instance_number)
+                                                & (raw_df.video_no == current_video_no)
+                                                & (raw_df.frame_no == current_frame_no)
+                                                & (raw_df.data_type == 'depthcrop')]['location'].values[0]
+
+            self.logger.info("processing " + os.path.split(current_crop_location)[1]
+                             + " and " + os.path.split(current_depthcrop_location)[1])
+
+            data.append({
+                'category': current_category,
+                'instance_number': current_instance_number,
+                'video_no': current_video_no,
+                'frame_no': current_frame_no,
+                'crop_location': current_crop_location,
+                'depthcrop_location': current_depthcrop_location
+            })
+
+        new_df = pd.DataFrame(data)
+        new_df.to_csv(self.csv_perframe_default, index=False)
+        return new_df
+
     def extract_rgb_only(self, output_path):
         data_frame = self.load_metadata()
         rgb_files = data_frame[data_frame['data_type'] == 'crop']['location']
@@ -139,19 +179,19 @@ class WashingtonRGBD(object):
     # Left:RGB, (Middle: Depth Map),  Right: Rotation
     def combine_viewpoints(self, angle, video_no, should_include_depth, output_path):
 
-        def join_rgb_with_rotation(data_frame, output_path):
-            data_frame = data_frame[data_frame['data_type'] == 'crop']
-            for i in range(len(data_frame.index)):
-                current_original_file_df = data_frame.iloc[[i]]
+        def join_rgb_with_rotation(df, output_path):
+            df = df[df['data_type'] == 'crop']
+            for i in range(len(df.index)):
+                current_original_file_df = df.iloc[[i]]
 
                 # Filtering out the rotation candidates,
                 # most of the things should be the same, except for frame_no,
                 # and the 2 poses should differentiate by the provided angle with an error bound of +-1
-                rotation_candidates = data_frame[(data_frame['category'] == current_original_file_df['category'].values[0])
-                                                 & (data_frame['instance_number'] == current_original_file_df['instance_number'].values[0])
-                                                 & (data_frame['video_no'] == current_original_file_df['video_no'].values[0])
-                                                 & (data_frame['pose'] <= current_original_file_df['pose'].values[0] + angle + 1)
-                                                 & (data_frame['pose'] >= current_original_file_df['pose'].values[0] + angle - 1)]
+                rotation_candidates = df[(df['category'] == current_original_file_df['category'].values[0])
+                                                 & (df['instance_number'] == current_original_file_df['instance_number'].values[0])
+                                                 & (df['video_no'] == current_original_file_df['video_no'].values[0])
+                                                 & (df['pose'] <= current_original_file_df['pose'].values[0] + angle + 1)
+                                                 & (df['pose'] >= current_original_file_df['pose'].values[0] + angle - 1)]
 
                 for j in range(len(rotation_candidates.index)):
                     current_rotated_file_df = rotation_candidates.iloc[[j]]
@@ -178,25 +218,49 @@ class WashingtonRGBD(object):
                                              '_'.join([os.path.splitext(left_img_name)[0],
                                                        right_img_name])), img)
 
-        def join_rgb_depth_rotation(data_frame, output_path):
-            original_df = data_frame[data_frame['data_type'] == 'crop']
-            for i in range(len(original_df.index)):
-                current_original_file_df = original_df.iloc[[i]]
+        def join_rgb_depth_rotation(df, output_path):
+            original_rgb_df = df[df['data_type'] == 'crop']
+            original_rgb_df = original_rgb_df.sort_values(['category', 'video_no', 'frame_no'])
+            original_depth_df = df[df['data_type'] == 'depthcrop']
 
-                rotation_candidates = original_df[(original_df['category'] == current_original_file_df['category'].values[0])
-                                                  & (original_df['instance_number'] == current_original_file_df['instance_number'].values[0])
-                                                  & (original_df['video_no'] == current_original_file_df['video_no'].values[0])
-                                                  & (original_df['pose'] <= current_original_file_df['pose'].values[0] + angle + 1)
-                                                  & (original_df['pose'] >= current_original_file_df['pose'].values[0] + angle - 1)]
+            for i in range(len(original_rgb_df.index)):
+                current_original_file_df = original_rgb_df.iloc[[i]]
+                current_category = current_original_file_df['category'].values[0]
+                current_instance_number = current_original_file_df['instance_number'].values[0]
+                current_video_no = current_original_file_df['video_no'].values[0]
+                current_frame = current_original_file_df['frame_no'].values[0]
+                current_pose = current_original_file_df['pose'].values[0]
 
-                depth_candidates = data_frame[(data_frame['category'] == current_original_file_df['category'].values[0])
-                                              & (data_frame['instance_number'] == int(current_original_file_df['instance_number'].values[0]))
-                                              & (data_frame['video_no'] == int(current_original_file_df['video_no'].values[0]))
-                                              & (data_frame['frame_no'] == int(current_original_file_df['frame_no'].values[0]))
-                                              & (data_frame['data_type'] == 'depthcrop')]
+                rotation_candidates = original_rgb_df[(original_rgb_df['category'] == current_category)
+                                                      & (original_rgb_df['instance_number'] == current_instance_number)
+                                                      & (original_rgb_df['video_no'] == current_video_no)
+                                                      & (original_rgb_df['pose'] <= current_pose + angle + 1)
+                                                      & (original_rgb_df['pose'] >= current_pose + angle - 1)]
+
+                depth_candidates = original_depth_df[(original_depth_df.category == current_category)
+                                                     & (original_depth_df.instance_number == current_instance_number)
+                                                     & (original_depth_df.video_no == current_video_no)
+                                                     & (original_depth_df.frame_no == current_frame)]
 
                 for j in range(len(rotation_candidates.index)):
                     if len(depth_candidates.index) == 0:
+                        print current_category
+                        print current_instance_number
+                        print current_video_no
+                        print current_frame
+                        print current_pose
+
+                        print original_depth_df[(original_depth_df  .category == 'apple')
+                                                & (original_depth_df.instance_number == 3)
+                                                & (original_depth_df.video_no == 1)
+                                                & (original_depth_df.frame_no == 2)
+                                                & (original_depth_df.data_type == 'depthcrop')]
+
+                        print original_depth_df[(original_depth_df  .category == 'apple')
+                                                & (original_depth_df.instance_number == 1)
+                                                & (original_depth_df.video_no == 1)
+                                                & (original_depth_df.frame_no == 4)
+                                                & (original_depth_df.data_type == 'depthcrop')]
                         continue
 
                     current_rotated_file_df = rotation_candidates.iloc[[j]]
@@ -228,14 +292,14 @@ class WashingtonRGBD(object):
                                                        os.path.splitext(middle_img_name)[0],
                                                        right_img_name])), img)
 
-        def join(data_frame, output_path, should_include_depth):
+        def join(df, output_path, should_include_depth):
             if output_path != '' and not os.path.isdir(output_path):
                 os.makedirs(output_path)
 
             if should_include_depth:
-                join_rgb_depth_rotation(data_frame, output_path)
+                join_rgb_depth_rotation(df, output_path)
             else:
-                join_rgb_with_rotation(data_frame, output_path)
+                join_rgb_with_rotation(df, output_path)
 
         data_frame = self.interpolate_poses(self.load_metadata())
 
@@ -253,6 +317,7 @@ class WashingtonRGBD(object):
 if __name__ == '__main__':
     ROOT_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset'
     CSV_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset.csv'
+    CSV_PERFRAME_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-perframe.csv'
     CSV_INTERPOLATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated.csv'
 
     logging.basicConfig(level=logging.INFO)
@@ -260,6 +325,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--rootdir", default=ROOT_DEFAULT)
     parser.add_argument("--csv_dir", default=CSV_DEFAULT)
+    parser.add_argument("--csv_perframe_dir", default=CSV_PERFRAME_DEFAULT)
     parser.add_argument("--csv_interpolated_dir", default=CSV_INTERPOLATED_DEFAULT)
     parser.add_argument("--processed_data_output", default='')
     parser.add_argument("--angle", default=10, type=int)
@@ -271,9 +337,14 @@ if __name__ == '__main__':
         os.makedirs(args.processed_data_output)
 
     # file_list = os.walk(args.rootdir)
-    washington_dataset = WashingtonRGBD(args.rootdir, args.csv_dir, args.csv_interpolated_dir)
-    washington_dataset.combine_viewpoints(angle=args.angle,
-                                          video_no=1,
-                                          should_include_depth=args.depth_included,
-                                          output_path=args.processed_data_output)
+    washington_dataset = WashingtonRGBD(root_dir=args.rootdir,
+                                        csv_default=args.csv_dir,
+                                        csv_perframe_default=args.csv_perframe_dir,
+                                        csv_interpolated_default=args.csv_interpolated_dir)
+
+    washington_dataset.get_df_per_frame()
+    # washington_dataset.combine_viewpoints(angle=args.angle,
+    #                                       video_no=1,
+    #                                       should_include_depth=args.depth_included,
+    #                                       output_path=args.processed_data_output)
 
