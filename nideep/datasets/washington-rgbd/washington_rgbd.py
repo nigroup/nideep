@@ -143,6 +143,7 @@ class WashingtonRGBD(object):
             current_instance_number = current_row['instance_number'].values[0]
             current_video_no = current_row['video_no'].values[0]
             current_frame_no = current_row['frame_no'].values[0]
+            current_pose = current_row['pose'].values[0]
             current_crop_location = current_row['location'].values[0]
             current_depthcrop_location = raw_df[(raw_df.category == current_category)
                                                 & (raw_df.instance_number == current_instance_number)
@@ -158,6 +159,7 @@ class WashingtonRGBD(object):
                 'instance_number': current_instance_number,
                 'video_no': current_video_no,
                 'frame_no': current_frame_no,
+                'pose': current_pose,
                 'crop_location': current_crop_location,
                 'depthcrop_location': current_depthcrop_location
             })
@@ -179,129 +181,54 @@ class WashingtonRGBD(object):
     # Left:RGB, (Middle: Depth Map),  Right: Rotation
     def combine_viewpoints(self, angle, video_no, should_include_depth, output_path):
 
-        def join_rgb_with_rotation(df, output_path):
-            df = df[df['data_type'] == 'crop']
+        def join(df, output_path):
+            if output_path != '' and not os.path.isdir(output_path):
+                os.makedirs(output_path)
+
             for i in range(len(df.index)):
                 current_original_file_df = df.iloc[[i]]
 
                 # Filtering out the rotation candidates,
                 # most of the things should be the same, except for frame_no,
                 # and the 2 poses should differentiate by the provided angle with an error bound of +-1
-                rotation_candidates = df[(df['category'] == current_original_file_df['category'].values[0])
-                                                 & (df['instance_number'] == current_original_file_df['instance_number'].values[0])
-                                                 & (df['video_no'] == current_original_file_df['video_no'].values[0])
-                                                 & (df['pose'] <= current_original_file_df['pose'].values[0] + angle + 1)
-                                                 & (df['pose'] >= current_original_file_df['pose'].values[0] + angle - 1)]
+                rotation_candidates = df[(df.category == current_original_file_df.category.values[0])
+                                         & (df.instance_number == current_original_file_df.instance_number.values[0])
+                                         & (df.video_no == current_original_file_df.video_no.values[0])
+                                         & (df.pose <= current_original_file_df.pose.values[0] + angle + 1)
+                                         & (df.pose >= current_original_file_df.pose.values[0] + angle - 1)]
 
                 for j in range(len(rotation_candidates.index)):
                     current_rotated_file_df = rotation_candidates.iloc[[j]]
 
-                    left_location = current_original_file_df['location'].values[0]
-                    right_location = current_rotated_file_df['location'].values[0]
+                    locations = []
+                    names = []
 
-                    left_img_name = left_location.split('/')[len(left_location.split('/')) - 1]
-                    right_img_name = right_location.split('/')[len(right_location.split('/')) - 1]
+                    locations.append(current_original_file_df.crop_location.values[0])
+                    names.append(os.path.split(locations[0])[1])
 
-                    self.logger.info("merging " + left_img_name + " and " + right_img_name)
+                    if should_include_depth:
+                        locations.append(current_original_file_df.depthcrop_location.values[0])
+                        names.append(os.path.split(locations[1])[1])
 
-                    left_img = cv2.imread(left_location)
-                    right_img = cv2.imread(right_location)
+                    locations.append(current_rotated_file_df.crop_location.values[0])
+                    names.append(os.path.split(locations[2])[1])
 
-                    smaller_height = min(len(left_img), len(right_img))
-                    smaller_width = min(len(left_img[0]), len(right_img[0]))
+                    self.logger.info("merging " + " and ".join(names))
 
-                    left_img = cv2.resize(left_img, (smaller_width, smaller_height))
-                    right_img = cv2.resize(right_img, (smaller_width, smaller_height))
+                    imgs = [cv2.imread(location) for location in locations]
 
-                    img = np.concatenate((left_img, right_img), axis=1)
+                    min_height = min([len(img) for img in imgs])
+                    min_width = min([len(img[0]) for img in imgs])
+
+                    imgs = map(lambda x: cv2.resize(x, (min_width, min_height)), imgs)
+
+                    img = np.concatenate(imgs, axis=1)
                     cv2.imwrite(os.path.join(output_path,
-                                             '_'.join([os.path.splitext(left_img_name)[0],
-                                                       right_img_name])), img)
+                                             '_'.join([os.path.splitext(name)[0] for name in names])
+                                             + os.path.splitext(names[0])[1]),
+                                img)
 
-        def join_rgb_depth_rotation(df, output_path):
-            original_rgb_df = df[df['data_type'] == 'crop']
-            original_rgb_df = original_rgb_df.sort_values(['category', 'video_no', 'frame_no'])
-            original_depth_df = df[df['data_type'] == 'depthcrop']
-
-            for i in range(len(original_rgb_df.index)):
-                current_original_file_df = original_rgb_df.iloc[[i]]
-                current_category = current_original_file_df['category'].values[0]
-                current_instance_number = current_original_file_df['instance_number'].values[0]
-                current_video_no = current_original_file_df['video_no'].values[0]
-                current_frame = current_original_file_df['frame_no'].values[0]
-                current_pose = current_original_file_df['pose'].values[0]
-
-                rotation_candidates = original_rgb_df[(original_rgb_df['category'] == current_category)
-                                                      & (original_rgb_df['instance_number'] == current_instance_number)
-                                                      & (original_rgb_df['video_no'] == current_video_no)
-                                                      & (original_rgb_df['pose'] <= current_pose + angle + 1)
-                                                      & (original_rgb_df['pose'] >= current_pose + angle - 1)]
-
-                depth_candidates = original_depth_df[(original_depth_df.category == current_category)
-                                                     & (original_depth_df.instance_number == current_instance_number)
-                                                     & (original_depth_df.video_no == current_video_no)
-                                                     & (original_depth_df.frame_no == current_frame)]
-
-                for j in range(len(rotation_candidates.index)):
-                    if len(depth_candidates.index) == 0:
-                        print current_category
-                        print current_instance_number
-                        print current_video_no
-                        print current_frame
-                        print current_pose
-
-                        print original_depth_df[(original_depth_df  .category == 'apple')
-                                                & (original_depth_df.instance_number == 3)
-                                                & (original_depth_df.video_no == 1)
-                                                & (original_depth_df.frame_no == 2)
-                                                & (original_depth_df.data_type == 'depthcrop')]
-
-                        print original_depth_df[(original_depth_df  .category == 'apple')
-                                                & (original_depth_df.instance_number == 1)
-                                                & (original_depth_df.video_no == 1)
-                                                & (original_depth_df.frame_no == 4)
-                                                & (original_depth_df.data_type == 'depthcrop')]
-                        continue
-
-                    current_rotated_file_df = rotation_candidates.iloc[[j]]
-
-                    left_location = current_original_file_df['location'].values[0]
-                    middle_location = depth_candidates['location'].values[0]
-                    right_location = current_rotated_file_df['location'].values[0]
-
-                    left_img_name = os.path.split(left_location)[1]
-                    middle_img_name = os.path.split(middle_location)[1]
-                    right_img_name = os.path.split(right_location)[1]
-
-                    self.logger.info("merging " + left_img_name + " and " + middle_img_name + " and " + right_img_name)
-
-                    left_img = cv2.imread(left_location)
-                    middle_img = cv2.imread(middle_location)
-                    right_img = cv2.imread(right_location)
-
-                    smaller_height = min(len(left_img), len(middle_img), len(right_img))
-                    smaller_width = min(len(left_img[0]), len(middle_img[0]), len(right_img[0]))
-
-                    left_img = cv2.resize(left_img, (smaller_width, smaller_height))
-                    middle_img = cv2.resize(middle_img, (smaller_width, smaller_height))
-                    right_img = cv2.resize(right_img, (smaller_width, smaller_height))
-
-                    img = np.concatenate((left_img, middle_img, right_img), axis=1)
-                    cv2.imwrite(os.path.join(output_path,
-                                             '_'.join([os.path.splitext(left_img_name)[0],
-                                                       os.path.splitext(middle_img_name)[0],
-                                                       right_img_name])), img)
-
-        def join(df, output_path, should_include_depth):
-            if output_path != '' and not os.path.isdir(output_path):
-                os.makedirs(output_path)
-
-            if should_include_depth:
-                join_rgb_depth_rotation(df, output_path)
-            else:
-                join_rgb_with_rotation(df, output_path)
-
-        data_frame = self.interpolate_poses(self.load_metadata())
+        data_frame = self.get_df_per_frame()
 
         # Filter out the first elevator only
         data_frame = data_frame[data_frame['video_no'] == video_no]
@@ -310,8 +237,8 @@ class WashingtonRGBD(object):
         train, test = train_test_split(data_frame, test_size=0.2)
 
         # construct training and test sets, saving to disk
-        join(train, os.path.join(output_path, 'train'), should_include_depth)
-        join(test, os.path.join(output_path, 'test'), should_include_depth)
+        join(train, os.path.join(output_path, 'train'))
+        join(test, os.path.join(output_path, 'test'))
 
 
 if __name__ == '__main__':
@@ -336,15 +263,13 @@ if __name__ == '__main__':
     if args.processed_data_output != '' and not os.path.isdir(args.processed_data_output):
         os.makedirs(args.processed_data_output)
 
-    # file_list = os.walk(args.rootdir)
     washington_dataset = WashingtonRGBD(root_dir=args.rootdir,
                                         csv_default=args.csv_dir,
                                         csv_perframe_default=args.csv_perframe_dir,
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
-    washington_dataset.get_df_per_frame()
-    # washington_dataset.combine_viewpoints(angle=args.angle,
-    #                                       video_no=1,
-    #                                       should_include_depth=args.depth_included,
-    #                                       output_path=args.processed_data_output)
+    washington_dataset.combine_viewpoints(angle=args.angle,
+                                          video_no=1,
+                                          should_include_depth=args.depth_included,
+                                          output_path=args.processed_data_output)
 
