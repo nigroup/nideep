@@ -182,9 +182,6 @@ class WashingtonRGBD(object):
     def combine_viewpoints(self, angle, video_no, should_include_depth, output_path):
 
         def join(df, output_path):
-            if output_path != '' and not os.path.isdir(output_path):
-                os.makedirs(output_path)
-
             for i in range(len(df.index)):
                 current_original_file_df = df.iloc[[i]]
 
@@ -214,23 +211,11 @@ class WashingtonRGBD(object):
                     names.append(os.path.split(locations[2])[1])
 
                     self.logger.info("merging " + " and ".join(names))
-
-                    imgs = [cv2.imread(location) for location in locations]
-
-                    min_height = min([len(img) for img in imgs])
-                    min_width = min([len(img[0]) for img in imgs])
-
-                    imgs = map(lambda x: cv2.resize(x, (min_width, min_height)), imgs)
-
-                    img = np.concatenate(imgs, axis=1)
-                    cv2.imwrite(os.path.join(output_path,
-                                             '_'.join([os.path.splitext(name)[0] for name in names])
-                                             + os.path.splitext(names[0])[1]),
-                                img)
+                    self.perform_cv_combination(locations, names, output_path)
 
         data_frame = self.get_df_per_frame()
 
-        # Filter out the first elevator only
+        # Filter out one elevation only
         data_frame = data_frame[data_frame['video_no'] == video_no]
 
         # train test split
@@ -239,6 +224,42 @@ class WashingtonRGBD(object):
         # construct training and test sets, saving to disk
         join(train, os.path.join(output_path, 'train'))
         join(test, os.path.join(output_path, 'test'))
+
+    # this method combines every rgb frame with its depthmap on the right
+    def combine_rgb_depth(self, output_path):
+        def join(df, output_path):
+            for i in range(len(df.index)):
+                current_row = df.iloc[[i]]
+                locations = [current_row.crop_location.values[0], current_row.depthcrop_location.values[0]]
+                names = [os.path.split(location)[1] for location in locations]
+
+                self.perform_cv_combination(locations, names, output_path)
+
+        df = self.get_df_per_frame()
+
+        train, test = train_test_split(df, test_size=0.2)
+
+        join(train, os.path.join(output_path, 'train'))
+        join(test, os.path.join(output_path, 'test'))
+
+    # combine all of the image in an array to only 1 image and save to file
+    @staticmethod
+    def perform_cv_combination(locations, names, output_path):
+        if output_path != '' and not os.path.isdir(output_path):
+            os.makedirs(output_path)
+
+        imgs = [cv2.imread(location) for location in locations]
+
+        min_height = min([len(img) for img in imgs])
+        min_width = min([len(img[0]) for img in imgs])
+
+        imgs = map(lambda x: cv2.resize(x, (min_width, min_height)), imgs)
+
+        img = np.concatenate(imgs, axis=1)
+        cv2.imwrite(os.path.join(output_path,
+                                 '_'.join([os.path.splitext(name)[0] for name in names])
+                                 + os.path.splitext(names[0])[1]),
+                    img)
 
 
 if __name__ == '__main__':
@@ -268,8 +289,10 @@ if __name__ == '__main__':
                                         csv_perframe_default=args.csv_perframe_dir,
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
-    washington_dataset.combine_viewpoints(angle=args.angle,
-                                          video_no=1,
-                                          should_include_depth=args.depth_included,
-                                          output_path=args.processed_data_output)
+    # washington_dataset.combine_viewpoints(angle=args.angle,
+    #                                       video_no=1,
+    #                                       should_include_depth=args.depth_included,
+    #                                       output_path=args.processed_data_output)
+
+    washington_dataset.combine_rgb_depth(args.processed_data_output)
 
