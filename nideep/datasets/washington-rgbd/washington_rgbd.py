@@ -94,7 +94,7 @@ class WashingtonRGBD(object):
         data_frame = pd.DataFrame(data) \
             .sort_values(['data_type', 'category', 'instance_number', 'video_no', 'frame_no'])
 
-        self.logger.info("csv saved to file: " + self.csv_default + '.csv')
+        self.logger.info("csv saved to file: " + self.csv_default)
         data_frame.to_csv(self.csv_default, index=False)
 
         return data_frame
@@ -152,8 +152,22 @@ class WashingtonRGBD(object):
                                                 & (raw_df.frame_no == current_frame_no)
                                                 & (raw_df.data_type == 'depthcrop')]['location'].values[0]
 
+            current_maskcrop_location = raw_df[(raw_df.category == current_category)
+                                                & (raw_df.instance_number == current_instance_number)
+                                                & (raw_df.video_no == current_video_no)
+                                                & (raw_df.frame_no == current_frame_no)
+                                                & (raw_df.data_type == 'maskcrop')]['location'].values[0]
+
+            current_loc_location = raw_df[(raw_df.category == current_category)
+                                               & (raw_df.instance_number == current_instance_number)
+                                               & (raw_df.video_no == current_video_no)
+                                               & (raw_df.frame_no == current_frame_no)
+                                               & (raw_df.data_type == 'loc')]['location'].values[0]
+
             self.logger.info("processing " + os.path.split(current_crop_location)[1]
-                             + " and " + os.path.split(current_depthcrop_location)[1])
+                             + " and " + os.path.split(current_depthcrop_location)[1]
+                             + " and " + os.path.split(current_maskcrop_location)[1]
+                             + " and " + os.path.split(current_loc_location)[1])
 
             data.append({
                 'category': current_category,
@@ -162,7 +176,9 @@ class WashingtonRGBD(object):
                 'frame_no': current_frame_no,
                 'pose': current_pose,
                 'crop_location': current_crop_location,
-                'depthcrop_location': current_depthcrop_location
+                'depthcrop_location': current_depthcrop_location,
+                'maskcrop_location': current_depthcrop_location,
+                'loc_location': current_depthcrop_location
             })
 
         new_df = pd.DataFrame(data)
@@ -290,7 +306,8 @@ if __name__ == '__main__':
                                         csv_perframe_default=args.csv_perframe_dir,
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
-    washington_dataset.load_metadata()
+    # washington_dataset.load_metadata()
+    washington_dataset.get_df_per_frame()
 
     # washington_dataset.combine_viewpoints(angle=args.angle,
     #                                       video_no=1,
