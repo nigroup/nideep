@@ -44,7 +44,8 @@ class WashingtonRGBD(object):
         for current_root, _, files in file_list:
             # For the time being, we do not work on the mask, location
             # For the pose, it should be attached to the corresponding data entry, not as a separate entry
-            files = [f for f in files if 'mask' not in f and 'loc' not in f and 'pose' not in f]
+            # files = [f for f in files if 'mask' not in f and 'loc' not in f and 'pose' not in f]
+            files = [f for f in files if 'pose' not in f]
 
             for f in files:
                 self.logger.info("processing " + f)
@@ -90,11 +91,11 @@ class WashingtonRGBD(object):
                              'pose': float(pose_value),
                              'data_type': data_type})
 
-            data_frame = pd.DataFrame(data) \
-                .sort_values(['data_type', 'category', 'instance_number', 'video_no', 'frame_no'])
+        data_frame = pd.DataFrame(data) \
+            .sort_values(['data_type', 'category', 'instance_number', 'video_no', 'frame_no'])
 
-            self.logger.info("csv saved to file: " + self.csv_default + '.csv')
-            data_frame.to_csv(self.csv_default, index=False)
+        self.logger.info("csv saved to file: " + self.csv_default + '.csv')
+        data_frame.to_csv(self.csv_default, index=False)
 
         return data_frame
 
@@ -289,10 +290,12 @@ if __name__ == '__main__':
                                         csv_perframe_default=args.csv_perframe_dir,
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
+    washington_dataset.load_metadata()
+
     # washington_dataset.combine_viewpoints(angle=args.angle,
     #                                       video_no=1,
     #                                       should_include_depth=args.depth_included,
     #                                       output_path=args.processed_data_output)
 
-    washington_dataset.combine_rgb_depth(args.processed_data_output)
+    # washington_dataset.combine_rgb_depth(args.processed_data_output)
 
