@@ -135,34 +135,47 @@ class WashingtonRGBD(object):
             return pd.read_csv(self.csv_perframe_default)
 
         raw_df = self.interpolate_poses(self.load_metadata())
+
         raw_rgb_df = raw_df[raw_df.data_type == 'crop']
+        raw_depth_df = raw_df[raw_df.data_type == 'depthcrop']
+        raw_maskcrop_df = raw_df[raw_df.data_type == 'maskcrop']
+        raw_loc_df = raw_df[raw_df.data_type == 'loc']
+
+        print "length of rgb = " + str(len(raw_rgb_df.index))
+        print "length of depth = " + str(len(raw_depth_df.index))
+        print "length of maskcrop = " + str(len(raw_maskcrop_df.index))
+        print "length of loc = " + str(len(raw_loc_df.index))
+
         data = []
 
         for i in range(len(raw_rgb_df.index)):
-            current_row = raw_df.iloc[[i]]
-            current_category = current_row['category'].values[0]
-            current_instance_number = current_row['instance_number'].values[0]
-            current_video_no = current_row['video_no'].values[0]
-            current_frame_no = current_row['frame_no'].values[0]
-            current_pose = current_row['pose'].values[0]
-            current_crop_location = current_row['location'].values[0]
-            current_depthcrop_location = raw_df[(raw_df.category == current_category)
-                                                & (raw_df.instance_number == current_instance_number)
-                                                & (raw_df.video_no == current_video_no)
-                                                & (raw_df.frame_no == current_frame_no)
-                                                & (raw_df.data_type == 'depthcrop')]['location'].values[0]
+            current_rgb_row = raw_rgb_df.iloc[[i]]
 
-            current_maskcrop_location = raw_df[(raw_df.category == current_category)
-                                                & (raw_df.instance_number == current_instance_number)
-                                                & (raw_df.video_no == current_video_no)
-                                                & (raw_df.frame_no == current_frame_no)
-                                                & (raw_df.data_type == 'maskcrop')]['location'].values[0]
+            current_category = current_rgb_row.category.values[0]
+            current_instance_number = current_rgb_row.instance_number.values[0]
+            current_video_no = current_rgb_row.video_no.values[0]
+            current_frame_no = current_rgb_row.frame_no.values[0]
+            current_pose = current_rgb_row.pose.values[0]
 
-            current_loc_location = raw_df[(raw_df.category == current_category)
-                                               & (raw_df.instance_number == current_instance_number)
-                                               & (raw_df.video_no == current_video_no)
-                                               & (raw_df.frame_no == current_frame_no)
-                                               & (raw_df.data_type == 'loc')]['location'].values[0]
+            current_crop_location = current_rgb_row.location.values[0]
+
+            current_depthcrop_location = raw_depth_df[(raw_depth_df.category == current_category)
+                                                      & (raw_depth_df.instance_number == current_instance_number)
+                                                      & (raw_depth_df.video_no == current_video_no)
+                                                      & (raw_depth_df.frame_no == current_frame_no)].location.values[0]
+
+            try:
+                current_maskcrop_location = raw_maskcrop_df[(raw_maskcrop_df.category == current_category)
+                                                            & (raw_maskcrop_df.instance_number == current_instance_number)
+                                                            & (raw_maskcrop_df.video_no == current_video_no)
+                                                            & (raw_maskcrop_df.frame_no == current_frame_no)].location.values[0]
+            except IndexError:
+                current_maskcrop_location = ""
+
+            current_loc_location = raw_loc_df[(raw_loc_df.category == current_category)
+                                              & (raw_loc_df.instance_number == current_instance_number)
+                                              & (raw_loc_df.video_no == current_video_no)
+                                              & (raw_loc_df.frame_no == current_frame_no)].location.values[0]
 
             self.logger.info("processing " + os.path.split(current_crop_location)[1]
                              + " and " + os.path.split(current_depthcrop_location)[1]
