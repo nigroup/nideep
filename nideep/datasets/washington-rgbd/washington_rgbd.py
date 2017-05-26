@@ -110,16 +110,28 @@ class WashingtonRGBD(object):
         sorted_df = data_frame.sort_values(['data_type', 'category', 'instance_number', 'video_no', 'frame_no'])
         poses = np.array(sorted_df['pose'])
 
-        current_video = -1
+        # current_video = -1
 
+        unit_diff_angle = 0
         for i in range(0, len(poses)):
-            if (sorted_df['video_no'][i] != current_video) and (poses[i] == 0):
-                unit_diff_angle = poses[i + 5] / 5
+            # if (sorted_df['video_no'][i] != current_video) and (poses[i] == 0):
+            if sorted_df.frame_no[i] == 1 and i + 5 < len(poses):
+                distance = poses[i + 5] - poses[i]
 
-            if poses[i] == -1:
+                # in some cases, the next angle exceeds 360 causing an overflow
+                if distance < -180:
+                    distance = distance + 360
+                elif distance > 180:
+                    distance = distance - 360
+
+                unit_diff_angle = distance * 1.0 / 5
+
+            elif poses[i] == -1:
                 poses[i] = poses[i - 1] + unit_diff_angle
                 if poses[i] > 360:
                     poses[i] = poses[i] - 360
+                elif poses[i] < 0:
+                    poses[i] = poses[i] + 360
 
         sorted_df['pose'] = poses
         sorted_df.to_csv(self.csv_interpolated_default, index=False)
@@ -140,11 +152,6 @@ class WashingtonRGBD(object):
         raw_depth_df = raw_df[raw_df.data_type == 'depthcrop']
         raw_maskcrop_df = raw_df[raw_df.data_type == 'maskcrop']
         raw_loc_df = raw_df[raw_df.data_type == 'loc']
-
-        print "length of rgb = " + str(len(raw_rgb_df.index))
-        print "length of depth = " + str(len(raw_depth_df.index))
-        print "length of maskcrop = " + str(len(raw_maskcrop_df.index))
-        print "length of loc = " + str(len(raw_loc_df.index))
 
         data = []
 
@@ -320,7 +327,8 @@ if __name__ == '__main__':
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
     # washington_dataset.load_metadata()
-    washington_dataset.get_df_per_frame()
+    # washington_dataset.get_df_per_frame()
+    washington_dataset.interpolate_poses(washington_dataset.load_metadata())
 
     # washington_dataset.combine_viewpoints(angle=args.angle,
     #                                       video_no=1,
