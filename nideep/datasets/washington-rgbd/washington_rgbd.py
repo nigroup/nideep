@@ -142,7 +142,7 @@ class WashingtonRGBD(object):
 
     # Get a new dataframe where each row represent all information about 1 frame including the rgb and depth locations
     # structure: ['category', 'instance_number', 'video_no', 'frame_no', 'crop_location', 'depthcrop_location']
-    def get_df_per_frame(self):
+    def aggregate_frame_data(self):
         if os.path.isfile(self.csv_perframe_default):
             return pd.read_csv(self.csv_perframe_default)
 
@@ -197,8 +197,8 @@ class WashingtonRGBD(object):
                 'pose': current_pose,
                 'crop_location': current_crop_location,
                 'depthcrop_location': current_depthcrop_location,
-                'maskcrop_location': current_depthcrop_location,
-                'loc_location': current_depthcrop_location
+                'maskcrop_location': current_maskcrop_location,
+                'loc_location': current_loc_location
             })
 
         new_df = pd.DataFrame(data)
@@ -250,7 +250,7 @@ class WashingtonRGBD(object):
                     self.logger.info("merging " + " and ".join(names))
                     self.perform_cv_combination(locations, names, output_path)
 
-        data_frame = self.get_df_per_frame()
+        data_frame = self.aggregate_frame_data()
 
         # Filter out one elevation only
         data_frame = data_frame[data_frame['video_no'] == video_no]
@@ -272,7 +272,7 @@ class WashingtonRGBD(object):
 
                 self.perform_cv_combination(locations, names, output_path)
 
-        df = self.get_df_per_frame()
+        df = self.aggregate_frame_data()
 
         train, test = train_test_split(df, test_size=0.2)
 
@@ -302,7 +302,7 @@ class WashingtonRGBD(object):
 if __name__ == '__main__':
     ROOT_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset'
     CSV_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset.csv'
-    CSV_PERFRAME_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-perframe.csv'
+    CSV_AGGREGATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated-aggregated.csv'
     CSV_INTERPOLATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated.csv'
 
     logging.basicConfig(level=logging.INFO)
@@ -310,7 +310,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--rootdir", default=ROOT_DEFAULT)
     parser.add_argument("--csv_dir", default=CSV_DEFAULT)
-    parser.add_argument("--csv_perframe_dir", default=CSV_PERFRAME_DEFAULT)
+    parser.add_argument("--csv_perframe_dir", default=CSV_AGGREGATED_DEFAULT)
     parser.add_argument("--csv_interpolated_dir", default=CSV_INTERPOLATED_DEFAULT)
     parser.add_argument("--processed_data_output", default='')
     parser.add_argument("--angle", default=10, type=int)
@@ -327,8 +327,8 @@ if __name__ == '__main__':
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
     # washington_dataset.load_metadata()
-    # washington_dataset.get_df_per_frame()
-    washington_dataset.interpolate_poses(washington_dataset.load_metadata())
+    washington_dataset.aggregate_frame_data()
+    # washington_dataset.interpolate_poses(washington_dataset.load_metadata())
 
     # washington_dataset.combine_viewpoints(angle=args.angle,
     #                                       video_no=1,
