@@ -3,7 +3,6 @@ import logging
 import numpy as np
 import cv2
 import pandas as pd
-import cPickle as pickle
 from preprocessing import crop_face
 from PIL import Image
 
@@ -44,7 +43,8 @@ class Entity(object):
             labels = [labels_dict[k][count] if k in labels_dict.keys() else None for k in selected_labels]
             binarized_labels = [1 if l >= 50 else 0 for l in labels]
 
-            record = {'features': None, 'labels': np.array(binarized_labels), 'message': '', 'valid': True}
+            record = {'video': self.path_video, 'frame_number': count, 'features': None,
+                      'labels': np.array(binarized_labels), 'message': '', 'valid': True}
 
             if not labels:
                 record['valid'] = False
@@ -55,13 +55,17 @@ class Entity(object):
             else:
                 if os.path.isfile(frame_file):
                     # only valid frames are dumped to disk
-                    record['features'] = cv2.imread(frame_file)
+                    record['features'] = cv2.imread(frame_file, cv2.IMREAD_GRAYSCALE) if self.grayscale else cv2.imread(
+                        frame_file)
                     record['message'] = 'Cached version read'
                 else:
-                    success, msg, value = self.preprocess_frame(image, count, labels, projection)
+                    success, msg, value = self.preprocess_frame(image, count, labels)
                     record['valid'] = success
                     record['message'] = msg
                     record['features'] = value
+
+            if record['valid'] and len(record['features'].shape) == 2:
+                record['features'] = np.expand_dims(record['features'], -1)
 
             if record['valid'] or not valid_only:
                 result.append(record)
@@ -70,7 +74,7 @@ class Entity(object):
 
         return result
 
-    def preprocess_frame(self, frame, frame_number, labels, projection):
+    def preprocess_frame(self, frame, frame_number, labels):
         frame_file = self.__frame_filename(frame_number)
 
         if frame_number < self.landmarks_df.shape[0]:
@@ -92,9 +96,9 @@ class Entity(object):
         cropped = np.array(crop_face(Image.fromarray(frame), eye_left=left_eye, eye_right=right_eye,
                                      offset_pct=(0.25, 0.25), dest_sz=(64, 64)))
 
-        # gray_image = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+        to_save = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY) if self.grayscale else cropped
 
-        cv2.imwrite(frame_file, cropped)  # save frame as PNG file
+        cv2.imwrite(frame_file, to_save)  # save frame as PNG file
         return True, 'Success', cv2.imread(frame_file)
 
     def dense_labels_dict(self):
@@ -128,7 +132,7 @@ class Entity(object):
         video_name = self.path_video.split('/')[-1][:-4]
         return self.cache_dir + video_name + '-frame%d.png' % frame_number
 
-    def __init__(self, path_video, path_au_labels, path_landmarks, cache_dir):
+    def __init__(self, path_video, path_au_labels, path_landmarks, cache_dir, grayscale=False):
         '''
         path_video -- path to AVI/FLV file
         path_au_labels -- path to csv file with timestamped au labels
@@ -136,6 +140,7 @@ class Entity(object):
         cache_dir -- path to dump preprocessed frames
         '''
         self.cache_dir = cache_dir
+        self.grayscale = grayscale
         self.logger = logging.getLogger(__name__)
         self.path_video = path_video
         if not os.path.isfile(self.path_video):
