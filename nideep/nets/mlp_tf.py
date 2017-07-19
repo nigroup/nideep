@@ -14,7 +14,7 @@ class MLP(AbstractNetTF):
         fc_name_w = 'fc-%d/w' % self.depth
         self.w = {
             fc_name_w: tf.get_variable(fc_name_w,
-                                       [self.n_hidden[-1], self.n_outputs],
+                                       [self.n_input, self.n_outputs],
                                        initializer=tf.random_normal_initializer(),
                                        )
         }
@@ -55,7 +55,7 @@ class MLP(AbstractNetTF):
         Constructor
         '''
         # Network Parameters
-        self.n_hidden = params['n_hidden']  # 1st layer num features
+        self.n_input = params['n_input']  # 1st layer num features
         self.n_outputs = params['n_outputs']  # 1st layer num features
         super(MLP, self).__init__(params)
 
