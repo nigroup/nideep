@@ -21,17 +21,8 @@ class AbstractNet(object):
         pass
     
     def _config_scopes(self):
-        self.var_scope = self.prefix + 'layer-%d' % self.depth
+        self.var_scope = self.prefix
         self.name_scope = self.var_scope + '/'
-        
-    def _depth(self, params):
-        if 'depth' not in params:
-            depth = 1
-        else:
-            depth = params['depth']
-        if depth < 1:
-            raise ValueError("Invalid depth (%s). Must be >= 1" % depth)
-        self.depth = depth
     
     @property
     def x(self):
@@ -66,7 +57,6 @@ class AbstractNet(object):
         self.prefix = ''
         if 'prefix' in params:
             self.prefix = params['prefix']
-        self._depth(params)
         self._config_scopes()
         self._init_learning_params()
         self._cost_op = None
