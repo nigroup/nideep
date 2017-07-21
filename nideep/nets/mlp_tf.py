@@ -11,30 +11,29 @@ class MLP(AbstractNetTF):
     classdocs
     '''
     def _init_learning_params_scoped(self):
-        fc_name_w = 'fc-%d/w' % self.depth
-        self.w = {
-            fc_name_w: tf.get_variable(fc_name_w,
-                                       [self.n_input, self.n_outputs],
-                                       initializer=tf.random_normal_initializer(),
-                                       )
-        }
-        self.b = {}
-        for key, value in self.w.iteritems():
-            key_b = key.replace('/w', '/b').replace('_w', '_b').replace('-w', '-b')
-            self.b[key_b] = tf.get_variable(\
-                                            key_b,
-                                            [int(value.get_shape()[-1])],
-                                            initializer=tf.constant_initializer(0.)
-                                            )
+        self.w = {}
+        for idx, dim in enumerate(self.n_nodes):
+            input_dim = self.n_nodes[idx-1]
+            if idx == 0:
+                input_dim = self.n_input    
+            fc_name_w = 'fc-%d/w' % idx
+            self.w[fc_name_w] = tf.get_variable(fc_name_w,
+                                                [input_dim, dim],
+                                                initializer=self._init_weight_op()
+                                                )
+        self._init_bias_vars()
                 
     def _fc(self, x):
-        fc_name_w = 'fc-%d/w' % self.depth
-        fc_name_b = 'fc-%d/b' % self.depth
-        fc_op = tf.add(tf.matmul(x, self.w[fc_name_w]),
-                        self.b[fc_name_b],
-                        name='fc-%d' % self.depth)
-        self._y_logits = fc_op
-        self.y_pred = tf.nn.softmax(fc_op, name='a-%d' % self.depth)
+        in_op = x
+        for idx in xrange(len(self.n_nodes)):
+            fc_name_w = 'fc-%d/w' % idx
+            fc_name_b = 'fc-%d/b' % idx
+            fc_op = tf.add(tf.matmul(in_op, self.w[fc_name_w]),
+                            self.b[fc_name_b],
+                            name='fc-%d' % idx)
+            self._y_logits = fc_op
+            self.y_pred = tf.nn.softmax(fc_op, name='a-%d' % idx)
+            in_op = self.y_pred
         return self.y_pred, self._y_logits
             
     def build(self):
@@ -56,7 +55,7 @@ class MLP(AbstractNetTF):
         '''
         # Network Parameters
         self.n_input = params['n_input']  # 1st layer num features
-        self.n_outputs = params['n_outputs']  # 1st layer num features
+        self.n_nodes = params['n_nodes']  # 1st layer num features
         super(MLP, self).__init__(params)
 
         self._cost_op = None

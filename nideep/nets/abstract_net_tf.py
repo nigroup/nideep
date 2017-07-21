@@ -25,6 +25,14 @@ class AbstractNetTF(AbstractNet):
         return tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
                                  scope=self.name_scope)
         
+    def _init_bias_vars(self, bias_value=0.):
+        self.b = {}
+        for key, tensor in self.w.iteritems():
+            key_b = key.replace('/w', '/b').replace('_w', '_b').replace('-w', '-b')
+            self.b[key_b] = tf.get_variable(key_b,
+                                            [tensor.get_shape()[-1].value],
+                                            initializer=self._init_bias_op(bias_value))
+        
     @abstractmethod
     def _init_learning_params_scoped(self):
         pass
