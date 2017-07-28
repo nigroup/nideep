@@ -1,4 +1,5 @@
 # Travis CI configuration file
+dist: trusty
 sudo: false
 language: cpp
 compiler:
