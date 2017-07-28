@@ -66,9 +66,12 @@ before_install:
   - travis_retry wget -P $CAFFE_ROOT/tools/extra https://raw.githubusercontent.com/BVLC/caffe/master/tools/extra/parse_log.py
   
 install:
-  - travis_retry pip install lmdb
-  - echo "Installing Coveralls if coverage enabled:"
-  - if [[ $WITH_COVERAGE == ON ]]; then travis_retry pip install coveralls; fi
+  # Packages that need to be installed via pip
+  - travis_retry pip install lmdb tensorflow
+  - if [[ $WITH_COVERAGE == ON ]]; then
+      echo "Installing Coveralls"
+      travis_retry pip install coveralls;
+    fi
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
   - export C_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$C_INCLUDE_PATH"
   - export CPLUS_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$CPLUS_INCLUDE_PATH"
