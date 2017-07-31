@@ -11,7 +11,7 @@ def resettable_metric(metric, scope, **metric_args):
     '''
     with tf.variable_scope(scope) as scope:
         metric_op, update_op = metric(**metric_args)
-        vars = tf.contrib.framework.get_variables(\
+        v = tf.contrib.framework.get_variables(\
                     scope, collection=tf.GraphKeys.LOCAL_VARIABLES)
-        reset_op = tf.variables_initializer(vars)
+        reset_op = tf.variables_initializer(v)
     return metric_op, update_op, reset_op
