@@ -5,6 +5,7 @@ Created on Mar 28, 2017
 '''
 import logging
 import os
+import random
 from collections import namedtuple
 
 import numpy as np
@@ -30,7 +31,10 @@ class AMFED(object):
     KEY_VIDEO = 'video'
     KEY_AU_LABELS = 'au_label'
     KEY_LANDMARKS = 'landmarks'
-    INDEX_FILE = 'amfed-index.csv'
+    TMP_TRAIN_IMAGES = 'xtrain.dat'
+    TMP_TRAIN_LABELS = 'ytrain.dat'
+    TMP_TEST_IMAGES = 'xtest.dat'
+    TMP_TEST_LABELS = 'ytest.dat'
 
     @staticmethod
     def is_video(p):
@@ -104,21 +108,53 @@ class AMFED(object):
         common_entities = self.from_list_to_tuple(common_entity_names, lists, list_names)
         return pd.DataFrame([c._asdict() for c in common_entities])
 
-    def as_numpy_array(self):
-        entities = self.find_data_intersection()
-        count = 0
-        result = []
-        for _, e in entities.iterrows():
-            entity = Entity(e.video, e.au_label, e.landmarks, self.cache_dir)
-            entity_records = entity.frames(projection=['Smile', 'AU02', 'AU04', 'Trackerfail'], valid_only=True)
-            result += entity_records
-            self.logger.info('Finished video %d/%d' % (count + 1, len(entities)))
-            count += 1
+    def as_numpy_array(self, projection=['Smile', 'Trackerfail'], valid_only=True, train_proportion=0.8):
+        tmp_train_images = os.path.join(self.cache_dir, self.TMP_TRAIN_IMAGES)
+        tmp_train_labels = os.path.join(self.cache_dir, self.TMP_TRAIN_LABELS)
+        tmp_test_images = os.path.join(self.cache_dir, self.TMP_TEST_IMAGES)
+        tmp_test_labels = os.path.join(self.cache_dir, self.TMP_TEST_LABELS)
+        if all([os.path.exists(f) for f in [tmp_train_images, tmp_train_labels, tmp_test_images, tmp_test_labels]]):
+            X_train_memmap = np.memmap(tmp_train_images).reshape((-1, 64, 64, self.c_dim))
+            y_train_memmap = np.memmap(tmp_train_labels).reshape((-1, len(projection) - 1))
+            X_test_memmap = np.memmap(tmp_test_images).reshape((-1, 64, 64, self.c_dim))
+            y_test_memmap = np.memmap(tmp_test_labels).reshape((-1, len(projection) - 1))
+        else:
+            entities = self.find_data_intersection()
+            test_size = int(entities.shape[0] * (1 - train_proportion))
+            test_idxs = random.sample(range(entities.shape[0]), test_size)
+            count = 0
+            train = []
+            test = []
+            for i, e in entities.iterrows():
+                entity = Entity(e.video, e.au_label, e.landmarks, self.cache_dir)
+                entity_records = entity.frames(projection=projection, valid_only=valid_only)
+                if i in test_idxs:
+                    test += entity_records
+                else:
+                    train += entity_records
+                self.logger.info('Finished video %d/%d' % (count + 1, len(entities)))
+                count += 1
 
-        X_train = np.concatenate([np.expand_dims(r['features'], axis=0) for r in result])
-        y_train = np.concatenate([np.expand_dims(r['labels'][:-1], axis=0) for r in result])
+            X_train_memmap, y_train_memmap = self.__list_to_array(tmp_train_images, tmp_train_labels, train)
+            if test_idxs:
+                X_test_memmap, y_test_memmap = self.__list_to_array(tmp_test_images, tmp_test_labels, test)
 
-        return X_train, y_train
+        p = np.random.permutation(X_train_memmap.shape[0])
+        return X_train_memmap[p], y_train_memmap[p], X_test_memmap, y_test_memmap
+
+    def __list_to_array(self, tmp_images_path, tmp_labels_path, result):
+        # trim = lambda d: {k: v for k, v in d.iteritems() if k not in ['features']}
+        # pickle.dump([trim(d) for d in result], open("result.p", "wb"))
+
+        X = np.concatenate([np.expand_dims(r['features'], axis=0) for r in result])
+        y = np.concatenate([np.expand_dims(r['labels'][:-1], axis=0) for r in result])
+
+        X_memmap = np.memmap(tmp_images_path, shape=X.shape, mode='w+')
+        y_memmap = np.memmap(tmp_labels_path, shape=y.shape, mode='w+')
+        X_memmap[:] = X[:]
+        y_memmap[:] = y[:]
+
+        return X_memmap, y_memmap
 
 
     @staticmethod
@@ -131,14 +167,14 @@ class AMFED(object):
 
     def set_subset(self, entities):
         self.entities = entities
-        
 
-    def __init__(self, dir_prefix, video_type=VIDEO_TYPE_FLV, cache_dir=None):
+    def __init__(self, dir_prefix, video_type=VIDEO_TYPE_FLV, cache_dir=None, grayscale=False):
         '''
         Constructor
         '''
         self.logger = logging.getLogger(__name__)
         self.cache_dir = cache_dir
+        self.c_dim = 1 if grayscale else 3
         if cache_dir and not os.path.isdir(cache_dir):
             os.makedirs(cache_dir)
             self.logger.info("Creating cache directory at %s" % os.path.abspath(self.cache_dir))
