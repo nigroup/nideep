@@ -50,5 +50,22 @@ class TestMNISTTF:
         assert_false(np.array_equal(d1.validation.labels, d2.validation.labels))
         assert_true(np.array_equal(d1.test.images, d2.test.images))
         assert_true(np.array_equal(d1.test.labels, d2.test.labels))
-#        
+
+    def test_seed(self):
+        d1 = MNIST.read_data_sets(self.dir_tmp, seed=123)
+        d2 = MNIST.read_data_sets(self.dir_tmp, seed=999)
+        d3 = MNIST.read_data_sets(self.dir_tmp, seed=123)
+        assert_false(np.array_equal(d1.train.images, d2.train.images))
+        assert_false(np.array_equal(d1.train.labels, d2.train.labels))
+        assert_false(np.array_equal(d1.validation.images, d2.validation.images))
+        assert_false(np.array_equal(d1.validation.labels, d2.validation.labels))
+        assert_true(np.array_equal(d1.test.images, d2.test.images))
+        assert_true(np.array_equal(d1.test.labels, d2.test.labels))
+        # same seed
+        assert_true(np.array_equal(d1.train.images, d3.train.images))
+        assert_true(np.array_equal(d1.train.labels, d3.train.labels))
+        assert_true(np.array_equal(d1.validation.images, d3.validation.images))
+        assert_true(np.array_equal(d1.validation.labels, d3.validation.labels))
+        assert_true(np.array_equal(d1.test.images, d3.test.images))
+        assert_true(np.array_equal(d1.test.labels, d3.test.labels))
         
