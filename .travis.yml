@@ -68,7 +68,7 @@ before_install:
   
 install:
   # Packages that need to be installed via pip
-  - travis_retry pip install lmdb tensorflow
+  - travis_retry pip install lmdb bunch tensorflow
   - if [[ $WITH_COVERAGE == ON ]]; then
       echo "Installing Coveralls"
       travis_retry pip install coveralls;

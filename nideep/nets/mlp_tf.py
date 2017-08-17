@@ -32,9 +32,9 @@ class MLP(AbstractNetTF):
                             self.b[fc_name_b],
                             name='fc-%d' % idx)
             self._y_logits = fc_op
-            self.y_pred = tf.nn.softmax(fc_op, name='a-%d' % idx)
-            in_op = self.y_pred
-        return self.y_pred, self._y_logits
+            self.p = tf.nn.softmax(fc_op, name='a-%d' % idx)
+            in_op = self.p
+        return self.p, self._y_logits
             
     def build(self):
         with tf.name_scope(self.name_scope + 'fc'):
