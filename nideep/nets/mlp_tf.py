@@ -21,7 +21,7 @@ class MLP(AbstractNetTF):
                                                 [input_dim, dim],
                                                 initializer=self._init_weight_op()
                                                 )
-        self._init_bias_vars()
+        self._init_bias_vars(bias_value=0.1)
                 
     def _fc(self, x):
         in_op = x
@@ -31,9 +31,12 @@ class MLP(AbstractNetTF):
             fc_op = tf.add(tf.matmul(in_op, self.w[fc_name_w]),
                             self.b[fc_name_b],
                             name='fc-%d' % idx)
-            self._y_logits = fc_op
-            self.p = tf.nn.softmax(fc_op, name='a-%d' % idx)
-            in_op = self.p
+            if idx < len(self.n_nodes)-1:
+                a = tf.sigmoid(fc_op, name='a-%d' % idx)
+                in_op = a
+            else:
+                self._y_logits = fc_op
+                self.p = tf.nn.softmax(fc_op, name='a-%d' % idx)
         return self.p, self._y_logits
             
     def build(self):

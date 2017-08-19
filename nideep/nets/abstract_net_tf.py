@@ -14,8 +14,9 @@ class AbstractNetTF(AbstractNet):
     __metaclass__ = ABCMeta
     
     @staticmethod
-    def _init_weight_op():
-        return tf.random_normal_initializer()
+    def _init_weight_op(mean=0.0, stddev=0.1):
+        return tf.random_normal_initializer(mean=mean,
+                                            stddev=stddev)
     
     @staticmethod
     def _init_bias_op(value):
