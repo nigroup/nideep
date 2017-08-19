@@ -69,3 +69,20 @@ class TestMNISTTF:
         assert_true(np.array_equal(d1.test.images, d3.test.images))
         assert_true(np.array_equal(d1.test.labels, d3.test.labels))
         
+    def test_data_scale(self):
+        from tensorflow.examples.tutorials.mnist import input_data
+        d0 = input_data.read_data_sets(self.dir_tmp, one_hot=True)
+        d1 = MNIST.read_data_sets(self.dir_tmp, one_hot=True)
+        assert_equals(d0.train.images.min(), 0)
+        assert_equals(d0.train.images.max(), 1)
+        assert_equals(d0.train.images.min(), d1.train.images.min())
+        assert_equals(d0.train.images.max(), d1.train.images.max())
+        assert_equals(d0.validation.images.min(), 0)
+        assert_equals(d0.validation.images.max(), 1)
+        assert_equals(d0.validation.images.min(), d1.validation.images.min())
+        assert_equals(d0.validation.images.max(), d1.validation.images.max())
+        assert_equals(d0.test.images.min(), 0)
+        assert_equals(d0.test.images.max(), 1)
+        assert_equals(d0.test.images.min(), d1.test.images.min())
+        assert_equals(d0.test.images.max(), d1.test.images.max())
+        

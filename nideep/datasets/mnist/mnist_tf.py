@@ -40,9 +40,8 @@ class MNIST(object):
         np.random.shuffle(perm0)
         train_idxs = perm0[validation_size:]
         val_idxs = perm0[:validation_size]
-        
         train = DataSet(\
-                    ds.train.images[train_idxs],
+                    np.multiply(ds.train.images[train_idxs], 255.), # will rescale to [0,1] inside
                     ds.train.labels[train_idxs],
                     fake_data=fake_data,
                     one_hot=one_hot,
@@ -50,7 +49,7 @@ class MNIST(object):
                     reshape=False, # already reshaped
                     seed=seed)
         validation = DataSet(\
-                        ds.train.images[val_idxs],
+                        np.multiply(ds.train.images[val_idxs], 255.), # will rescale to [0,1] inside
                         ds.train.labels[val_idxs],
                         fake_data=fake_data,
                         one_hot=one_hot,
