@@ -45,11 +45,6 @@ def colorize_depth(depth_map):
     min_depth = sorted_depth[0]
     max_depth = sorted_depth[len(sorted_depth) - 1]
 
-    # for i in range(depth_map.shape[0]):
-    #     for j in range(depth_map.shape[1]):
-    #         pixel = depth_map[i][j]
-    #         depth_map[i][j] = (pixel - min_depth) * 1.0 / (max_depth - min_depth) if pixel >= min_depth else 0
-
     depth_map = np.asarray(map(lambda pixel:
                                (pixel - min_depth) * 1.0 / (max_depth - min_depth),
                                depth_map))
@@ -60,19 +55,23 @@ def colorize_depth(depth_map):
 
 
 def preprocess_frame(row, file_dir):
-    image = imread(row.crop_location)
-    depth = imread(row.depthcrop_location, flatten=True)
+    try:
+        image = imread(row['crop_location'])
+        depth = imread(row['depthcrop_location'], flatten=True)
 
-    image = tile_border(image, 256)
-    depth = tile_border(colorize_depth(depth), 256)
+        image = tile_border(image, 256)
+        depth = tile_border(colorize_depth(depth), 256)
 
-    combined_image = np.concatenate([image, depth], axis=1)
-    cv2.imwrite(file_dir, cv2.cvtColor(combined_image, cv2.COLOR_RGB2BGR))
+        combined_image = np.concatenate([image, depth], axis=1)
+        cv2.imwrite(file_dir, cv2.cvtColor(combined_image, cv2.COLOR_RGB2BGR))
+    except IOError:
+        print 'file ' + row.crop_location + ' does not exist. Probably in the other train split half'
 
 
-def build_training_data(washington_df, output_base_path):
-    if not os.path.isdir(output_base_path):
-        os.mkdir(output_base_path)
+def build_training_data(washington_df, save_path):
+    dir_path = os.path.split(save_path)[0]
+    if not os.path.isdir(dir_path):
+        os.mkdir(dir_path)
 
     categories = np.sort(np.unique(washington_df.category))
 
@@ -81,7 +80,7 @@ def build_training_data(washington_df, output_base_path):
         row = washington_df.iloc[i]
         label_vector = np.array([int(c == row.category) for c in categories])
 
-        file_path = os.path.join(output_base_path,
+        file_path = os.path.join(dir_path,
                                  '_'.join([str(row.category),
                                            str(row.instance_number),
                                            str(row.video_no),
@@ -100,34 +99,73 @@ def build_training_data(washington_df, output_base_path):
         preprocess_frame(row, file_path)
 
     train_df = pd.DataFrame(train_df)
-    train_df.to_csv(os.path.join(output_base_path, 'train_info.csv'), index=False)
+    train_df.to_csv(save_path, index=False)
 
 
-def train_test_split_5_frames(train_info_df, output_base_path):
-    categories = np.unique(train_info_df.category)
+def mapping_to_gan_data(data_frame, gan_image_dir, saving_dir):
+    if not os.path.isdir(saving_dir):
+        os.mkdir(saving_dir)
 
-    test_df = pd.DataFrame(columns=list(train_info_df))
-    train_df = pd.DataFrame(columns=list(train_info_df))
-    for category in categories:
-        # Select 1 category for test and insert the whole category to test set
-        category_df = train_info_df[train_info_df.category == category]
-        max_instance = np.max(category_df.instance_number)
-        test_instance = np.random.randint(max_instance) + 1
-        test_df = test_df.append(category_df[category_df.instance_number == test_instance])
+    new_df = []
+    for i in range(data_frame.shape[0]):
+        current_row = data_frame.iloc[i]
 
-        # For the rest, select every 5th frame for test, rest for training
-        training_instances_df = category_df[category_df.instance_number != test_instance]
-        train_df = train_df.append(training_instances_df[training_instances_df.frame_no % 5 != 1])
-        test_df = test_df.append(training_instances_df[training_instances_df.frame_no % 5 == 1])
+        location = current_row.location
+        label = current_row.label
+        category = current_row.category
+        instance_number = current_row.instance_number
+        video_no = current_row.video_no
+        frame_no = current_row.frame_no
 
-    if train_df.shape[0] + test_df.shape[0] == train_info_df.shape[0]:
-        logger.info('saving test and train to csv')
-        train_df.to_csv(os.path.join(output_base_path, 'training_set.csv'), index=False)
-        test_df.to_csv(os.path.join(output_base_path, 'test_set.csv'), index=False)
-    else:
-        logger.warning('Splitting error')
-        logger.warning('training size = %d' % train_df.shape[0])
-        logger.warning('testing size = %d' % test_df.shape[0])
+        basic_name_element = '_'.join([category,
+                                       str(int(instance_number)),
+                                       str(int(video_no)),
+                                       str(int(frame_no))])
+
+        rgb_file_name_crop = '_'.join([basic_name_element,
+                                       'crop'])
+        rgb_file_name_depthcrop = '_'.join([basic_name_element,
+                                            'depthcrop'])
+
+        rgb_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-inputs.png'
+        depth_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-outputs.png'
+
+        row = {'crop_location': os.path.join(gan_image_dir, rgb_file_name),
+               'depthcrop_location': os.path.join(gan_image_dir, depth_file_name)}
+
+        preprocess_frame(pd.Series(row), os.path.join(saving_dir, basic_name_element + '.png'))
+
+        new_df.append({
+            'location': location,
+            'label': label,
+            'category': category,
+            'instance_number': instance_number,
+            'video_no': video_no,
+            'frame_no': frame_no,
+            'location_generated': os.path.join(saving_dir, basic_name_element + '.png')
+        })
+
+    new_df = pd.DataFrame(new_df)
+    new_df.to_csv(os.path.join(saving_dir, 'gan-test-data.csv'), index=False)
+
+
+def preprocess_a_folder(folder_dir, output_path):
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path)
+
+    file_list = os.walk(folder_dir)
+
+    for current_dir, _, files in file_list:
+        files = np.sort(files)
+        for i in range(len(files)):
+            f = files[i]
+            if 'inputs' in f:
+                crop_location = os.path.join(current_dir, f)
+                depthcrop_location = os.path.join(current_dir, files[i + 1])
+                row = {'crop_location': crop_location,
+                       'depthcrop_location': depthcrop_location}
+
+                preprocess_frame(row, os.path.join(output_path, f))
 
 
 if __name__ == '__main__':
@@ -136,6 +174,17 @@ if __name__ == '__main__':
     CSV_AGGREGATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated-aggregated.csv'
     CSV_INTERPOLATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated.csv'
     PROCESSED_PAIR_PATH = '/mnt/raid/data/ni/dnn/pduy/eitel-et-al-data/'
+    GAN_TEST_FOLDER = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split/images/'
+    GAN_PROCESSED_FOLDER = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split/processed_images/'
+    GAN_TEST_FOLDER_075 = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-075/images/'
+    GAN_PROCESSED_FOLDER_075 = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-075/processed_images/'
+
+    GAN_TEST_FOLDER_30_EPOCS = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-30-epochs/images/'
+    GAN_PROCESSED_FOLDER_30_EPOCS = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-30-epochs' \
+                                    '/processed_images/'
+    GAN_TEST_FOLDER_35_EPOCS = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-35-epochs/images/'
+    GAN_PROCESSED_FOLDER_35_EPOCS = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-35-epochs' \
+                                    '/processed_images/'
 
     logging.basicConfig(level=logging.INFO)
 
@@ -145,10 +194,20 @@ if __name__ == '__main__':
                                         csv_interpolated_default=CSV_INTERPOLATED_DEFAULT)
 
     aggregate_washington_df = washington_dataset.aggregate_frame_data()
-    small_df = aggregate_washington_df[(aggregate_washington_df.category == 'apple')
-                                       | (aggregate_washington_df.category == 'keyboard')
-                                       | (aggregate_washington_df.category == 'banana')]
+    washington_train_df, washington_test_df = washington_dataset.train_test_split_eitel(aggregate_washington_df)
 
-    # build_training_data(aggregate_washington_df, PROCESSED_PAIR_PATH)
-    train_test_split_5_frames(pd.read_csv(os.path.join(PROCESSED_PAIR_PATH, 'train_info.csv'), index_col=False),
-                              PROCESSED_PAIR_PATH)
+    # small_df = aggregate_washington_df[(aggregate_washington_df.category == 'apple')
+    #                                    | (aggregate_washington_df.category == 'keyboard')
+    #                                    | (aggregate_washington_df.category == 'banana')]
+
+    # build_training_data(washington_train_df, os.path.join(PROCESSED_PAIR_PATH, 'training_set.csv'))
+    # build_training_data(washington_test_df, os.path.join(PROCESSED_PAIR_PATH, 'test_set.csv'))
+    # train_test_split_5_frames(pd.read_csv(os.path.join(PROCESSED_PAIR_PATH, 'train_info.csv'), index_col=False),
+    #                           PROCESSED_PAIR_PATH)
+
+    train_df = pd.read_csv(os.path.join(PROCESSED_PAIR_PATH, 'training_set.csv'))
+    test_df = pd.read_csv(os.path.join(PROCESSED_PAIR_PATH, 'test_set.csv'))
+
+    mapping_to_gan_data(train_df, GAN_TEST_FOLDER_35_EPOCS, GAN_PROCESSED_FOLDER_35_EPOCS)
+    # preprocess_a_folder('/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-copy/images/',
+    #                     '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-copy/processed_images/')

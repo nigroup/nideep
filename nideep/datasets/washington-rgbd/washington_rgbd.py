@@ -10,15 +10,15 @@ from sklearn.model_selection import train_test_split
 
 class WashingtonRGBD(object):
     """
-    
+
     Data Wrapper class for WashingtonRGBD dataset
     Attributes
     -----------
     root_dir: root directory until the rgbd-dataset folder. For example: /mnt/raid/data/ni/dnn/pduy/rgbd-dataset
     csv_default: the default directory for loading/saving the csv description of the dataset
-    csv_interpolated_default: the default directory for loading/saving the pose-interpolated csv description of the 
+    csv_interpolated_default: the default directory for loading/saving the pose-interpolated csv description of the
     dataset.
-    
+
     """
 
     def __init__(self, root_dir='', csv_default='', csv_perframe_default='', csv_interpolated_default=''):
@@ -216,7 +216,8 @@ class WashingtonRGBD(object):
     # together with a train-test-split for doing a hold-out validation.
     # Only one elevation video_no is taken, the other elevations are ignored
     # Left:RGB, (Middle: Depth Map),  Right: Rotation
-    def combine_viewpoints(self, angle, video_no, should_include_depth, output_path):
+    # split_method = {'random', 'eitel'}
+    def combine_viewpoints(self, angle, video_no, should_include_depth, output_path, split_method='random'):
 
         def join(df, output_path):
             for i in range(len(df.index)):
@@ -256,14 +257,17 @@ class WashingtonRGBD(object):
         data_frame = data_frame[data_frame['video_no'] == video_no]
 
         # train test split
-        train, test = train_test_split(data_frame, test_size=0.2)
+        train, test = train_test_split(data_frame, test_size=0.2) if split_method == 'random' \
+            else self.train_test_split_eitel(data_frame)
 
         # construct training and test sets, saving to disk
         join(train, os.path.join(output_path, 'train'))
         join(test, os.path.join(output_path, 'test'))
 
     # this method combines every rgb frame with its depthmap on the right
-    def combine_rgb_depth(self, output_path):
+    # split method: "random" or "eitel" - the method used in Eitel et al.
+    # https://arxiv.org/abs/1507.06821
+    def combine_rgb_depth(self, output_path, split_method='random'):
         def join(df, output_path):
             for i in range(len(df.index)):
                 current_row = df.iloc[[i]]
@@ -274,7 +278,8 @@ class WashingtonRGBD(object):
 
         df = self.aggregate_frame_data()
 
-        train, test = train_test_split(df, test_size=0.2)
+        train, test = train_test_split(df, test_size=0.2) if split_method == 'random' \
+            else self.train_test_split_eitel(df)
 
         join(train, os.path.join(output_path, 'train'))
         join(test, os.path.join(output_path, 'test'))
@@ -297,6 +302,30 @@ class WashingtonRGBD(object):
                                  '_'.join([os.path.splitext(name)[0] for name in names])
                                  + os.path.splitext(names[0])[1]),
                     img)
+
+    @staticmethod
+    def train_test_split_eitel(train_info_df, seed=1000):
+        np.random.seed(seed)
+        categories = np.unique(train_info_df.category)
+
+        test_df = pd.DataFrame(columns=list(train_info_df))
+        train_df = pd.DataFrame(columns=list(train_info_df))
+        for category in categories:
+            # Select 1 category for test and insert the whole category to test set
+            category_df = train_info_df[train_info_df.category == category]
+            max_instance = np.max(category_df.instance_number)
+            test_instance = np.random.randint(max_instance) + 1
+            test_df = test_df.append(category_df[category_df.instance_number == test_instance])
+
+            # For the rest, select every 5th frame for test, rest for training
+            training_instances_df = category_df[category_df.instance_number != test_instance]
+            train_df = train_df.append(training_instances_df[training_instances_df.frame_no % 5 != 1])
+            test_df = test_df.append(training_instances_df[training_instances_df.frame_no % 5 == 1])
+
+        if train_df.shape[0] + test_df.shape[0] == train_info_df.shape[0]:
+            return train_df, test_df
+        else:
+            raise ValueError('Train and Test do not sum up to the original dataframe')
 
 
 if __name__ == '__main__':
@@ -327,7 +356,7 @@ if __name__ == '__main__':
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
     # washington_dataset.load_metadata()
-    washington_dataset.aggregate_frame_data()
+    # washington_dataset.aggregate_frame_data()
     # washington_dataset.interpolate_poses(washington_dataset.load_metadata())
 
     # washington_dataset.combine_viewpoints(angle=args.angle,
@@ -335,5 +364,5 @@ if __name__ == '__main__':
     #                                       should_include_depth=args.depth_included,
     #                                       output_path=args.processed_data_output)
 
-    # washington_dataset.combine_rgb_depth(args.processed_data_output)
+    washington_dataset.combine_rgb_depth(args.processed_data_output, split_method='eitel')
 
