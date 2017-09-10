@@ -304,7 +304,12 @@ class WashingtonRGBD(object):
                     img)
 
     @staticmethod
-    def train_test_split_eitel(train_info_df, seed=1000):
+    def train_test_split_eitel(train_info_df, seed=1000, train_output='', test_output=''):
+        if train_output != '' and not os.path.isdir(os.path.split(train_output)[0]):
+            os.makedirs(os.path.split(train_output)[0])
+        if test_output != '' and not os.path.isdir(os.path.split(test_output)[0]):
+            os.makedirs(os.path.split(test_output)[0])
+
         np.random.seed(seed)
         categories = np.unique(train_info_df.category)
 
@@ -323,6 +328,11 @@ class WashingtonRGBD(object):
             test_df = test_df.append(training_instances_df[training_instances_df.frame_no % 5 == 1])
 
         if train_df.shape[0] + test_df.shape[0] == train_info_df.shape[0]:
+            if train_output != '':
+                train_df.to_csv(train_output)
+            if test_output != '':
+                test_df.to_csv(test_output)
+
             return train_df, test_df
         else:
             raise ValueError('Train and Test do not sum up to the original dataframe')
@@ -333,6 +343,8 @@ if __name__ == '__main__':
     CSV_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset.csv'
     CSV_AGGREGATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated-aggregated.csv'
     CSV_INTERPOLATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated.csv'
+    CSV_EITEL_TRAIN_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-train.csv'
+    CSV_EITEL_TEST_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-test.csv'
 
     logging.basicConfig(level=logging.INFO)
 
@@ -364,5 +376,7 @@ if __name__ == '__main__':
     #                                       should_include_depth=args.depth_included,
     #                                       output_path=args.processed_data_output)
 
-    washington_dataset.combine_rgb_depth(args.processed_data_output, split_method='eitel')
+    # washington_dataset.combine_rgb_depth(args.processed_data_output, split_method='eitel')
+    WashingtonRGBD.train_test_split_eitel(washington_dataset.aggregate_frame_data(),
+                                          train_output=CSV_EITEL_TRAIN_DEFAULT, test_output=CSV_EITEL_TEST_DEFAULT)
 
