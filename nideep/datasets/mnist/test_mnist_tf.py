@@ -20,7 +20,70 @@ class TestMNISTTF:
     @classmethod
     def teardown_class(self):
         shutil.rmtree(self.dir_tmp)
-
+        
+#    def test_to_tf_record(self):
+#        import tensorflow as tf
+#        x = tf.placeholder(tf.float32, [None, 784])
+#        name_w = 'W'
+#        with tf.variable_scope("var_scope", reuse=None):
+#            W = tf.get_variable(name_w, shape=[784, 10],
+#                                initializer=tf.random_normal_initializer(stddev=0.1))
+#            b = tf.get_variable('b', shape=[10],
+#                                initializer=tf.constant_initializer(0.1))
+#        logits = tf.matmul(x, W) + b
+#        y = tf.nn.softmax(logits)
+#        y_ = tf.placeholder(tf.float32, [None, 10])
+#        cross_entropy = tf.reduce_mean(
+#        tf.nn.softmax_cross_entropy_with_logits(\
+#                labels=y_, logits=logits))
+#        train_step = tf.train.GradientDescentOptimizer(0.9).minimize(cross_entropy)
+#        init_op = tf.global_variables_initializer()
+#        one_hot = True
+#        mnist = MNIST.read_data_sets('MNIST_data', one_hot=True)
+#        MNIST.to_tf_record(os.path.join('MNIST_data', 'train.tfrecords'),
+#                           one_hot=one_hot)
+#
+#
+#        img, label = MNIST.read_and_decode_ops(os.path.join('MNIST_data', 'train.tfrecords'),
+#                                               one_hot=one_hot)
+##        import tensorflow as tf
+#        batch_xs_op, batch_ys_op = tf.train.batch([img, label],
+#                                                batch_size=128,
+#                                                capacity=2000,
+##                                                min_after_dequeue=1000,
+#                                                num_threads=8
+#                                                )
+#        
+#        import matplotlib.pyplot as plt
+#        f, a = plt.subplots(3, 4, figsize=(10, 2))
+#        with tf.Session() as sess:
+#                    
+#            coord = tf.train.Coordinator()
+#            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+##            for i in range(3):
+##                val, l = sess.run([batch_xs_op, batch_ys_op])
+##                print(val.shape, l)
+##                for j in range(4):
+##                    a[i][j].imshow(np.reshape(val[j], (28, 28)), clim=(0.0, 1.0))
+#
+##            plt.show()
+#            sess.run(init_op)
+#            for itr in range(1000):
+#                batch_xs, batch_ys = sess.run([batch_xs_op, batch_ys_op])
+#                _, c = sess.run([train_step, cross_entropy],
+#                     feed_dict={x: batch_xs, y_: batch_ys})
+##                print(c)
+#            print
+#            correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+#            accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+#            print(sess.run(accuracy,
+#                           feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
+#            print(sess.run(accuracy,
+#                           feed_dict={x: mnist.validation.images, y_: mnist.validation.labels}))
+#            
+#            coord.request_stop()
+#            coord.join(threads)
+            
     @patch('nideep.datasets.mnist.mnist_tf.extract_images')
     def test_read(self, mock_extract):
         mock_extract.return_value = np.empty_like((100000, 28, 28))
