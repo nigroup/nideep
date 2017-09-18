@@ -30,21 +30,43 @@ class AbstractNetTF(AbstractNet):
         self.b = {}
         for key, tensor in self.w.iteritems():
             key_b = key.replace('/w', '/b').replace('_w', '_b').replace('-w', '-b')
-            self.b[key_b] = tf.get_variable(key_b,
-                                            [tensor.get_shape()[-1].value],
-                                            initializer=self._init_bias_op(bias_value))
-        
+            if self.reuse:
+                self.b[key_b] = self._restore_variable(self.var_scope + '/' + key_b)
+            else:    
+                self.b[key_b] = tf.get_variable(key_b,
+                                                [tensor.get_shape()[-1].value],
+                                                initializer=self._init_bias_op(bias_value))
+            
     @abstractmethod
     def _init_learning_params_scoped(self):
         pass
 
     def _init_learning_params(self):
-        with tf.variable_scope(self.var_scope):
+        with tf.variable_scope(self.var_scope, reuse=self.reuse):
             self._init_learning_params_scoped()
         pass
+    
+    def _restore_variable(self, var_name):
+        v = self.get_tensor_by_name(var_name)
+        self.vars_restored.append(v)
+        return v
+    
+    def get_tensor_by_name(self, tensor_name, graph=tf.get_default_graph(), index=-1):
+        name_with_index = self.get_tensor_names(tensor_name, graph=graph)[index]
+        return graph.get_tensor_by_name(name_with_index)
+    
+    def get_tensor_names(self, tensor_name, graph=tf.get_default_graph()):
+#        op_names = [output.name for op in graph.get_operations()
+#                    if op.op_def and 'Variable' in op.op_def.name and
+#                    tensor_name == op.name for output in op.outputs]
+        op_names = [output.name for op in graph.get_operations()
+                    if op.op_def and
+                    tensor_name == op.name for output in op.outputs]
+        return op_names
     
     def __init__(self, params):
         '''
         Constructor
         '''
+        self.reuse = params.get('reuse', None)
         super(AbstractNetTF, self).__init__(params)

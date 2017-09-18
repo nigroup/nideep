@@ -5,6 +5,7 @@ Created on Jul 14, 2017
 '''
 import tensorflow as tf
 from nideep.nets.abstract_net_tf import AbstractNetTF
+from networkx.algorithms.shortest_paths.unweighted import predecessor
 
 class MLP(AbstractNetTF):
     '''
@@ -39,10 +40,9 @@ class MLP(AbstractNetTF):
                 self.p = tf.nn.softmax(fc_op, name='a-%d' % idx)
         return self.p, self._y_logits
             
-    def build(self):
+    def _init_ops(self):
         with tf.name_scope(self.name_scope + 'fc'):
-            pred, logits = self._fc(self.x)
-        return pred, logits
+            self.p, self.logits = self._fc(self.x)
                 
     def cost(self, y_true, name=None):
         with tf.name_scope(self.name_scope):
