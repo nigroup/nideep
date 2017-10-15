@@ -205,6 +205,22 @@ class WashingtonRGBD(object):
         new_df.to_csv(self.csv_perframe_default, index=False)
         return new_df
 
+    # add location of the interpolated depth map
+    # Now the columns are:
+    # ['category', 'instance_number', 'video_no', 'frame_no',
+    # 'crop_location', 'depthcrop_location', 'filled_depthcrop_location']
+    def add_filled_depth_to_aggregated_data(self):
+        aggregated_df = self.aggregate_frame_data()
+        depth_locations = aggregated_df.depthcrop_location
+        filled_depth_locations = map(lambda location:
+                                     os.path.join(os.path.split(location)[0],
+                                                  os.path.splitext(os.path.split(location)[1])[0] + '_filled.png'),
+                                     depth_locations)
+        aggregated_df['filled_depthcrop_location'] = pd.Series(filled_depth_locations, index=aggregated_df.index)
+
+        aggregated_df.to_csv(self.csv_perframe_default, index=False)
+        return aggregated_df
+
     def extract_rgb_only(self, output_path):
         data_frame = self.load_metadata()
         rgb_files = data_frame[data_frame['data_type'] == 'crop']['location']
@@ -377,6 +393,8 @@ if __name__ == '__main__':
     #                                       output_path=args.processed_data_output)
 
     # washington_dataset.combine_rgb_depth(args.processed_data_output, split_method='eitel')
-    WashingtonRGBD.train_test_split_eitel(washington_dataset.aggregate_frame_data(),
+    WashingtonRGBD.train_test_split_eitel(washington_dataset.add_filled_depth_to_aggregated_data(),
                                           train_output=CSV_EITEL_TRAIN_DEFAULT, test_output=CSV_EITEL_TEST_DEFAULT)
+
+    # washington_dataset.add_filled_depth_to_aggregated_data()
 

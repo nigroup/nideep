@@ -41,7 +41,7 @@ def tile_border(rgb_image, dst_size):
 def colorize_depth(depth_map):
     # scale everything to [0, 255]
     sorted_depth = np.unique(np.sort(depth_map.flatten()))
-    sorted_depth = np.delete(sorted_depth, 0)
+    # sorted_depth = np.delete(sorted_depth, 0)
     min_depth = sorted_depth[0]
     max_depth = sorted_depth[len(sorted_depth) - 1]
 
@@ -57,7 +57,8 @@ def colorize_depth(depth_map):
 def preprocess_frame(row, file_dir):
     try:
         image = imread(row['crop_location'])
-        depth = imread(row['depthcrop_location'], flatten=True)
+        # depth = imread(row['depthcrop_location'], flatten=True)   # Using the original depth
+        depth = imread(row['filled_depthcrop_location'], flatten=True)     # Using the filled depth
 
         image = tile_border(image, 256)
         depth = tile_border(colorize_depth(depth), 256)
@@ -82,9 +83,9 @@ def build_training_data(washington_df, save_path):
 
         file_path = os.path.join(dir_path,
                                  '_'.join([str(row.category),
-                                           str(row.instance_number),
-                                           str(row.video_no),
-                                           str(row.frame_no)])
+                                           str(int(row.instance_number)),
+                                           str(int(row.video_no)),
+                                           str(int(row.frame_no))])
                                  + ".png")
 
         logger.info('processing ' + file_path)
@@ -102,7 +103,7 @@ def build_training_data(washington_df, save_path):
     train_df.to_csv(save_path, index=False)
 
 
-def mapping_to_gan_data(data_frame, gan_image_dir, saving_dir):
+def mapping_to_gan_data(data_frame, gan_image_dir, saving_dir, need_preprocess=False):
     if not os.path.isdir(saving_dir):
         os.mkdir(saving_dir)
 
@@ -122,18 +123,19 @@ def mapping_to_gan_data(data_frame, gan_image_dir, saving_dir):
                                        str(int(video_no)),
                                        str(int(frame_no))])
 
-        rgb_file_name_crop = '_'.join([basic_name_element,
-                                       'crop'])
-        rgb_file_name_depthcrop = '_'.join([basic_name_element,
-                                            'depthcrop'])
+        if need_preprocess:
+            rgb_file_name_crop = '_'.join([basic_name_element,
+                                           'crop'])
+            rgb_file_name_depthcrop = '_'.join([basic_name_element,
+                                                'depthcrop'])
+            # rgb_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-inputs.png'    #OLD NAMING
+            # depth_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-outputs.png' #OLD NAMING
+            rgb_file_name = rgb_file_name_crop + '-inputs.png'
+            depth_file_name = rgb_file_name_crop + '-outputs.png'
+            row = {'crop_location': os.path.join(gan_image_dir, rgb_file_name),
+                   'filled_depthcrop_location': os.path.join(gan_image_dir, depth_file_name)}
 
-        rgb_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-inputs.png'
-        depth_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-outputs.png'
-
-        row = {'crop_location': os.path.join(gan_image_dir, rgb_file_name),
-               'depthcrop_location': os.path.join(gan_image_dir, depth_file_name)}
-
-        preprocess_frame(pd.Series(row), os.path.join(saving_dir, basic_name_element + '.png'))
+            preprocess_frame(pd.Series(row), os.path.join(saving_dir, basic_name_element + '.png'))
 
         new_df.append({
             'location': location,
@@ -174,10 +176,15 @@ if __name__ == '__main__':
     CSV_AGGREGATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated-aggregated.csv'
     CSV_INTERPOLATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated.csv'
     PROCESSED_PAIR_PATH = '/mnt/raid/data/ni/dnn/pduy/eitel-et-al-data/'
-    GAN_TEST_FOLDER = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split/images/'
-    GAN_PROCESSED_FOLDER = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split/processed_images/'
-    GAN_TEST_FOLDER_075 = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-075/images/'
-    GAN_PROCESSED_FOLDER_075 = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-075/processed_images/'
+    GAN_TEST_FOLDER_50 = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-50-test/images'
+    GAN_PROCESSED_FOLDER_75 = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-50-test/processed-images'
+    GAN_TEST_FOLDER_25 = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-25-test/images'
+    GAN_PROCESSED_FOLDER_25 = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-25-test/processed-images'
+    GAN_TEST_FOLDER_10 = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-10-test/images'
+    GAN_PROCESSED_FOLDER_10 = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-10-test/processed-images'
+    GAN_TEST_FOLDER_10_40EP = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-10-40ep-test/images'
+    GAN_PROCESSED_FOLDER_10_40EP = '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-10-40ep-test/' \
+                                   'processed-images'
 
     GAN_TEST_FOLDER_30_EPOCS = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-30-epochs/images/'
     GAN_PROCESSED_FOLDER_30_EPOCS = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-split-30-epochs' \
@@ -188,13 +195,13 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
 
-    washington_dataset = WashingtonRGBD(root_dir=ROOT_DEFAULT,
-                                        csv_default=CSV_DEFAULT,
-                                        csv_perframe_default=CSV_AGGREGATED_DEFAULT,
-                                        csv_interpolated_default=CSV_INTERPOLATED_DEFAULT)
+    # washington_dataset = WashingtonRGBD(root_dir=ROOT_DEFAULT,
+    #                                     csv_default=CSV_DEFAULT,
+    #                                     csv_perframe_default=CSV_AGGREGATED_DEFAULT,
+    #                                     csv_interpolated_default=CSV_INTERPOLATED_DEFAULT)
 
-    aggregate_washington_df = washington_dataset.aggregate_frame_data()
-    washington_train_df, washington_test_df = washington_dataset.train_test_split_eitel(aggregate_washington_df)
+    # aggregate_washington_df = washington_dataset.aggregate_frame_data()
+    # washington_train_df, washington_test_df = washington_dataset.train_test_split_eitel(aggregate_washington_df)
 
     # small_df = aggregate_washington_df[(aggregate_washington_df.category == 'apple')
     #                                    | (aggregate_washington_df.category == 'keyboard')
@@ -208,6 +215,7 @@ if __name__ == '__main__':
     train_df = pd.read_csv(os.path.join(PROCESSED_PAIR_PATH, 'training_set.csv'))
     test_df = pd.read_csv(os.path.join(PROCESSED_PAIR_PATH, 'test_set.csv'))
 
-    mapping_to_gan_data(train_df, GAN_TEST_FOLDER_35_EPOCS, GAN_PROCESSED_FOLDER_35_EPOCS)
-    # preprocess_a_folder('/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-copy/images/',
-    #                     '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset-rgb-depth-train-copy/processed_images/')
+    mapping_to_gan_data(data_frame=train_df, gan_image_dir=GAN_TEST_FOLDER_10_40EP, saving_dir=GAN_PROCESSED_FOLDER_10_40EP,
+                        need_preprocess=True)
+    # preprocess_a_folder('/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-50-test/images/',
+    #                     '/mnt/raid/data/ni/dnn/pduy/training-depth-16bit/rgbd-depth-50-test/processed-images/')
