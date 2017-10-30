@@ -4,6 +4,7 @@ Created on Jul 31, 2017
 @author: kashefy
 '''
 import os
+from collections import namedtuple
 import numpy as np
 import skimage.transform as transform
 from tensorflow.python.framework import dtypes, random_seed
@@ -12,6 +13,7 @@ from tensorflow.contrib.learn.python.learn.datasets.mnist import DataSet, read_d
 import tensorflow as tf
 # imported for mocking
 from tensorflow.contrib.learn.python.learn.datasets.mnist import extract_images
+from _ast import Num
 
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
@@ -91,8 +93,15 @@ class MNIST(object):
                                      seed=seed,
                                      )
         fname0, ext = os.path.splitext(fpath)
-        fpath_list_out = []
-        for phase in ['train', 'validation', 'test']:
+        DatasetTFRecords = namedtuple('DatasetTFRecords',
+                                      ['num_examples',
+                                       'path',
+                                       'one_hot',
+                                       'orientations',
+                                       'phase'])
+        dsets = Datasets(train=None, validation=None, test=None)
+        for phase in dsets._fields:#['train', 'validation', 'test']:
+            num_examples = 0
             if fname0.endswith(phase):
                 fpath_phase = fpath
             else:
@@ -100,10 +109,10 @@ class MNIST(object):
             if not os.path.isfile(fpath_phase):
                 # Skip if it already exists
                 with tf.python_io.TFRecordWriter(fpath_phase) as writer:
-                    split = getattr(mnist, 'train')
+                    split = getattr(mnist, phase)
                     for img, label in zip(split.images, split.labels):
                         if img.ndim < 2:
-                            raise AttributeError("Rotation need 2-dims of images resolved, found shape %s" % img.shape) 
+                            raise AttributeError("Rotation needs both height and width images resolved, found shape %s" % img.shape) 
                         img = np.expand_dims(img, axis=0)
                         imgs_orient_all, labels_orient_all = \
                             MNIST.rotate(img, orientations, one_hot)
@@ -131,8 +140,14 @@ class MNIST(object):
                                     'img_raw'       : _bytes_feature(img_raw),
                                     }))
                             writer.write(example.SerializeToString())  # Serialize To String
-                fpath_list_out.append(fpath_phase)
-        return fpath_list_out
+                            num_examples += 1
+            dsets.train = DatasetTFRecords(
+                                num_examples=num_examples,
+                                path=fpath_phase,
+                                one_hot=one_hot,
+                                orientations=orientations,
+                                phase=phase)
+        return dsets
                     
     @classmethod        
     def read_and_decode_ops(cls, fpath, one_hot=False,
