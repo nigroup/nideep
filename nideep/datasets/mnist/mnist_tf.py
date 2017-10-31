@@ -98,18 +98,23 @@ class MNIST(object):
                                        'path',
                                        'one_hot',
                                        'orientations',
-                                       'phase'])
-        dsets = Datasets(train=None, validation=None, test=None)
-        for phase in dsets._fields:#['train', 'validation', 'test']:
+                                       'phase',
+                                       'images',
+                                       'labels'])
+        dsets = {}
+        for phase in Datasets._fields:#['train', 'validation', 'test']:
+            split = getattr(mnist, phase)
             num_examples = 0
             if fname0.endswith(phase):
                 fpath_phase = fpath
             else:
                 fpath_phase = ''.join([fname0, '_', phase, ext])
-            if not os.path.isfile(fpath_phase):
+            if os.path.isfile(fpath_phase):
                 # Skip if it already exists
+                print(fpath_phase)
+                num_examples = sum(1 for _ in tf.python_io.tf_record_iterator(fpath_phase))
+            else:
                 with tf.python_io.TFRecordWriter(fpath_phase) as writer:
-                    split = getattr(mnist, phase)
                     for img, label in zip(split.images, split.labels):
                         if img.ndim < 2:
                             raise AttributeError("Rotation needs both height and width images resolved, found shape %s" % img.shape) 
@@ -141,13 +146,20 @@ class MNIST(object):
                                     }))
                             writer.write(example.SerializeToString())  # Serialize To String
                             num_examples += 1
-            dsets.train = DatasetTFRecords(
+            dsets[phase] = DatasetTFRecords(
                                 num_examples=num_examples,
                                 path=fpath_phase,
                                 one_hot=one_hot,
                                 orientations=orientations,
-                                phase=phase)
-        return dsets
+                                phase=phase,
+                                images=np.empty((num_examples,) + split.images.shape[1:],
+                                                dtype=split.images.dtype),
+                                labels=np.empty((num_examples,) + split.labels.shape[1:],
+                                                dtype=split.labels.dtype),
+                                )
+        return Datasets(train=dsets['train'],
+                        validation=dsets['validation'],
+                        test=dsets['test'])
                     
     @classmethod        
     def read_and_decode_ops(cls, fpath, one_hot=False,
@@ -189,7 +201,11 @@ class MNIST(object):
             return img, label
     
     @staticmethod
-    def rotate(imgs, orientations, one_hot):
+    def rotate(imgs,
+               orientations,
+               one_hot,
+               mode='symmetric',
+               cval=0):
         num_examples_in = len(imgs)
         labels_orient_all = None
         imgs_orient_all = None
@@ -199,7 +215,7 @@ class MNIST(object):
                 img_rot = transform.rotate(img, angle,
                                            resize=False, center=None,
                                            order=1,
-                                           mode='symmetric', cval=0,
+                                           mode=mode, cval=cval,
                                            clip=True, preserve_range=False)
                 imgs_orient[img_idx] = img_rot
             if one_hot:
