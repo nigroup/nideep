@@ -111,7 +111,6 @@ class MNIST(object):
                 fpath_phase = ''.join([fname0, '_', phase, ext])
             if os.path.isfile(fpath_phase):
                 # Skip if it already exists
-                print(fpath_phase)
                 num_examples = sum(1 for _ in tf.python_io.tf_record_iterator(fpath_phase))
             else:
                 with tf.python_io.TFRecordWriter(fpath_phase) as writer:
