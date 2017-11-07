@@ -13,7 +13,6 @@ from tensorflow.contrib.learn.python.learn.datasets.mnist import DataSet, read_d
 import tensorflow as tf
 # imported for mocking
 from tensorflow.contrib.learn.python.learn.datasets.mnist import extract_images
-from _ast import Num
 
 def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
