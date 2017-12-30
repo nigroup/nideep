@@ -21,16 +21,17 @@ class MLP(AbstractNetTF):
                                                 [input_dim, dim],
                                                 initializer=self._init_weight_op()
                                                 )
-            if idx == len(self.n_nodes)-1:
+            if idx == self.branch:
                 fc_name_w = 'fc-%d-aux/w' % idx
                 self.w[fc_name_w] = tf.get_variable(fc_name_w,
-                                                    [input_dim, 9],
+                                                    [dim, 9],
                                                     initializer=self._init_weight_op()
                                                     )
         self._init_bias_vars(bias_value=0.1)
                 
     def _fc(self, x):
         in_op = x
+        branch_op = x
         for idx in xrange(len(self.n_nodes)):
             fc_name_w = 'fc-%d/w' % idx
             fc_name_b = 'fc-%d/b' % idx
@@ -43,16 +44,15 @@ class MLP(AbstractNetTF):
             else:
                 self._y_logits = fc_op
                 self.p = tf.nn.softmax(fc_op, name='a-%d' % idx)
-        
+            if idx == self.branch:
+                branch_op = a
+        idx = self.branch
         fc_name_w = 'fc-%d-aux/w' % idx
         fc_name_b = 'fc-%d-aux/b' % idx
-        if len(self.n_nodes) == 1:
-            in_op = x
-        else:
-            in_op = a
+        in_op = branch_op
         fc_op = tf.add(tf.matmul(in_op, self.w[fc_name_w]),
                         self.b[fc_name_b],
-                        name='fc-%d' % idx)
+                        name='fc-%d-aux' % idx)
         self._y_logits_aux = fc_op
         self.p_aux = tf.nn.softmax(fc_op, name='a-%d-aux' % idx)
         return self.p, self._y_logits
@@ -70,7 +70,7 @@ class MLP(AbstractNetTF):
             self._cost_ops.append(c)
             return c
         
-    def cost_o(self, y_true, name=None):
+    def cost_aux(self, y_true, name=None):
         with tf.name_scope(self.name_scope):
             c = tf.reduce_mean(
                 tf.nn.softmax_cross_entropy_with_logits(\
@@ -94,3 +94,5 @@ class MLP(AbstractNetTF):
 
         self._cost_ops = []
         self._y_logits = None
+        self.branch = params.get('branch', len(self.n_nodes)-1)
+        self.logger.debug("Branch aux. task from layer: %d" % self.branch)

@@ -5,6 +5,7 @@ Created on Jul 14, 2017
 '''
 from __future__ import division, print_function, absolute_import
 from abc import ABCMeta, abstractmethod
+import logging
 
 class AbstractNet(object):
     '''
@@ -81,6 +82,10 @@ class AbstractNet(object):
         '''
         Constructor
         '''
+        logger_name = self.__class__.__name__
+        if params.get('logger_name', None) is not None:
+            logger_name = '.'.join([params.get('logger_name', None), logger_name])
+        self.logger = logging.getLogger(logger_name)
         self._x = None
         self._p = None
         self.prefix = params.get('prefix', '')
