@@ -319,6 +319,7 @@ class WashingtonRGBD(object):
                                  + os.path.splitext(names[0])[1]),
                     img)
 
+    # Train-test split method in Eitel et al.
     @staticmethod
     def train_test_split_eitel(train_info_df, seed=1000, train_output='', test_output=''):
         if train_output != '' and not os.path.isdir(os.path.split(train_output)[0]):
@@ -353,6 +354,76 @@ class WashingtonRGBD(object):
         else:
             raise ValueError('Train and Test do not sum up to the original dataframe')
 
+    # create train and test CSVs, where each frame is associated with a rotated frame by 20 degrees (10th item)
+    def train_test_split_eitel_stereo_rgb(self, seed=1000, rotation_index=10, train_output='', test_output=''):
+        self.logger.info('Splitting train/test for stereo rgb')
+        washington_aggredated_df = self.aggregate_frame_data()
+
+        dicts = []
+        categories = washington_aggredated_df.category.unique()
+        for cat in categories:
+            items_in_cat = washington_aggredated_df[washington_aggredated_df.category == cat]
+            instances = items_in_cat.instance_number.unique()
+            for ins in instances:
+                items_in_ins = items_in_cat[items_in_cat.instance_number == ins]
+                vids = items_in_ins.video_no.unique()
+                for vid in vids:
+                    items_in_vid = items_in_ins[items_in_ins.video_no == vid] \
+                        .sort_values('frame_no')[['crop_location', 'filled_depthcrop_location', 'frame_no', 'pose']]
+                    rotated_items = items_in_vid.iloc[rotation_index: items_in_vid.shape[0]] \
+                        .append(items_in_vid.iloc[0: rotation_index])
+
+                    for item_index in range(rotated_items.shape[0]):
+                        original_item = items_in_vid.iloc[item_index]
+                        rotated_item = rotated_items.iloc[item_index]
+
+                        if original_item.pose > rotated_item.pose:
+                            (original_item, rotated_item) = (rotated_item, original_item)
+
+                        dicts.append({'category': cat,
+                                      'instance_number': int(ins),
+                                      'video_no': int(vid),
+                                      'frame_no': int(original_item.frame_no),
+                                      'rgb_original_path': original_item.crop_location,
+                                      'depth_original_path': original_item.filled_depthcrop_location,
+                                      'rgb_target_path': rotated_item.crop_location,
+                                      'depth_target_path': rotated_item.filled_depthcrop_location})
+
+        input_df = pd.DataFrame(dicts)
+
+        if train_output != '' and not os.path.isdir(os.path.split(train_output)[0]):
+            os.makedirs(os.path.split(train_output)[0])
+        if test_output != '' and not os.path.isdir(os.path.split(test_output)[0]):
+            os.makedirs(os.path.split(test_output)[0])
+
+        np.random.seed(seed)
+        categories = np.unique(input_df.category)
+
+        test_df = pd.DataFrame(columns=list(input_df))
+        train_df = pd.DataFrame(columns=list(input_df))
+        for category in categories:
+            # Select 1 instance for test and insert the whole category to test set
+            category_df = input_df[input_df.category == category]
+            max_instance = np.max(category_df.instance_number)
+            test_instance = np.random.randint(max_instance) + 1
+            test_df = test_df.append(category_df[category_df.instance_number == test_instance])
+
+            # For the rest, select every 5th frame for test, rest for training
+            training_instances_df = category_df[category_df.instance_number != test_instance]
+            train_df = train_df.append(training_instances_df[training_instances_df.frame_no % 5 != 1])
+            test_df = test_df.append(training_instances_df[training_instances_df.frame_no % 5 == 1])
+
+        if train_df.shape[0] + test_df.shape[0] == input_df.shape[0]:
+            if train_output != '':
+                train_df.to_csv(train_output, index=False)
+            if test_output != '':
+                test_df.to_csv(test_output, index=False)
+
+            return train_df, test_df
+        else:
+            raise ValueError('Train and Test do not sum up to the original dataframe')
+
+
 
 if __name__ == '__main__':
     ROOT_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset'
@@ -361,6 +432,8 @@ if __name__ == '__main__':
     CSV_INTERPOLATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated.csv'
     CSV_EITEL_TRAIN_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-train.csv'
     CSV_EITEL_TEST_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-test.csv'
+    CSV_EITEL_TRAIN_STEREO_RGB_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-train-stereo-rgb.csv'
+    CSV_EITEL_TEST_STEREO_RGB_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-test-stereo-rgb.csv'
 
     logging.basicConfig(level=logging.INFO)
 
@@ -383,18 +456,7 @@ if __name__ == '__main__':
                                         csv_perframe_default=args.csv_perframe_dir,
                                         csv_interpolated_default=args.csv_interpolated_dir)
 
-    # washington_dataset.load_metadata()
-    # washington_dataset.aggregate_frame_data()
-    # washington_dataset.interpolate_poses(washington_dataset.load_metadata())
+    washington_dataset.train_test_split_eitel_stereo_rgb(train_output=CSV_EITEL_TRAIN_STEREO_RGB_DEFAULT,
+                                                     test_output=CSV_EITEL_TEST_STEREO_RGB_DEFAULT)
 
-    # washington_dataset.combine_viewpoints(angle=args.angle,
-    #                                       video_no=1,
-    #                                       should_include_depth=args.depth_included,
-    #                                       output_path=args.processed_data_output)
-
-    # washington_dataset.combine_rgb_depth(args.processed_data_output, split_method='eitel')
-    WashingtonRGBD.train_test_split_eitel(washington_dataset.add_filled_depth_to_aggregated_data(),
-                                          train_output=CSV_EITEL_TRAIN_DEFAULT, test_output=CSV_EITEL_TEST_DEFAULT)
-
-    # washington_dataset.add_filled_depth_to_aggregated_data()
 
