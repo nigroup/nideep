@@ -149,8 +149,8 @@ def map_to_gan_data_with_depth(original_training_df, gan_image_dir, saving_dir, 
             logger.info('processing Depth GAN')
             rgb_file_name_crop = '_'.join([basic_name_element,
                                            'crop'])
-            rgb_file_name_depthcrop = '_'.join([basic_name_element,
-                                                'depthcrop'])
+            # rgb_file_name_depthcrop = '_'.join([basic_name_element,
+            #                                     'depthcrop'])
             # rgb_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-inputs.png'    #OLD NAMING
             # depth_file_name = '_'.join([rgb_file_name_crop, rgb_file_name_depthcrop]) + '-outputs.png' #OLD NAMING
             rgb_file_name = rgb_file_name_crop + '-inputs.png'
@@ -263,8 +263,7 @@ def preprocess_a_folder(folder_dir, output_path):
 
     for current_dir, _, files in file_list:
         files = np.sort(files)
-        for i in range(len(files)):
-            f = files[i]
+        for i, f in enumerate(files):
             if 'inputs' in f:
                 crop_location = os.path.join(current_dir, f)
                 depthcrop_location = os.path.join(current_dir, files[i + 1])
