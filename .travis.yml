@@ -71,7 +71,7 @@ install:
   - travis_retry pip install lmdb tensorflow
   - if [[ $WITH_COVERAGE == ON ]]; then
       echo "Installing Coveralls"
-      travis_retry pip install coveralls;
+      travis_retry pip install coverage coveralls;
     fi
   - export LD_LIBRARY_PATH="$CONDA_ENV_PREFIX/lib:$LD_LIBRARY_PATH"
   - export C_INCLUDE_PATH="$CONDA_ENV_PREFIX/include:$C_INCLUDE_PATH"
