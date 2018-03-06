@@ -25,7 +25,7 @@ env:
     - CONDA_ENV_PREFIX=$HOME/miniconda/envs/$CONDA_ENV
     # since we've set language to cpp we have to define python vars ourselves
     - TRAVIS_PYTHON_VERSION="2.7"
-    - WITH_COVERAGE=ON
+    - WITH_COVERAGE=OFF
     - CAFFE_ROOT=$DEPS_DIR/caffe # created during install
 
 before_install:
@@ -85,6 +85,7 @@ script:
   - export PYTHONPATH="$TRAVIS_BUILD_DIR:$CAFFE_ROOT/python:$CAFFE_ROOT/tools/extra:$PYTHONPATH"
   - if [[ $WITH_COVERAGE == ON ]]; then
       nosetests --with-coverage --logging-level=INFO --nocapture;
+    else
       nosetests --logging-level=INFO --nocapture;
     fi
       
