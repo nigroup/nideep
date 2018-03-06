@@ -4,7 +4,7 @@ Created on Jan 06, 2016
 @author: kashefy
 '''
 from nose.tools import assert_greater, assert_equal, assert_is_instance, assert_true
-import lmdb_utils as lu
+import nideep.iow.lmdb_utils as lu
 
 class TestLMDBConsts:
 

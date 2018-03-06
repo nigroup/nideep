@@ -10,7 +10,7 @@ import numpy as np
 from nose.tools import assert_true, \
     assert_list_equal, assert_not_in, assert_in, assert_equal
 from h5py import File
-import label_utils as lu
+import nideep.datasets.label_utils as lu
 
 class TestLabelUtils:
 

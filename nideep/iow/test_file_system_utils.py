@@ -9,7 +9,7 @@ import os
 import tempfile
 import shutil
 import sys
-import file_system_utils as fs
+import nideep.iow.file_system_utils as fs
 from nideep.eval.log_utils import is_caffe_info_log
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)

@@ -11,8 +11,8 @@ import tempfile
 import shutil
 import numpy as np
 import h5py
-from balance import CLNAME_OTHER
-import balance_hdf5 as bal
+from nideep.datasets.balance import CLNAME_OTHER
+import nideep.datasets.balance_hdf5 as bal
 
 class TestBalanceClassCountHDF5:
 

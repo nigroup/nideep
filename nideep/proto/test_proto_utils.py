@@ -7,7 +7,7 @@ from nose.tools import assert_is_not_none, assert_is_not, assert_equal
 import os
 from google.protobuf import text_format
 from caffe.proto.caffe_pb2 import NetParameter
-import proto_utils as pu
+import nideep.proto.proto_utils as pu
 
 import sys
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
