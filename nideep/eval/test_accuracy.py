@@ -1,5 +1,5 @@
 from nose.tools import assert_equals
-import nideep.eval.accuracy
+import nideep.eval.accuracy as accuracy
 import numpy as np
 
 class TestHammingAccuracy:

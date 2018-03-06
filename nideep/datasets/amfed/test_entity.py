@@ -12,7 +12,7 @@ from nose.tools import assert_equals, assert_true, \
     assert_list_equal, assert_greater
 from mock import patch, MagicMock
 import numpy as np
-from nideep.datasets.entity import Entity
+from nideep.datasets.amfed.entity import Entity
 
 def generate_random_entity_name():
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(9))
