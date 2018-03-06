@@ -4,8 +4,7 @@ Created on May 30, 2016
 @author: kashefy
 '''
 import lmdb
-
-from lmdb_utils import IDX_FMT, MAP_SZ
+from nideep.iow.lmdb_utils import IDX_FMT, MAP_SZ
 
 def copy_samples_lmdb(path_lmdb, path_dst, keys, func_data=None):
     """
