@@ -86,12 +86,11 @@ script:
   - if [[ $WITH_COVERAGE == ON ]]; then
       nosetests --with-coverage --logging-level=INFO --nocapture;
     else
-      nosetests ./nideep/datasets/twoears/test_label_utils.py;
-      nosetests ./nideep/datasets/;
+      #nosetests --logging-level=INFO --nocapture;
       nosetests ./nideep/eval/ --ignore-files='_tf.py';
       IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename | paste -sd "|" -`;
       echo $IGNORE_FILES;
-      nosetests ./nideep/eval/ --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -`;
+      nosetests --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -` --logging-level=INFO --nocapture;
     fi
       
 after_success:
