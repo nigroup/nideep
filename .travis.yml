@@ -87,6 +87,8 @@ script:
       nosetests --with-coverage --logging-level=INFO --nocapture;
     else
       nosetests ./nideep/datasets/twoears/test_label_utils.py;
+      nosetests ./nideep/datasets/;
+      nosetests ./nideep/eval/;
     fi
       
 after_success:
