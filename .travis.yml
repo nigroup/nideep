@@ -87,10 +87,9 @@ script:
       nosetests --with-coverage --logging-level=INFO --nocapture;
     else
       #nosetests --logging-level=INFO --nocapture;
-      nosetests ./nideep/eval/ --ignore-files='_tf.py';
       IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename | paste -sd "|" -`;
       echo $IGNORE_FILES;
-      nosetests --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -` --logging-level=INFO --nocapture;
+      nosetests . --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -` --logging-level=INFO --nocapture;
     fi
       
 after_success:
