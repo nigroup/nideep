@@ -26,6 +26,7 @@ env:
     # since we've set language to cpp we have to define python vars ourselves
     - TRAVIS_PYTHON_VERSION="2.7"
     - WITH_COVERAGE=OFF
+    - DO_EXCLUDE_TF_MODULES=ON
     - CAFFE_ROOT=$DEPS_DIR/caffe # created during install
 
 before_install:
@@ -86,9 +87,14 @@ script:
   - if [[ $WITH_COVERAGE == ON ]]; then
       nosetests --with-coverage --logging-level=INFO --nocapture;
     else
-      IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename | paste -sd "|" -`;
-      echo $IGNORE_FILES;
-      nosetests . --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -` --logging-level=INFO --nocapture;
+      if [[ $DO_EXCLUDE_TF_MODULES == ON ]]; then
+        nosetests --logging-level=INFO --nocapture;
+      else
+        IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename`;
+        echo "Exclude tensorflow dependent modules from test (currently causes segmentation faults)"
+        echo $IGNORE_FILES;
+        nosetests --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -` --logging-level=INFO --nocapture;
+      fi
     fi
       
 after_success:
