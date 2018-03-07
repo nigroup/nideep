@@ -90,10 +90,10 @@ script:
       if [[ $DO_EXCLUDE_TF_MODULES == OFF ]]; then
         nosetests --logging-level=INFO --nocapture;
       else
-        IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename`;
-        echo "Exclude tensorflow dependent modules from test (currently causes segmentation faults)"
+        IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename | paste -sd "|" -`;
+        echo "Exclude tensorflow dependent modules from test (currently causes segmentation faults):"
         echo $IGNORE_FILES;
-        nosetests --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -` --logging-level=INFO --nocapture;
+        nosetests . --ignore-files=`echo $IGNORE_FILES` --logging-level=INFO --nocapture;
       fi
     fi
       
