@@ -87,7 +87,7 @@ script:
   - if [[ $WITH_COVERAGE == ON ]]; then
       nosetests --with-coverage --logging-level=INFO --nocapture;
     else
-      if [[ $DO_EXCLUDE_TF_MODULES == ON ]]; then
+      if [[ $DO_EXCLUDE_TF_MODULES == OFF ]]; then
         nosetests --logging-level=INFO --nocapture;
       else
         IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename`;
