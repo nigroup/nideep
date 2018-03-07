@@ -89,6 +89,9 @@ script:
       nosetests ./nideep/datasets/twoears/test_label_utils.py;
       nosetests ./nideep/datasets/;
       nosetests ./nideep/eval/ --ignore-files='_tf.py';
+      IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename | paste -sd "|" -`
+      echo $IGNORE_FILES
+      nosetests ./nideep/eval/ --ignore-files=`echo $IGNORE_FILES | paste -sd "|" -`
     fi
       
 after_success:
