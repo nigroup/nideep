@@ -115,7 +115,7 @@ def nyudv2_to_lmdb(path_mat,
     #         raise ValueError("No. of depths != no. of labels. (%d) != (%d)",
     #                          len(depths), len(labels))
 
-        print typ, len(dat), dat[0].shape
+        print(typ, len(dat), dat[0].shape)
 
         fpath_lmdb = os.path.join(dir_dst, '%s%s_train_lmdb' % (dst_prefix, typ))
         to_lmdb.arrays_to_lmdb([dat[i] for i in train_idx], fpath_lmdb)
@@ -140,7 +140,5 @@ if __name__ == '__main__':
                    os.path.expanduser('~/data/nyudv2'),
                    val_list=val_list
                    )
-
-    print lmdb_info
-
+    print(lmdb_info)
     pass

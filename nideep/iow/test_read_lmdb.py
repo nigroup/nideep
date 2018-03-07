@@ -12,7 +12,7 @@ import shutil
 import numpy as np
 import lmdb
 import caffe
-import read_lmdb as r
+import nideep.iow.read_lmdb as r
 
 class TestReadLabelsLMDB:
 

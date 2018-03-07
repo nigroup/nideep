@@ -10,7 +10,7 @@ import tempfile
 import shutil
 import numpy as np
 import cv2 as cv2
-import read_img as r
+import nideep.iow.read_img as r
 
 class TestReadImage:
 

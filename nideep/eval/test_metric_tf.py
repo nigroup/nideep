@@ -5,7 +5,7 @@ Created on Jul 28, 2017
 '''
 from nose.tools import assert_equals
 import tensorflow as tf
-import metric_tf as m
+import nideep.eval.metric_tf as m
 
 def test_resettable_metric():
 

@@ -5,7 +5,7 @@ Created on Oct 28, 2015
 '''
 from nose.tools import assert_equals, assert_true, assert_raises
 import numpy as np
-import mat_utils as mu
+import nideep.blobs.mat_utils as mu
 
 def test_cwh_to_chw_invalid_dims():
 

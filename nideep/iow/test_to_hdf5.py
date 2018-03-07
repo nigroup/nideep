@@ -10,7 +10,7 @@ import tempfile
 import shutil
 import numpy as np
 import h5py
-import to_hdf5 as to
+import nideep.iow.to_hdf5 as to
 
 class TestArraysToHDF5:
 

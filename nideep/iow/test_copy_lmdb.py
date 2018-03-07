@@ -11,10 +11,10 @@ import shutil
 import numpy as np
 import lmdb
 import caffe
-from lmdb_utils import IDX_FMT, MAP_SZ
-import to_lmdb as tol
-import read_lmdb as r
-import copy_lmdb as c
+from nideep.iow.lmdb_utils import IDX_FMT, MAP_SZ
+import nideep.iow.to_lmdb as tol
+import nideep.iow.read_lmdb as r
+import nideep.iow.copy_lmdb as c
 
 class TestCopySamplesLMDB:
 

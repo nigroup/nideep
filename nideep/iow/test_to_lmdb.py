@@ -12,7 +12,7 @@ import numpy as np
 from scipy import io
 import lmdb
 import cv2 as cv2
-import to_lmdb as tol
+import nideep.iow.to_lmdb as tol
 import caffe
 
 class DatumMock:
