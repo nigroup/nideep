@@ -76,11 +76,9 @@ if __name__ == '__main__':
     img_pil = read_img_PIL(fpath, mean=np.array((104.00698793, 116.66876762, 122.67891434)))
     img_cv2 = read_img_cv2(fpath, mean=np.array((104.00698793, 116.66876762, 122.67891434)))
     img_caf = read_img_caf(fpath, mean=np.array((104.00698793, 116.66876762, 122.67891434)))
-
-    print img_pil.shape, img_cv2.shape, img_caf.shape
-
-    print img_pil[:, 0:2, 0:2]
-    print img_cv2[:, 0:2, 0:2]
-    print img_caf[:, 0:2, 0:2]
+    print(img_pil.shape, img_cv2.shape, img_caf.shape)
+    print(mg_pil[:, 0:2, 0:2])
+    print(img_cv2[:, 0:2, 0:2])
+    print(img_caf[:, 0:2, 0:2])
 
     pass

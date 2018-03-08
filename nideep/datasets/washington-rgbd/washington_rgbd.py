@@ -10,21 +10,22 @@ from sklearn.model_selection import train_test_split
 
 class WashingtonRGBD(object):
     """
-    
+
     Data Wrapper class for WashingtonRGBD dataset
     Attributes
     -----------
     root_dir: root directory until the rgbd-dataset folder. For example: /mnt/raid/data/ni/dnn/pduy/rgbd-dataset
     csv_default: the default directory for loading/saving the csv description of the dataset
-    csv_interpolated_default: the default directory for loading/saving the pose-interpolated csv description of the 
+    csv_interpolated_default: the default directory for loading/saving the pose-interpolated csv description of the
     dataset.
-    
+
     """
 
-    def __init__(self, root_dir='', csv_default='', csv_interpolated_default=''):
+    def __init__(self, root_dir='', csv_default='', csv_perframe_default='', csv_interpolated_default=''):
         self.logger = logging.getLogger(__name__)
         self.root_dir = root_dir
         self.csv_default = csv_default
+        self.csv_perframe_default = csv_perframe_default
         self.csv_interpolated_default = csv_interpolated_default
 
     # Load the dataset metadata to a Pandas dataframe and save the result to a csv file
@@ -43,7 +44,8 @@ class WashingtonRGBD(object):
         for current_root, _, files in file_list:
             # For the time being, we do not work on the mask, location
             # For the pose, it should be attached to the corresponding data entry, not as a separate entry
-            files = [f for f in files if 'mask' not in f and 'loc' not in f and 'pose' not in f]
+            # files = [f for f in files if 'mask' not in f and 'loc' not in f and 'pose' not in f]
+            files = [f for f in files if 'pose' not in f]
 
             for f in files:
                 self.logger.info("processing " + f)
@@ -89,11 +91,11 @@ class WashingtonRGBD(object):
                              'pose': float(pose_value),
                              'data_type': data_type})
 
-            data_frame = pd.DataFrame(data) \
-                .sort_values(['data_type', 'category', 'instance_number', 'video_no', 'frame_no'])
+        data_frame = pd.DataFrame(data) \
+            .sort_values(['data_type', 'category', 'instance_number', 'video_no', 'frame_no'])
 
-            self.logger.info("csv saved to file: " + self.csv_default + '.csv')
-            data_frame.to_csv(self.csv_default, index=False)
+        self.logger.info("csv saved to file: " + self.csv_default)
+        data_frame.to_csv(self.csv_default, index=False)
 
         return data_frame
 
@@ -108,16 +110,28 @@ class WashingtonRGBD(object):
         sorted_df = data_frame.sort_values(['data_type', 'category', 'instance_number', 'video_no', 'frame_no'])
         poses = np.array(sorted_df['pose'])
 
-        current_video = -1
+        # current_video = -1
 
+        unit_diff_angle = 0
         for i in range(0, len(poses)):
-            if (sorted_df['video_no'][i] != current_video) and (poses[i] == 0):
-                unit_diff_angle = poses[i + 5] / 5
+            # if (sorted_df['video_no'][i] != current_video) and (poses[i] == 0):
+            if sorted_df.frame_no[i] == 1 and i + 5 < len(poses):
+                distance = poses[i + 5] - poses[i]
 
-            if poses[i] == -1:
+                # in some cases, the next angle exceeds 360 causing an overflow
+                if distance < -180:
+                    distance = distance + 360
+                elif distance > 180:
+                    distance = distance - 360
+
+                unit_diff_angle = distance * 1.0 / 5
+
+            elif poses[i] == -1:
                 poses[i] = poses[i - 1] + unit_diff_angle
                 if poses[i] > 360:
                     poses[i] = poses[i] - 360
+                elif poses[i] < 0:
+                    poses[i] = poses[i] + 360
 
         sorted_df['pose'] = poses
         sorted_df.to_csv(self.csv_interpolated_default, index=False)
@@ -125,6 +139,87 @@ class WashingtonRGBD(object):
         self.logger.info('Interpolation finished!')
 
         return sorted_df
+
+    # Get a new dataframe where each row represent all information about 1 frame including the rgb and depth locations
+    # structure: ['category', 'instance_number', 'video_no', 'frame_no', 'crop_location', 'depthcrop_location']
+    def aggregate_frame_data(self):
+        if os.path.isfile(self.csv_perframe_default):
+            return pd.read_csv(self.csv_perframe_default)
+
+        raw_df = self.interpolate_poses(self.load_metadata())
+
+        raw_rgb_df = raw_df[raw_df.data_type == 'crop']
+        raw_depth_df = raw_df[raw_df.data_type == 'depthcrop']
+        raw_maskcrop_df = raw_df[raw_df.data_type == 'maskcrop']
+        raw_loc_df = raw_df[raw_df.data_type == 'loc']
+
+        data = []
+
+        for i in range(len(raw_rgb_df.index)):
+            current_rgb_row = raw_rgb_df.iloc[[i]]
+
+            current_category = current_rgb_row.category.values[0]
+            current_instance_number = current_rgb_row.instance_number.values[0]
+            current_video_no = current_rgb_row.video_no.values[0]
+            current_frame_no = current_rgb_row.frame_no.values[0]
+            current_pose = current_rgb_row.pose.values[0]
+
+            current_crop_location = current_rgb_row.location.values[0]
+
+            current_depthcrop_location = raw_depth_df[(raw_depth_df.category == current_category)
+                                                      & (raw_depth_df.instance_number == current_instance_number)
+                                                      & (raw_depth_df.video_no == current_video_no)
+                                                      & (raw_depth_df.frame_no == current_frame_no)].location.values[0]
+
+            try:
+                current_maskcrop_location = raw_maskcrop_df[(raw_maskcrop_df.category == current_category)
+                                                            & (raw_maskcrop_df.instance_number == current_instance_number)
+                                                            & (raw_maskcrop_df.video_no == current_video_no)
+                                                            & (raw_maskcrop_df.frame_no == current_frame_no)].location.values[0]
+            except IndexError:
+                current_maskcrop_location = ""
+
+            current_loc_location = raw_loc_df[(raw_loc_df.category == current_category)
+                                              & (raw_loc_df.instance_number == current_instance_number)
+                                              & (raw_loc_df.video_no == current_video_no)
+                                              & (raw_loc_df.frame_no == current_frame_no)].location.values[0]
+
+            self.logger.info("processing " + os.path.split(current_crop_location)[1]
+                             + " and " + os.path.split(current_depthcrop_location)[1]
+                             + " and " + os.path.split(current_maskcrop_location)[1]
+                             + " and " + os.path.split(current_loc_location)[1])
+
+            data.append({
+                'category': current_category,
+                'instance_number': current_instance_number,
+                'video_no': current_video_no,
+                'frame_no': current_frame_no,
+                'pose': current_pose,
+                'crop_location': current_crop_location,
+                'depthcrop_location': current_depthcrop_location,
+                'maskcrop_location': current_maskcrop_location,
+                'loc_location': current_loc_location
+            })
+
+        new_df = pd.DataFrame(data)
+        new_df.to_csv(self.csv_perframe_default, index=False)
+        return new_df
+
+    # add location of the interpolated depth map
+    # Now the columns are:
+    # ['category', 'instance_number', 'video_no', 'frame_no',
+    # 'crop_location', 'depthcrop_location', 'filled_depthcrop_location']
+    def add_filled_depth_to_aggregated_data(self):
+        aggregated_df = self.aggregate_frame_data()
+        depth_locations = aggregated_df.depthcrop_location
+        filled_depth_locations = map(lambda location:
+                                     os.path.join(os.path.split(location)[0],
+                                                  os.path.splitext(os.path.split(location)[1])[0] + '_filled.png'),
+                                     depth_locations)
+        aggregated_df['filled_depthcrop_location'] = pd.Series(filled_depth_locations, index=aggregated_df.index)
+
+        aggregated_df.to_csv(self.csv_perframe_default, index=False)
+        return aggregated_df
 
     def extract_rgb_only(self, output_path):
         data_frame = self.load_metadata()
@@ -137,129 +232,215 @@ class WashingtonRGBD(object):
     # together with a train-test-split for doing a hold-out validation.
     # Only one elevation video_no is taken, the other elevations are ignored
     # Left:RGB, (Middle: Depth Map),  Right: Rotation
-    def combine_viewpoints(self, angle, video_no, should_include_depth, output_path):
+    # split_method = {'random', 'eitel'}
+    def combine_viewpoints(self, angle, video_no, should_include_depth, output_path, split_method='random'):
 
-        def join_rgb_with_rotation(data_frame, output_path):
-            data_frame = data_frame[data_frame['data_type'] == 'crop']
-            for i in range(len(data_frame.index)):
-                current_original_file_df = data_frame.iloc[[i]]
+        def join(df, output_path):
+            for i in range(len(df.index)):
+                current_original_file_df = df.iloc[[i]]
 
                 # Filtering out the rotation candidates,
                 # most of the things should be the same, except for frame_no,
                 # and the 2 poses should differentiate by the provided angle with an error bound of +-1
-                rotation_candidates = data_frame[(data_frame['category'] == current_original_file_df['category'].values[0])
-                                                 & (data_frame['instance_number'] == current_original_file_df['instance_number'].values[0])
-                                                 & (data_frame['video_no'] == current_original_file_df['video_no'].values[0])
-                                                 & (data_frame['pose'] <= current_original_file_df['pose'].values[0] + angle + 1)
-                                                 & (data_frame['pose'] >= current_original_file_df['pose'].values[0] + angle - 1)]
+                rotation_candidates = df[(df.category == current_original_file_df.category.values[0])
+                                         & (df.instance_number == current_original_file_df.instance_number.values[0])
+                                         & (df.video_no == current_original_file_df.video_no.values[0])
+                                         & (df.pose <= current_original_file_df.pose.values[0] + angle + 1)
+                                         & (df.pose >= current_original_file_df.pose.values[0] + angle - 1)]
 
                 for j in range(len(rotation_candidates.index)):
                     current_rotated_file_df = rotation_candidates.iloc[[j]]
 
-                    left_location = current_original_file_df['location'].values[0]
-                    right_location = current_rotated_file_df['location'].values[0]
+                    locations = []
+                    names = []
 
-                    left_img_name = left_location.split('/')[len(left_location.split('/')) - 1]
-                    right_img_name = right_location.split('/')[len(right_location.split('/')) - 1]
+                    locations.append(current_original_file_df.crop_location.values[0])
+                    names.append(os.path.split(locations[0])[1])
 
-                    self.logger.info("merging " + left_img_name + " and " + right_img_name)
+                    if should_include_depth:
+                        locations.append(current_original_file_df.depthcrop_location.values[0])
+                        names.append(os.path.split(locations[1])[1])
 
-                    left_img = cv2.imread(left_location)
-                    right_img = cv2.imread(right_location)
+                    locations.append(current_rotated_file_df.crop_location.values[0])
+                    names.append(os.path.split(locations[2])[1])
 
-                    smaller_height = min(len(left_img), len(right_img))
-                    smaller_width = min(len(left_img[0]), len(right_img[0]))
+                    self.logger.info("merging " + " and ".join(names))
+                    self.perform_cv_combination(locations, names, output_path)
 
-                    left_img = cv2.resize(left_img, (smaller_width, smaller_height))
-                    right_img = cv2.resize(right_img, (smaller_width, smaller_height))
+        data_frame = self.aggregate_frame_data()
 
-                    img = np.concatenate((left_img, right_img), axis=1)
-                    cv2.imwrite(os.path.join(output_path,
-                                             '_'.join([os.path.splitext(left_img_name)[0],
-                                                       right_img_name])), img)
-
-        def join_rgb_depth_rotation(data_frame, output_path):
-            original_df = data_frame[data_frame['data_type'] == 'crop']
-            for i in range(len(original_df.index)):
-                current_original_file_df = original_df.iloc[[i]]
-
-                rotation_candidates = original_df[(original_df['category'] == current_original_file_df['category'].values[0])
-                                                  & (original_df['instance_number'] == current_original_file_df['instance_number'].values[0])
-                                                  & (original_df['video_no'] == current_original_file_df['video_no'].values[0])
-                                                  & (original_df['pose'] <= current_original_file_df['pose'].values[0] + angle + 1)
-                                                  & (original_df['pose'] >= current_original_file_df['pose'].values[0] + angle - 1)]
-
-                depth_candidates = data_frame[(data_frame['category'] == current_original_file_df['category'].values[0])
-                                              & (data_frame['instance_number'] == int(current_original_file_df['instance_number'].values[0]))
-                                              & (data_frame['video_no'] == int(current_original_file_df['video_no'].values[0]))
-                                              & (data_frame['frame_no'] == int(current_original_file_df['frame_no'].values[0]))
-                                              & (data_frame['data_type'] == 'depthcrop')]
-
-                for j in range(len(rotation_candidates.index)):
-                    if len(depth_candidates.index) == 0:
-                        continue
-
-                    current_rotated_file_df = rotation_candidates.iloc[[j]]
-
-                    left_location = current_original_file_df['location'].values[0]
-                    middle_location = depth_candidates['location'].values[0]
-                    right_location = current_rotated_file_df['location'].values[0]
-
-                    left_img_name = os.path.split(left_location)[1]
-                    middle_img_name = os.path.split(middle_location)[1]
-                    right_img_name = os.path.split(right_location)[1]
-
-                    self.logger.info("merging " + left_img_name + " and " + middle_img_name + " and " + right_img_name)
-
-                    left_img = cv2.imread(left_location)
-                    middle_img = cv2.imread(middle_location)
-                    right_img = cv2.imread(right_location)
-
-                    smaller_height = min(len(left_img), len(middle_img), len(right_img))
-                    smaller_width = min(len(left_img[0]), len(middle_img[0]), len(right_img[0]))
-
-                    left_img = cv2.resize(left_img, (smaller_width, smaller_height))
-                    middle_img = cv2.resize(middle_img, (smaller_width, smaller_height))
-                    right_img = cv2.resize(right_img, (smaller_width, smaller_height))
-
-                    img = np.concatenate((left_img, middle_img, right_img), axis=1)
-                    cv2.imwrite(os.path.join(output_path,
-                                             '_'.join([os.path.splitext(left_img_name)[0],
-                                                       os.path.splitext(middle_img_name)[0],
-                                                       right_img_name])), img)
-
-        def join(data_frame, output_path, should_include_depth):
-            if output_path != '' and not os.path.isdir(output_path):
-                os.makedirs(output_path)
-
-            if should_include_depth:
-                join_rgb_depth_rotation(data_frame, output_path)
-            else:
-                join_rgb_with_rotation(data_frame, output_path)
-
-        data_frame = self.interpolate_poses(self.load_metadata())
-
-        # Filter out the first elevator only
+        # Filter out one elevation only
         data_frame = data_frame[data_frame['video_no'] == video_no]
 
         # train test split
-        train, test = train_test_split(data_frame, test_size=0.2)
+        train, test = train_test_split(data_frame, test_size=0.2) if split_method == 'random' \
+            else self.train_test_split_eitel(data_frame)
 
         # construct training and test sets, saving to disk
-        join(train, os.path.join(output_path, 'train'), should_include_depth)
-        join(test, os.path.join(output_path, 'test'), should_include_depth)
+        join(train, os.path.join(output_path, 'train'))
+        join(test, os.path.join(output_path, 'test'))
+
+    # this method combines every rgb frame with its depthmap on the right
+    # split method: "random" or "eitel" - the method used in Eitel et al.
+    # https://arxiv.org/abs/1507.06821
+    def combine_rgb_depth(self, output_path, split_method='random'):
+        def join(df, output_path):
+            for i in range(len(df.index)):
+                current_row = df.iloc[[i]]
+                locations = [current_row.crop_location.values[0], current_row.depthcrop_location.values[0]]
+                names = [os.path.split(location)[1] for location in locations]
+
+                self.perform_cv_combination(locations, names, output_path)
+
+        df = self.aggregate_frame_data()
+
+        train, test = train_test_split(df, test_size=0.2) if split_method == 'random' \
+            else self.train_test_split_eitel(df)
+
+        join(train, os.path.join(output_path, 'train'))
+        join(test, os.path.join(output_path, 'test'))
+
+    # combine all of the image in an array to only 1 image and save to file
+    @staticmethod
+    def perform_cv_combination(locations, names, output_path):
+        if output_path != '' and not os.path.isdir(output_path):
+            os.makedirs(output_path)
+
+        imgs = [cv2.imread(location) for location in locations]
+
+        min_height = min([len(img) for img in imgs])
+        min_width = min([len(img[0]) for img in imgs])
+
+        imgs = map(lambda x: cv2.resize(x, (min_width, min_height)), imgs)
+
+        img = np.concatenate(imgs, axis=1)
+        cv2.imwrite(os.path.join(output_path,
+                                 '_'.join([os.path.splitext(name)[0] for name in names])
+                                 + os.path.splitext(names[0])[1]),
+                    img)
+
+    # Train-test split method in Eitel et al.
+    @staticmethod
+    def train_test_split_eitel(train_info_df, seed=1000, train_output='', test_output=''):
+        if train_output != '' and not os.path.isdir(os.path.split(train_output)[0]):
+            os.makedirs(os.path.split(train_output)[0])
+        if test_output != '' and not os.path.isdir(os.path.split(test_output)[0]):
+            os.makedirs(os.path.split(test_output)[0])
+
+        np.random.seed(seed)
+        categories = np.unique(train_info_df.category)
+
+        test_df = pd.DataFrame(columns=list(train_info_df))
+        train_df = pd.DataFrame(columns=list(train_info_df))
+        for category in categories:
+            # Select 1 category for test and insert the whole category to test set
+            category_df = train_info_df[train_info_df.category == category]
+            max_instance = np.max(category_df.instance_number)
+            test_instance = np.random.randint(max_instance) + 1
+            test_df = test_df.append(category_df[category_df.instance_number == test_instance])
+
+            # For the rest, select every 5th frame for test, rest for training
+            training_instances_df = category_df[category_df.instance_number != test_instance]
+            train_df = train_df.append(training_instances_df[training_instances_df.frame_no % 5 != 1])
+            test_df = test_df.append(training_instances_df[training_instances_df.frame_no % 5 == 1])
+
+        if train_df.shape[0] + test_df.shape[0] == train_info_df.shape[0]:
+            if train_output != '':
+                train_df.to_csv(train_output)
+            if test_output != '':
+                test_df.to_csv(test_output)
+
+            return train_df, test_df
+        else:
+            raise ValueError('Train and Test do not sum up to the original dataframe')
+
+    # create train and test CSVs, where each frame is associated with a rotated frame by 20 degrees (10th item)
+    def train_test_split_eitel_stereo_rgb(self, seed=1000, rotation_index=10, train_output='', test_output=''):
+        self.logger.info('Splitting train/test for stereo rgb')
+        washington_aggredated_df = self.aggregate_frame_data()
+
+        dicts = []
+        categories = washington_aggredated_df.category.unique()
+        for cat in categories:
+            items_in_cat = washington_aggredated_df[washington_aggredated_df.category == cat]
+            instances = items_in_cat.instance_number.unique()
+            for ins in instances:
+                items_in_ins = items_in_cat[items_in_cat.instance_number == ins]
+                vids = items_in_ins.video_no.unique()
+                for vid in vids:
+                    items_in_vid = items_in_ins[items_in_ins.video_no == vid] \
+                        .sort_values('frame_no')[['crop_location', 'filled_depthcrop_location', 'frame_no', 'pose']]
+                    rotated_items = items_in_vid.iloc[rotation_index: items_in_vid.shape[0]] \
+                        .append(items_in_vid.iloc[0: rotation_index])
+
+                    for item_index in range(rotated_items.shape[0]):
+                        original_item = items_in_vid.iloc[item_index]
+                        rotated_item = rotated_items.iloc[item_index]
+
+                        if original_item.pose > rotated_item.pose:
+                            (original_item, rotated_item) = (rotated_item, original_item)
+
+                        dicts.append({'category': cat,
+                                      'instance_number': int(ins),
+                                      'video_no': int(vid),
+                                      'frame_no': int(original_item.frame_no),
+                                      'rgb_original_path': original_item.crop_location,
+                                      'depth_original_path': original_item.filled_depthcrop_location,
+                                      'rgb_target_path': rotated_item.crop_location,
+                                      'depth_target_path': rotated_item.filled_depthcrop_location})
+
+        input_df = pd.DataFrame(dicts)
+
+        if train_output != '' and not os.path.isdir(os.path.split(train_output)[0]):
+            os.makedirs(os.path.split(train_output)[0])
+        if test_output != '' and not os.path.isdir(os.path.split(test_output)[0]):
+            os.makedirs(os.path.split(test_output)[0])
+
+        np.random.seed(seed)
+        categories = np.unique(input_df.category)
+
+        test_df = pd.DataFrame(columns=list(input_df))
+        train_df = pd.DataFrame(columns=list(input_df))
+        for category in categories:
+            # Select 1 instance for test and insert the whole category to test set
+            category_df = input_df[input_df.category == category]
+            max_instance = np.max(category_df.instance_number)
+            test_instance = np.random.randint(max_instance) + 1
+            test_df = test_df.append(category_df[category_df.instance_number == test_instance])
+
+            # For the rest, select every 5th frame for test, rest for training
+            training_instances_df = category_df[category_df.instance_number != test_instance]
+            train_df = train_df.append(training_instances_df[training_instances_df.frame_no % 5 != 1])
+            test_df = test_df.append(training_instances_df[training_instances_df.frame_no % 5 == 1])
+
+        if train_df.shape[0] + test_df.shape[0] == input_df.shape[0]:
+            if train_output != '':
+                train_df.to_csv(train_output, index=False)
+            if test_output != '':
+                test_df.to_csv(test_output, index=False)
+
+            return train_df, test_df
+        else:
+            raise ValueError('Train and Test do not sum up to the original dataframe')
+
 
 
 if __name__ == '__main__':
     ROOT_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset'
     CSV_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset.csv'
+    CSV_AGGREGATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated-aggregated.csv'
     CSV_INTERPOLATED_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/rgbd-dataset-interpolated.csv'
+    CSV_EITEL_TRAIN_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-train.csv'
+    CSV_EITEL_TEST_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-test.csv'
+    CSV_EITEL_TRAIN_STEREO_RGB_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-train-stereo-rgb.csv'
+    CSV_EITEL_TEST_STEREO_RGB_DEFAULT = '/mnt/raid/data/ni/dnn/pduy/rgbd-dataset/eitel-test-stereo-rgb.csv'
 
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--rootdir", default=ROOT_DEFAULT)
     parser.add_argument("--csv_dir", default=CSV_DEFAULT)
+    parser.add_argument("--csv_perframe_dir", default=CSV_AGGREGATED_DEFAULT)
     parser.add_argument("--csv_interpolated_dir", default=CSV_INTERPOLATED_DEFAULT)
     parser.add_argument("--processed_data_output", default='')
     parser.add_argument("--angle", default=10, type=int)
@@ -270,10 +451,12 @@ if __name__ == '__main__':
     if args.processed_data_output != '' and not os.path.isdir(args.processed_data_output):
         os.makedirs(args.processed_data_output)
 
-    # file_list = os.walk(args.rootdir)
-    washington_dataset = WashingtonRGBD(args.rootdir, args.csv_dir, args.csv_interpolated_dir)
-    washington_dataset.combine_viewpoints(angle=args.angle,
-                                          video_no=1,
-                                          should_include_depth=args.depth_included,
-                                          output_path=args.processed_data_output)
+    washington_dataset = WashingtonRGBD(root_dir=args.rootdir,
+                                        csv_default=args.csv_dir,
+                                        csv_perframe_default=args.csv_perframe_dir,
+                                        csv_interpolated_default=args.csv_interpolated_dir)
+
+    washington_dataset.train_test_split_eitel_stereo_rgb(train_output=CSV_EITEL_TRAIN_STEREO_RGB_DEFAULT,
+                                                     test_output=CSV_EITEL_TEST_STEREO_RGB_DEFAULT)
+
 

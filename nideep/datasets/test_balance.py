@@ -7,7 +7,7 @@ from nose.tools import assert_equals, assert_is_instance, \
     assert_list_equal, assert_greater, assert_in, assert_almost_equal, \
     assert_not_in
 import numpy as np
-from balance import Balancer, CLNAME_OTHER
+from nideep.datasets.balance import Balancer, CLNAME_OTHER
 
 class TestBalancer:
 

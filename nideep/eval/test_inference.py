@@ -12,7 +12,7 @@ import shutil
 import numpy as np
 from numpy.testing import assert_array_equal
 import h5py
-import inference as infr
+import nideep.eval.inference as infr
 import sys
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
 ROOT_PKG_PATH = os.path.dirname(os.path.dirname(CURRENT_MODULE_PATH))

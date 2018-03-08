@@ -10,7 +10,7 @@ import shutil
 import string
 from nose.tools import assert_equals, assert_true, \
     assert_list_equal
-from amfed import AMFED
+from nideep.datasets.amfed.amfed import AMFED
 
 
 def generate_random_entity_name():

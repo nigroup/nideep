@@ -13,7 +13,7 @@ from nose.tools import assert_equals, assert_false, \
 import numpy as np
 import lmdb
 import h5py
-import dataSource as ds
+import nideep.iow.dataSource as ds
 
 def create_empty_lmdb(p):
     db = lmdb.open(p, map_size=int(1e12))

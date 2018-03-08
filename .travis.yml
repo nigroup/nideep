@@ -25,7 +25,8 @@ env:
     - CONDA_ENV_PREFIX=$HOME/miniconda/envs/$CONDA_ENV
     # since we've set language to cpp we have to define python vars ourselves
     - TRAVIS_PYTHON_VERSION="2.7"
-    - WITH_COVERAGE=ON
+    - WITH_COVERAGE=OFF
+    - DO_EXCLUDE_TF_MODULES=ON
     - CAFFE_ROOT=$DEPS_DIR/caffe # created during install
 
 before_install:
@@ -53,7 +54,7 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock h5py opencv PIL protobuf scikit-learn scikit-image pandas
+  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock coverage h5py opencv PIL protobuf scikit-learn scikit-image pandas
   - source activate $CONDA_ENV
   # Download caffe protobuf message definitions
   - mkdir -p $CAFFE_ROOT/src/caffe/proto
@@ -85,7 +86,15 @@ script:
   - export PYTHONPATH="$TRAVIS_BUILD_DIR:$CAFFE_ROOT/python:$CAFFE_ROOT/tools/extra:$PYTHONPATH"
   - if [[ $WITH_COVERAGE == ON ]]; then
       nosetests --with-coverage --logging-level=INFO --nocapture;
-      nosetests --logging-level=INFO --nocapture;
+    else
+      if [[ $DO_EXCLUDE_TF_MODULES == OFF ]]; then
+        nosetests --logging-level=INFO --nocapture;
+      else
+        IGNORE_FILES=`grep -rl 'import tensorflow' . /dev/null | xargs -L 1 basename | paste -sd "|" -`;
+        echo "Exclude tensorflow dependent modules from test (currently causes segmentation faults):"
+        echo $IGNORE_FILES;
+        nosetests . --ignore-files=`echo $IGNORE_FILES` --logging-level=INFO --nocapture;
+      fi
     fi
       
 after_success:
