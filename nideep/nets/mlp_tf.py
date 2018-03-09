@@ -24,20 +24,20 @@ class MLP(AbstractNetTF):
             if idx == self.branch:
                 fc_name_w = 'fc-%d-aux/w' % idx
                 self.w[fc_name_w] = tf.get_variable(fc_name_w,
-                                                    [dim, 9],
+                                                    [input_dim, 9],
                                                     initializer=self._init_weight_op()
                                                     )
         self._init_bias_vars(bias_value=0.1)
                 
     def _fc(self, x):
-        in_op = x
+        in_op = a = x
         branch_op = x
         for idx in xrange(len(self.n_nodes)):
             fc_name_w = 'fc-%d/w' % idx
             fc_name_b = 'fc-%d/b' % idx
             fc_op = tf.add(tf.matmul(in_op, self.w[fc_name_w]),
-                            self.b[fc_name_b],
-                            name='fc-%d' % idx)
+                           self.b[fc_name_b],
+                           name='fc-%d' % idx)
             if idx < len(self.n_nodes)-1:
                 a = tf.sigmoid(fc_op, name='a-%d' % idx)
                 in_op = a
@@ -88,10 +88,9 @@ class MLP(AbstractNetTF):
         Constructor
         '''
         # Network Parameters
+        super(MLP, self).__init__(params)
         self.n_input = params['n_input']  # 1st layer num features
         self.n_nodes = params['n_nodes']  # 1st layer num features
-        super(MLP, self).__init__(params)
-
         self._cost_ops = []
         self._y_logits = None
         self.branch = params.get('branch', len(self.n_nodes)-1)
