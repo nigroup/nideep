@@ -33,6 +33,8 @@ class MLP(AbstractNetTF):
         in_op = a = x
         branch_op = x
         for idx in xrange(len(self.n_nodes)):
+            if idx == self.branch:
+                branch_op = a
             fc_name_w = 'fc-%d/w' % idx
             fc_name_b = 'fc-%d/b' % idx
             fc_op = tf.add(tf.matmul(in_op, self.w[fc_name_w]),
@@ -44,8 +46,6 @@ class MLP(AbstractNetTF):
             else:
                 self._y_logits = fc_op
                 self.p = tf.nn.softmax(fc_op, name='a-%d' % idx)
-            if idx == self.branch:
-                branch_op = a
         idx = self.branch
         fc_name_w = 'fc-%d-aux/w' % idx
         fc_name_b = 'fc-%d-aux/b' % idx
