@@ -9,7 +9,7 @@ import shutil
 import tempfile
 from nose.tools import assert_equal, assert_false, assert_raises, \
     assert_is_instance, assert_is_none, assert_less, assert_true
-import log_utils as lu
+import nideep.eval.log_utils as lu
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
 ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)

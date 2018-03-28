@@ -9,9 +9,9 @@ from nose.tools import assert_equal, assert_greater, assert_true, \
     assert_list_equal, assert_false, assert_raises, \
     assert_is_instance, assert_is_not_none, assert_is_none
 import numpy as np
-from eval_utils import Phase
-from learning_curve import LearningCurve
-from learning_curve import LearningCurveFromPath
+from nideep.eval.eval_utils import Phase
+from nideep.eval.learning_curve import LearningCurve
+from nideep.eval.learning_curve import LearningCurveFromPath
 
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)
 ROOT_PKG_PATH = os.path.dirname(CURRENT_MODULE_PATH)

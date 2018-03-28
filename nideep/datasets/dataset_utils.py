@@ -87,7 +87,7 @@ def get_labels_lut(labels_list, labels_subset):
             idx += 1
 
         if not found:
-            print "Could not find %s" % name
+            print("Could not find %s" % name)
 
     # print len(labels_list)
     sz = max(max_src_idx + 1, len(labels_list)) + 1

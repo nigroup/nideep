@@ -7,7 +7,7 @@ import shutil
 import numpy as np
 from scipy import io
 import h5py
-import nyudv2_to_lmdb as n2l
+import nideep.datasets.nyudv2.nyudv2_to_lmdb as n2l
 import nideep.iow.to_lmdb as tol
 import nideep.iow.read_lmdb as rl
 import nideep.iow.copy_lmdb as cl

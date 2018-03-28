@@ -6,7 +6,7 @@ Created on Sep 16, 2015
 import numpy as np
 import lmdb
 import caffe
-from lmdb_utils import IDX_FMT
+from nideep.iow.lmdb_utils import IDX_FMT
 
 def read_labels(path_lmdb):
     """

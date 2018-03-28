@@ -12,7 +12,7 @@ import shutil
 from google.protobuf import text_format
 from caffe.proto.caffe_pb2 import NetParameter
 from nideep.proto.proto_utils import Parser
-import net_merge as mrg
+import nideep.nets.net_merge as mrg
 
 import sys
 CURRENT_MODULE_PATH = os.path.abspath(sys.modules[__name__].__file__)

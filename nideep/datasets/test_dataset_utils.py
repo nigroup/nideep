@@ -6,7 +6,7 @@ Created on Oct 28, 2015
 from nose.tools import assert_equals, assert_is_instance, assert_is_not_none, \
     assert_list_equal
 import numpy as np
-import dataset_utils as du
+import nideep.datasets.dataset_utils as du
 
 class TestTrainValSplitFromNames:
 
