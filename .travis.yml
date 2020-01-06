@@ -54,7 +54,7 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock coverage h5py opencv PIL protobuf scikit-learn scikit-image pandas
+  - conda create -q -n $CONDA_ENV python=$TRAVIS_PYTHON_VERSION pip numpy scipy nose mock coverage h5py opencv PIL protobuf scikit-learn tensorflow pandas
   - source activate $CONDA_ENV
   # Download caffe protobuf message definitions
   - mkdir -p $CAFFE_ROOT/src/caffe/proto
@@ -69,7 +69,8 @@ before_install:
   
 install:
   # Packages that need to be installed via pip
-  - travis_retry pip install lmdb bunch tensorflow
+  - travis_retry pip install lmdb bunch
+  - travis_retry pip install -U scikit-image
   - if [[ $WITH_COVERAGE == ON ]]; then
       echo "Installing Coveralls"
       travis_retry pip install coveralls;
