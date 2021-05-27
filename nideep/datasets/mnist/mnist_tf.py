@@ -19,6 +19,27 @@ def _int64_feature(value):
 
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+    
+def to_canvas_single(img, src_shape=(28,28), target_shape=(128,128)):
+    img_src = img_src.reshape(src_shape)
+    img_dst = np.zeros(target_shape)
+    pos_tl_r = target_shape[0]//2-src_shape[0]//2
+    pos_tl_c = target_shape[1]//2-src_shape[1]//2
+    pos_br_r = target_shape[0]//2+src_shape[0]//2
+    pos_br_c = target_shape[1]//2+src_shape[1]//2
+    img_dst[pos_tl_r:pos_br_r, pos_tl_c:pos_br_c] = img_src
+    return img_dst
+    
+def to_canvas(arr, src_shape=(28,28), target_shape=(128,128)):
+    pos_tl_r = target_shape[0]//2 - src_shape[0]//2
+    pos_tl_c = target_shape[1]//2 - src_shape[1]//2
+    pos_br_r = target_shape[0]//2 + src_shape[0]//2
+    pos_br_c = target_shape[1]//2 + src_shape[1]//2
+    arr_new = np.zeros((len(arr), target_shape[0], target_shape[1]))
+    arr_new[:, pos_tl_r:pos_br_r, pos_tl_c:pos_br_c] = arr.reshape(-1, src_shape[0], src_shape[1])
+    
+    arr_new = arr_new.reshape(-1,np.prod(target_shape))
+    return arr_new
 
 class MNIST(object):
     '''
@@ -32,7 +53,8 @@ class MNIST(object):
                        dtype=dtypes.float32,
                        reshape=True,
                        validation_size=5000,
-                       seed=None):
+                       seed=None,
+                       canvas_shape=None):
         
         seed1, seed2 = random_seed.get_seed(seed)
         # If op level seed is not set, use whatever graph level seed is returned
@@ -45,12 +67,19 @@ class MNIST(object):
                                   reshape=reshape,
                                   validation_size=0,
                                   seed=seed)
+        if canvas_shape is None:
+            train_images_canvas = ds.train.images
+            test_images_canvas = ds.test.images
+        else:
+            src_shape = (28,28)
+            train_images_canvas = to_canvas(ds.train.images, src_shape=src_shape, target_shape=canvas_shape)
+            test_images_canvas = to_canvas(ds.test.images, src_shape=src_shape, target_shape=canvas_shape)
         perm0 = np.arange(ds.train.num_examples)
         np.random.shuffle(perm0)
         train_idxs = perm0[validation_size:]
         val_idxs = perm0[:validation_size]
         train = DataSet(\
-                    np.multiply(ds.train.images[train_idxs], [1., 255.][dtype == dtypes.float32]), # will rescale to [0,1] inside
+                    np.multiply(train_images_canvas[train_idxs], [1., 255.][dtype == dtypes.float32]), # will rescale to [0,1] inside
                     ds.train.labels[train_idxs],
                     fake_data=fake_data,
                     one_hot=one_hot,
@@ -58,14 +87,22 @@ class MNIST(object):
                     reshape=False, # already reshaped
                     seed=seed)
         validation = DataSet(\
-                        np.multiply(ds.train.images[val_idxs], [1., 255.][dtype == dtypes.float32]), # will rescale to [0,1] inside
+                        np.multiply(train_images_canvas[val_idxs], [1., 255.][dtype == dtypes.float32]), # will rescale to [0,1] inside
                         ds.train.labels[val_idxs],
                         fake_data=fake_data,
                         one_hot=one_hot,
                         dtype=dtype,
                         reshape=False, # already reshaped
                         seed=seed)
-        return Datasets(train=train, validation=validation, test=ds.test)
+        test = DataSet(\
+                        np.multiply(test_images_canvas, [1., 255.][dtype == dtypes.float32]), # will rescale to [0,1] inside
+                        ds.test.labels,
+                        fake_data=fake_data,
+                        one_hot=one_hot,
+                        dtype=dtype,
+                        reshape=False, # already reshaped
+                        seed=seed)
+        return Datasets(train=train, validation=validation, test=test)
     
     @classmethod
     def to_tf_record(cls,
@@ -77,7 +114,7 @@ class MNIST(object):
                      reshape=True,
                      validation_size=5000,
                      seed=None,
-                     orientations=np.linspace(-90, 90, 180/(12+1), endpoint=True).tolist(),
+                     orientations=np.linspace(-90, 90, 180//(12+1), endpoint=True).tolist(),
                     ):
         """
         Get dataset with orientations stored in tf.records
@@ -238,7 +275,7 @@ class MNIST(object):
                               reshape=True,
                               validation_size=5000,
                               seed=None,
-                              orientations=np.linspace(-90, 90, 180/(12+1), endpoint=True).tolist()):
+                              orientations=np.linspace(-90, 90, 180//(12+1), endpoint=True).tolist()):
         
         seed1, seed2 = random_seed.get_seed(seed)
         # If op level seed is not set, use whatever graph level seed is returned
